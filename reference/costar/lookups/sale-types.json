@@ -1,0 +1,15 @@
+{
+  "_description": "Sale types for 0.Sale.SaleComp.SaleTypes array",
+
+  "byId": {
+    "1": "Investment",
+    "2": "Owner User",
+    "3": "Investment or Owner User"
+  },
+
+  "byName": {
+    "Investment": 1,
+    "Owner User": 2,
+    "Investment or Owner User": 3
+  }
+}

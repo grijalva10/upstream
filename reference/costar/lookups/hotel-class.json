@@ -1,0 +1,23 @@
+{
+  "_description": "Hotel class for Hospitality property type filtering",
+  "_verified": "2026-01-08 - From CoStar source files",
+  "_note": "Rarely used - only applies to PropertyType 1 (Hospitality)",
+
+  "byId": {
+    "1": "Luxury",
+    "2": "Upper Upscale",
+    "3": "Upscale",
+    "4": "Upper Midscale",
+    "5": "Midscale",
+    "6": "Economy"
+  },
+
+  "byName": {
+    "Luxury": 1,
+    "Upper Upscale": 2,
+    "Upscale": 3,
+    "Upper Midscale": 4,
+    "Midscale": 5,
+    "Economy": 6
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "_description": "Construction status for 0.Property.Building.ConstructionStatuses array",
+  "_note": "For off-market sourcing, typically use [1] (Existing only)",
+  "_verified": {
+    "1": "2026-01-08 - Confirmed via live CoStar payload with Existing filter"
+  },
+
+  "byId": {
+    "1": "Existing",
+    "2": "Demolished",
+    "3": "Proposed",
+    "4": "Under Construction",
+    "5": "Under Renovation",
+    "6": "Converted",
+    "8": "Deferred",
+    "9": "Abandoned",
+    "10": "Final Planning",
+    "11": "Under Redevelopment",
+    "12": "Redeveloped"
+  },
+
+  "byName": {
+    "Existing": 1,
+    "Demolished": 2,
+    "Proposed": 3,
+    "Under Construction": 4,
+    "Under Renovation": 5,
+    "Converted": 6,
+    "Deferred": 8,
+    "Abandoned": 9,
+    "Final Planning": 10,
+    "Under Redevelopment": 11,
+    "Redeveloped": 12
+  },
+
+  "forOffMarketSourcing": [1]
+}

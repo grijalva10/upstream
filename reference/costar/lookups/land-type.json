@@ -1,0 +1,18 @@
+{
+  "_description": "Land type for 0.Property.Land.LandTypes array",
+  "_verified": "2026-01-08 - From CoStar source files",
+
+  "byId": {
+    "1": "Residential",
+    "2": "Commercial",
+    "3": "Industrial",
+    "4": "Agricultural"
+  },
+
+  "byName": {
+    "Residential": 1,
+    "Commercial": 2,
+    "Industrial": 3,
+    "Agricultural": 4
+  }
+}

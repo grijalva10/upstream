@@ -1,0 +1,22 @@
+{
+  "_description": "Tenancy for 0.Property.Building.Tenancy array",
+  "_verified": "2026-01-08 - From CoStar source files",
+
+  "byId": {
+    "0": "Unknown",
+    "1": "Single Tenant",
+    "2": "Multi Tenant"
+  },
+
+  "byName": {
+    "Unknown": 0,
+    "Single Tenant": 1,
+    "Multi Tenant": 2
+  },
+
+  "presets": {
+    "singleTenant": [1],
+    "multiTenant": [2],
+    "singleOrUnknown": [0, 1]
+  }
+}

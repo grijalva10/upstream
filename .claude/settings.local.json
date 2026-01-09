@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c:*)",
+      "Bash(pip install:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebSearch",
+      "WebFetch(domain:alexop.dev)",
+      "Bash(move:*)",
+      "Skill(ralph-loop:help)",
+      "Skill(skill-creator)",
+      "Bash(dir /b \"C:\\\\Users\\\\grija\\\\projects\\\\upstream\\\\reference\\\\costar\")",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitialize Upstream Sourcing Engine with CoStar API reference data\n\n- Add project structure with agents, orchestrator, apps, packages\n- Create 6 Claude Code subagents for deal sourcing pipeline\n- Document CoStar BFF API payload structure and filters\n- Add verified lookups: property types, owner types, loan filters,\n  construction status, tenancy, building class, markets\n- Create sourcing-strategies.md with 22 executable plays\n- Include loan distress filters \\(payment status, CMBS, LTV, DSCR\\)\n- Add US markets lookup \\(521 markets with IDs\\)\n- Include industrial analytics data for value estimation\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
+    ]
+  }
+}

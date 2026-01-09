@@ -1,0 +1,14 @@
+{
+  "_description": "Building class for 0.Property.Building.BuildingClasses array",
+  "_note": "Payload uses STRING values ['A', 'B'], not integer IDs",
+  "_verified": "2026-01-08 - Confirmed via live CoStar payload with Class A, B filter",
+
+  "values": ["A", "B", "C", "F"],
+
+  "descriptions": {
+    "A": "Class A - Premier properties, excellent location, high-quality finishes",
+    "B": "Class B - Good properties, fair location, average finishes",
+    "C": "Class C - Older properties, below-average condition, functional",
+    "F": "Class F - Flex/industrial classification"
+  }
+}

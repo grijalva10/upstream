@@ -1,0 +1,140 @@
+{
+    "0": {
+        "BoundingBox": {
+            "UpperLeft": {
+                "Latitude": 53.91247753467119,
+                "Longitude": -143.14650495
+            },
+            "LowerRight": {
+                "Latitude": 14.958134245808175,
+                "Longitude": -58.77150495
+            }
+        },
+        "Geography": {
+            "Filter": {
+                "FilterType": 132, 
+                "Ids": [
+                    105,
+                    108,
+                    421
+                ]
+            }
+        },
+        "Property": {
+            "PropertyTypes": [
+                5
+            ],
+            "Building": {
+                "BuildingArea": {
+                    "Minimum": {
+                        "Value": 5000,
+                        "Code": "[sft_i]"
+                    },
+                    "Maximum": {
+                        "Value": 200000,
+                        "Code": "[sft_i]"
+                    }
+                },
+                "PropertySubtypes": [
+                    63
+                ],
+                "ConstructionStatuses": [
+                    1
+                ],
+                "PercentLeased": {
+                    "Minimum": "1"
+                },
+                "BuiltEventDate": {
+                    "Minimum": {
+                        "Month": 1,
+                        "Year": "1900"
+                    },
+                    "Maximum": {
+                        "Month": 12,
+                        "Year": "2026"
+                    }
+                },
+                "YearMonthBuiltIncludeUnknown": true,
+                "Stories": {
+                    "Minimum": "1"
+                },
+                "Tenancy": [
+                    2
+                ],
+                "IsOwnerOccupied": false,
+                "BuildingClasses": [
+                    "A",
+                    "B"
+                ]
+            },
+            "Land": {
+                "LandArea": {
+                    "Minimum": {
+                        "Value": 1,
+                        "Code": "[acr_us]"
+                    },
+                    "Maximum": {
+                        "Value": 9999,
+                        "Code": "[acr_us]"
+                    }
+                }
+            },
+            "Parking": {
+                "Spaces": {
+                    "Minimum": "1"
+                }
+            },
+            "LastSoldDate": {
+                "Minimum": "2021-01-08T22:28:50.096Z",
+                "Maximum": "2026-01-01T08:00:00.000Z"
+            },
+            "LastSoldPrice": {
+                "Minimum": {
+                    "Value": 1,
+                    "Code": "USD"
+                },
+                "Maximum": {
+                    "Value": 999999999,
+                    "Code": "USD"
+                }
+            },
+            "OwnerTypes": [
+                3
+            ]
+        },
+        "Sale": {
+            "SaleComp": {
+                "SaleTypes": [
+                    1
+                ],
+                "Exclusions": {
+                    "BulkPortfolios": 1,
+                    "MultiplePropertySales": 1,
+                    "BusinessParkSales": 1,
+                    "Condos": 1,
+                    "LandValueSale": 1
+                },
+                "IsFinancedSale": true,
+                "Price": {
+                    "CapitalizationRate": {
+                        "Minimum": "1",
+                        "Maximum": "20"
+                    }
+                }
+            }
+        },
+        "ListingType": 0
+    },
+    "1": 20,
+    "2": 1,
+    "3": {
+        "RateBasis": "month",
+        "CurrencyCode": "USD",
+        "BuildingAreaUnit": "SF",
+        "secondaryAreaUnit": "SF",
+        "AreaUom": "AC",
+        "lengthUnit": "FT"
+    },
+    "4": false,
+    "5": []
+}

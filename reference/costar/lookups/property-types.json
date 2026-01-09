@@ -1,0 +1,41 @@
+{
+  "_description": "Property types for 0.Property.PropertyTypes array",
+  "_note": "Only types 1,2,5,6,11 available via market filter. Others need BoundingBox.",
+
+  "byId": {
+    "1": "Hospitality",
+    "2": "Industrial",
+    "3": "Land",
+    "5": "Office",
+    "6": "Retail",
+    "7": "Flex",
+    "8": "Sports & Entertainment",
+    "10": "Specialty",
+    "11": "Multifamily",
+    "12": "Shopping Center",
+    "13": "Health Care",
+    "15": "Residential",
+    "16": "Homes",
+    "31": "Student"
+  },
+
+  "byName": {
+    "Hospitality": 1,
+    "Industrial": 2,
+    "Land": 3,
+    "Office": 5,
+    "Retail": 6,
+    "Flex": 7,
+    "Sports & Entertainment": 8,
+    "Specialty": 10,
+    "Multifamily": 11,
+    "Shopping Center": 12,
+    "Health Care": 13,
+    "Residential": 15,
+    "Homes": 16,
+    "Student": 31
+  },
+
+  "marketFilterSupported": [1, 2, 5, 6, 11],
+  "requiresBoundingBox": [3, 7, 8, 10, 12, 13, 15, 16, 31]
+}

@@ -1,0 +1,164 @@
+{
+  "_description": "Property subtypes for 0.Property.Building.PropertySubtypes array",
+  "_note": "Subtypes are grouped by parent property type. Some subtypes may apply to multiple types.",
+
+  "byPropertyType": {
+    "Office": {
+      "subtypes": {
+        "63": "Loft/Creative Space",
+        "64": "Medical",
+        "110": "Office/Residential",
+        "118": "Business Park",
+        "119": "Call Center",
+        "122": "Serviced Offices"
+      }
+    },
+    "Industrial": {
+      "subtypes": {
+        "1": "Light Manufacturing",
+        "40": "Telecom Hotel/Data Hosting",
+        "41": "Distribution",
+        "42": "Food Processing",
+        "44": "Manufacturing",
+        "46": "Refrigeration/Cold Storage",
+        "47": "Self-Storage",
+        "50": "Truck Terminal",
+        "52": "Warehouse",
+        "97": "Service",
+        "104": "Light Distribution",
+        "156": "Data Center"
+      }
+    },
+    "Retail": {
+      "subtypes": {
+        "4": "Auto Dealership",
+        "5": "Auto Repair",
+        "6": "Bank",
+        "7": "Bar/Nightclub",
+        "9": "Convenience Store",
+        "10": "Day Care Center",
+        "11": "Drug Store",
+        "12": "Fast Food",
+        "14": "Freestanding",
+        "18": "Restaurant",
+        "19": "Service Station",
+        "20": "Storefront",
+        "21": "Storefront Retail/Office",
+        "22": "Storefront Retail/Residential",
+        "23": "Supermarket",
+        "24": "Truck Stop",
+        "25": "Veterinarian/Kennel",
+        "87": "Bowling Alley",
+        "90": "Health Club",
+        "92": "Movie Theatre",
+        "116": "Department Store",
+        "147": "Quick Service"
+      }
+    },
+    "Multifamily": {
+      "subtypes": {
+        "58": "Apartments",
+        "62": "Manufactured Housing/Mobile Home Park",
+        "142": "Independent Living",
+        "144": "Residential Income",
+        "151": "Single Family",
+        "152": "Townhome",
+        "153": "Duplex",
+        "154": "Triplex",
+        "155": "Quadplex"
+      }
+    },
+    "Hospitality": {
+      "subtypes": {
+        "32": "Hotel",
+        "148": "Serviced Apartment",
+        "149": "Hostel",
+        "150": "Bed and Breakfast"
+      }
+    },
+    "Health Care": {
+      "subtypes": {
+        "26": "Assisted Living",
+        "27": "Congregate Senior Housing",
+        "28": "Continuing Care Retirement Community",
+        "29": "Hospital",
+        "30": "Rehabilitation Center",
+        "31": "Skilled Nursing Facility"
+      }
+    },
+    "Student": {
+      "subtypes": {
+        "143": "Dormitory",
+        "190": "Apartments (Student)",
+        "191": "Manufactured Housing/Mobile Home Park (Student)",
+        "192": "Dormitory (Student)"
+      }
+    }
+  },
+
+  "byId": {
+    "1": "Light Manufacturing",
+    "4": "Auto Dealership",
+    "5": "Auto Repair",
+    "6": "Bank",
+    "7": "Bar/Nightclub",
+    "9": "Convenience Store",
+    "10": "Day Care Center",
+    "11": "Drug Store",
+    "12": "Fast Food",
+    "14": "Freestanding",
+    "18": "Restaurant",
+    "19": "Service Station",
+    "20": "Storefront",
+    "21": "Storefront Retail/Office",
+    "22": "Storefront Retail/Residential",
+    "23": "Supermarket",
+    "24": "Truck Stop",
+    "25": "Veterinarian/Kennel",
+    "26": "Assisted Living",
+    "27": "Congregate Senior Housing",
+    "28": "Continuing Care Retirement Community",
+    "29": "Hospital",
+    "30": "Rehabilitation Center",
+    "31": "Skilled Nursing Facility",
+    "32": "Hotel",
+    "40": "Telecom Hotel/Data Hosting",
+    "41": "Distribution",
+    "42": "Food Processing",
+    "44": "Manufacturing",
+    "46": "Refrigeration/Cold Storage",
+    "47": "Self-Storage",
+    "50": "Truck Terminal",
+    "52": "Warehouse",
+    "58": "Apartments",
+    "62": "Manufactured Housing/Mobile Home Park",
+    "63": "Loft/Creative Space",
+    "64": "Medical",
+    "87": "Bowling Alley",
+    "90": "Health Club",
+    "92": "Movie Theatre",
+    "97": "Service",
+    "104": "Light Distribution",
+    "110": "Office/Residential",
+    "116": "Department Store",
+    "118": "Business Park",
+    "119": "Call Center",
+    "122": "Serviced Offices",
+    "142": "Independent Living",
+    "143": "Dormitory",
+    "144": "Residential Income",
+    "147": "Quick Service",
+    "148": "Serviced Apartment",
+    "149": "Hostel",
+    "150": "Bed and Breakfast",
+    "151": "Single Family",
+    "152": "Townhome",
+    "153": "Duplex",
+    "154": "Triplex",
+    "155": "Quadplex",
+    "156": "Data Center",
+    "190": "Apartments (Student)",
+    "191": "Manufactured Housing/Mobile Home Park (Student)",
+    "192": "Dormitory (Student)"
+  }
+}

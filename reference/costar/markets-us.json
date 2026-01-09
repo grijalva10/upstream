@@ -1,0 +1,10075 @@
+[
+  {
+    "marketKeyId": 105,
+    "name": "Abilene - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.960251,
+        "Longitude": -100.151924
+      },
+      "LowerRight": {
+        "Latitude": 32.079123,
+        "Longitude": -99.1140491
+      }
+    }
+  },
+  {
+    "marketKeyId": 108,
+    "name": "Akron - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.351133,
+        "Longitude": -81.688491
+      },
+      "LowerRight": {
+        "Latitude": 40.906496,
+        "Longitude": -80.9992789
+      }
+    }
+  },
+  {
+    "marketKeyId": 1253,
+    "name": "Alabama North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.008029,
+        "Longitude": -88.3474679
+      },
+      "LowerRight": {
+        "Latitude": 32.814455,
+        "Longitude": -85.2323782
+      }
+    }
+  },
+  {
+    "marketKeyId": 1254,
+    "name": "Alabama South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.246924,
+        "Longitude": -88.4732281
+      },
+      "LowerRight": {
+        "Latitude": 30.992856,
+        "Longitude": -84.888247
+      }
+    }
+  },
+  {
+    "marketKeyId": 67,
+    "name": "Alaska",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 71.390482,
+        "Longitude": -173.1262208
+      },
+      "LowerRight": {
+        "Latitude": 53.240008,
+        "Longitude": -130.0065548
+      }
+    }
+  },
+  {
+    "marketKeyId": 110,
+    "name": "Albany - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.967456,
+        "Longitude": -84.641953
+      },
+      "LowerRight": {
+        "Latitude": 31.078396,
+        "Longitude": -83.649384
+      }
+    }
+  },
+  {
+    "marketKeyId": 112,
+    "name": "Albany - NY",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.398045,
+        "Longitude": -74.7115801
+      },
+      "LowerRight": {
+        "Latitude": 42.355017,
+        "Longitude": -73.2649568
+      }
+    }
+  },
+  {
+    "marketKeyId": 111,
+    "name": "Albany - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.793074,
+        "Longitude": -123.260836
+      },
+      "LowerRight": {
+        "Latitude": 44.199844,
+        "Longitude": -121.792774
+      }
+    }
+  },
+  {
+    "marketKeyId": 116,
+    "name": "Albuquerque - NM",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.219799,
+        "Longitude": -107.6265101
+      },
+      "LowerRight": {
+        "Latitude": 34.259672,
+        "Longitude": -105.2901202
+      }
+    }
+  },
+  {
+    "marketKeyId": 118,
+    "name": "Alexandria - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.797149,
+        "Longitude": -92.9814638
+      },
+      "LowerRight": {
+        "Latitude": 30.88934,
+        "Longitude": -92.07239
+      }
+    }
+  },
+  {
+    "marketKeyId": 68,
+    "name": "Allentown & Reading - PA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.968303,
+        "Longitude": -76.513937
+      },
+      "LowerRight": {
+        "Latitude": 40.120468,
+        "Longitude": -75.0508402
+      }
+    }
+  },
+  {
+    "marketKeyId": 124,
+    "name": "Altoona - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.743665,
+        "Longitude": -78.6203831
+      },
+      "LowerRight": {
+        "Latitude": 40.243576,
+        "Longitude": -78.1162081
+      }
+    }
+  },
+  {
+    "marketKeyId": 126,
+    "name": "Amarillo - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.627515,
+        "Longitude": -103.042773
+      },
+      "LowerRight": {
+        "Latitude": 34.747416,
+        "Longitude": -101.0858861
+      }
+    }
+  },
+  {
+    "marketKeyId": 128,
+    "name": "Ames - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.209397,
+        "Longitude": -93.6987671
+      },
+      "LowerRight": {
+        "Latitude": 41.862572,
+        "Longitude": -93.2314432
+      }
+    }
+  },
+  {
+    "marketKeyId": 131,
+    "name": "Anchorage - AK",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 63.482913,
+        "Longitude": -153.0175
+      },
+      "LowerRight": {
+        "Latitude": 60.733787,
+        "Longitude": -146.4252199
+      }
+    }
+  },
+  {
+    "marketKeyId": 134,
+    "name": "Ann Arbor - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.435166,
+        "Longitude": -84.134079
+      },
+      "LowerRight": {
+        "Latitude": 42.071577,
+        "Longitude": -83.5393961
+      }
+    }
+  },
+  {
+    "marketKeyId": 135,
+    "name": "Anniston-Oxford - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.96846,
+        "Longitude": -86.1462248
+      },
+      "LowerRight": {
+        "Latitude": 33.55593,
+        "Longitude": -85.5294322
+      }
+    }
+  },
+  {
+    "marketKeyId": 136,
+    "name": "Appleton - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.590644,
+        "Longitude": -88.73977
+      },
+      "LowerRight": {
+        "Latitude": 43.891511,
+        "Longitude": -88.0416961
+      }
+    }
+  },
+  {
+    "marketKeyId": 1255,
+    "name": "Arizona Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.00426,
+        "Longitude": -116.1062719
+      },
+      "LowerRight": {
+        "Latitude": 31.332246,
+        "Longitude": -109.0452229
+      }
+    }
+  },
+  {
+    "marketKeyId": 1256,
+    "name": "Arkansas Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.499767,
+        "Longitude": -94.6177099
+      },
+      "LowerRight": {
+        "Latitude": 33.004106,
+        "Longitude": -89.644838
+      }
+    }
+  },
+  {
+    "marketKeyId": 141,
+    "name": "Asheville - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.065903,
+        "Longitude": -83.2575521
+      },
+      "LowerRight": {
+        "Latitude": 35.144434,
+        "Longitude": -82.1690179
+      }
+    }
+  },
+  {
+    "marketKeyId": 149,
+    "name": "Athens - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.27348,
+        "Longitude": -83.647031
+      },
+      "LowerRight": {
+        "Latitude": 33.689869,
+        "Longitude": -82.7795059
+      }
+    }
+  },
+  {
+    "marketKeyId": 150,
+    "name": "Atlanta - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.617924,
+        "Longitude": -85.3865809
+      },
+      "LowerRight": {
+        "Latitude": 32.84464,
+        "Longitude": -83.269134
+      }
+    }
+  },
+  {
+    "marketKeyId": 1805,
+    "name": "Atlanta - GA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.740866,
+        "Longitude": -85.3865809
+      },
+      "LowerRight": {
+        "Latitude": 32.84464,
+        "Longitude": -83.269134
+      }
+    }
+  },
+  {
+    "marketKeyId": 151,
+    "name": "Atlantic City - NJ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.729909,
+        "Longitude": -74.985223
+      },
+      "LowerRight": {
+        "Latitude": 39.288566,
+        "Longitude": -74.3328871
+      }
+    }
+  },
+  {
+    "marketKeyId": 155,
+    "name": "Auburn-Opelika - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.74653,
+        "Longitude": -85.6969549
+      },
+      "LowerRight": {
+        "Latitude": 32.40984,
+        "Longitude": -85.0010198
+      }
+    }
+  },
+  {
+    "marketKeyId": 156,
+    "name": "Augusta - GA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.983486,
+        "Longitude": -82.6488
+      },
+      "LowerRight": {
+        "Latitude": 32.803707,
+        "Longitude": -81.186912
+      }
+    }
+  },
+  {
+    "marketKeyId": 159,
+    "name": "Austin - TX",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.906188,
+        "Longitude": -98.2975522
+      },
+      "LowerRight": {
+        "Latitude": 29.630718,
+        "Longitude": -97.0244611
+      }
+    }
+  },
+  {
+    "marketKeyId": 161,
+    "name": "Bakersfield - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.798202,
+        "Longitude": -120.1941518
+      },
+      "LowerRight": {
+        "Latitude": 34.790609,
+        "Longitude": -117.6161951
+      }
+    }
+  },
+  {
+    "marketKeyId": 162,
+    "name": "Baltimore - MD",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.721503,
+        "Longitude": -77.311562
+      },
+      "LowerRight": {
+        "Latitude": 38.712786,
+        "Longitude": -75.747726
+      }
+    }
+  },
+  {
+    "marketKeyId": 163,
+    "name": "Bangor - ME",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.395681,
+        "Longitude": -69.355764
+      },
+      "LowerRight": {
+        "Latitude": 44.644053,
+        "Longitude": -67.93907
+      }
+    }
+  },
+  {
+    "marketKeyId": 166,
+    "name": "Barnstable Town - MA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.082393,
+        "Longitude": -70.687498
+      },
+      "LowerRight": {
+        "Latitude": 41.515054,
+        "Longitude": -69.9267892
+      }
+    }
+  },
+  {
+    "marketKeyId": 172,
+    "name": "Baton Rouge - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.044794,
+        "Longitude": -91.823072
+      },
+      "LowerRight": {
+        "Latitude": 30.025336,
+        "Longitude": -90.4012538
+      }
+    }
+  },
+  {
+    "marketKeyId": 173,
+    "name": "Battle Creek - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.422188,
+        "Longitude": -85.299557
+      },
+      "LowerRight": {
+        "Latitude": 42.070366,
+        "Longitude": -84.7095559
+      }
+    }
+  },
+  {
+    "marketKeyId": 174,
+    "name": "Bay City - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.997061,
+        "Longitude": -84.1681271
+      },
+      "LowerRight": {
+        "Latitude": 43.478623,
+        "Longitude": -83.698816
+      }
+    }
+  },
+  {
+    "marketKeyId": 177,
+    "name": "Beaumont - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.186627,
+        "Longitude": -94.7327321
+      },
+      "LowerRight": {
+        "Latitude": 29.560411,
+        "Longitude": -93.5080391
+      }
+    }
+  },
+  {
+    "marketKeyId": 179,
+    "name": "Beckley - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.263514,
+        "Longitude": -81.5715338
+      },
+      "LowerRight": {
+        "Latitude": 37.507851,
+        "Longitude": -80.7487571
+      }
+    }
+  },
+  {
+    "marketKeyId": 183,
+    "name": "Bellingham - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.002493,
+        "Longitude": -123.0909541
+      },
+      "LowerRight": {
+        "Latitude": 48.640357,
+        "Longitude": -120.6546761
+      }
+    }
+  },
+  {
+    "marketKeyId": 185,
+    "name": "Bend - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.393437,
+        "Longitude": -122.0026748
+      },
+      "LowerRight": {
+        "Latitude": 43.610227,
+        "Longitude": -119.8963649
+      }
+    }
+  },
+  {
+    "marketKeyId": 1257,
+    "name": "Bergen/Passaic - NJ",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.226195,
+        "Longitude": -74.586686
+      },
+      "LowerRight": {
+        "Latitude": 40.761865,
+        "Longitude": -73.8936788
+      }
+    }
+  },
+  {
+    "marketKeyId": 192,
+    "name": "Billings - MT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.751597,
+        "Longitude": -109.7986882
+      },
+      "LowerRight": {
+        "Latitude": 44.99944,
+        "Longitude": -107.462651
+      }
+    }
+  },
+  {
+    "marketKeyId": 193,
+    "name": "Binghamton - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.415702,
+        "Longitude": -76.563589
+      },
+      "LowerRight": {
+        "Latitude": 41.99779,
+        "Longitude": -75.359579
+      }
+    }
+  },
+  {
+    "marketKeyId": 194,
+    "name": "Birmingham - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.260483,
+        "Longitude": -87.636119
+      },
+      "LowerRight": {
+        "Latitude": 32.660117,
+        "Longitude": -86.043865
+      }
+    }
+  },
+  {
+    "marketKeyId": 1258,
+    "name": "Birmingham - AL",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.238776,
+        "Longitude": -87.3746201
+      },
+      "LowerRight": {
+        "Latitude": 32.997168,
+        "Longitude": -86.0438711
+      }
+    }
+  },
+  {
+    "marketKeyId": 195,
+    "name": "Bismarck - ND",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.32791,
+        "Longitude": -102.0972049
+      },
+      "LowerRight": {
+        "Latitude": 45.943449,
+        "Longitude": -100.0752289
+      }
+    }
+  },
+  {
+    "marketKeyId": 197,
+    "name": "Blacksburg - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.481672,
+        "Longitude": -81.0144889
+      },
+      "LowerRight": {
+        "Latitude": 36.708718,
+        "Longitude": -80.1044129
+      }
+    }
+  },
+  {
+    "marketKeyId": 198,
+    "name": "Bloomington - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.757608,
+        "Longitude": -89.2693969
+      },
+      "LowerRight": {
+        "Latitude": 40.048853,
+        "Longitude": -88.4592068
+      }
+    }
+  },
+  {
+    "marketKeyId": 199,
+    "name": "Bloomington - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.473345,
+        "Longitude": -87.054921
+      },
+      "LowerRight": {
+        "Latitude": 38.990699,
+        "Longitude": -86.3173822
+      }
+    }
+  },
+  {
+    "marketKeyId": 200,
+    "name": "Bloomsburg-Berwick - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.308702,
+        "Longitude": -76.794246
+      },
+      "LowerRight": {
+        "Latitude": 40.775511,
+        "Longitude": -76.2078269
+      }
+    }
+  },
+  {
+    "marketKeyId": 204,
+    "name": "Boise - ID",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.504452,
+        "Longitude": -117.0325778
+      },
+      "LowerRight": {
+        "Latitude": 41.996011,
+        "Longitude": -114.967224
+      }
+    }
+  },
+  {
+    "marketKeyId": 69,
+    "name": "Boston - MA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.886824,
+        "Longitude": -71.6800579
+      },
+      "LowerRight": {
+        "Latitude": 41.617017,
+        "Longitude": -70.4891812
+      }
+    }
+  },
+  {
+    "marketKeyId": 209,
+    "name": "Boston - MA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.573012,
+        "Longitude": -71.8987162
+      },
+      "LowerRight": {
+        "Latitude": 41.62375,
+        "Longitude": -70.525503
+      }
+    }
+  },
+  {
+    "marketKeyId": 210,
+    "name": "Boulder - CO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.262785,
+        "Longitude": -105.6943771
+      },
+      "LowerRight": {
+        "Latitude": 39.912886,
+        "Longitude": -105.0526372
+      }
+    }
+  },
+  {
+    "marketKeyId": 211,
+    "name": "Bowling Green - KY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.395284,
+        "Longitude": -86.9448089
+      },
+      "LowerRight": {
+        "Latitude": 36.628679,
+        "Longitude": -85.9489762
+      }
+    }
+  },
+  {
+    "marketKeyId": 217,
+    "name": "Bremerton - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.941508,
+        "Longitude": -123.023385
+      },
+      "LowerRight": {
+        "Latitude": 47.403206,
+        "Longitude": -122.4702299
+      }
+    }
+  },
+  {
+    "marketKeyId": 225,
+    "name": "Brownsville-Harlingen - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.411539,
+        "Longitude": -97.8620969
+      },
+      "LowerRight": {
+        "Latitude": 25.837544,
+        "Longitude": -97.144771
+      }
+    }
+  },
+  {
+    "marketKeyId": 227,
+    "name": "Brunswick - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.699575,
+        "Longitude": -82.2861371
+      },
+      "LowerRight": {
+        "Latitude": 31.010441,
+        "Longitude": -81.177255
+      }
+    }
+  },
+  {
+    "marketKeyId": 229,
+    "name": "Buffalo - NY",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.374839,
+        "Longitude": -79.1382859
+      },
+      "LowerRight": {
+        "Latitude": 42.437997,
+        "Longitude": -78.460416
+      }
+    }
+  },
+  {
+    "marketKeyId": 232,
+    "name": "Burlington - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.249851,
+        "Longitude": -79.54249
+      },
+      "LowerRight": {
+        "Latitude": 35.843385,
+        "Longitude": -79.2366682
+      }
+    }
+  },
+  {
+    "marketKeyId": 233,
+    "name": "Burlington - VT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.016659,
+        "Longitude": -73.3902311
+      },
+      "LowerRight": {
+        "Latitude": 44.161271,
+        "Longitude": -72.532638
+      }
+    }
+  },
+  {
+    "marketKeyId": 1259,
+    "name": "California Central Coast",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.914556,
+        "Longitude": -121.978395
+      },
+      "LowerRight": {
+        "Latitude": 34.045534,
+        "Longitude": -118.6324949
+      }
+    }
+  },
+  {
+    "marketKeyId": 1260,
+    "name": "California North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.009517,
+        "Longitude": -124.415163
+      },
+      "LowerRight": {
+        "Latitude": 38.667506,
+        "Longitude": -119.9959261
+      }
+    }
+  },
+  {
+    "marketKeyId": 1261,
+    "name": "California North Central",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.933325,
+        "Longitude": -122.40684
+      },
+      "LowerRight": {
+        "Latitude": 36.196939,
+        "Longitude": -118.429632
+      }
+    }
+  },
+  {
+    "marketKeyId": 1262,
+    "name": "California South/Central",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.901289,
+        "Longitude": -120.9187321
+      },
+      "LowerRight": {
+        "Latitude": 34.557456,
+        "Longitude": -115.6476982
+      }
+    }
+  },
+  {
+    "marketKeyId": 1734,
+    "name": "California Wine Country",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.864267,
+        "Longitude": -123.5335471
+      },
+      "LowerRight": {
+        "Latitude": 38.108975,
+        "Longitude": -122.0614049
+      }
+    }
+  },
+  {
+    "marketKeyId": 237,
+    "name": "California-Lexington Park - MD",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.513755,
+        "Longitude": -76.874405
+      },
+      "LowerRight": {
+        "Latitude": 37.888645,
+        "Longitude": -76.2365819
+      }
+    }
+  },
+  {
+    "marketKeyId": 244,
+    "name": "Canton - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.988717,
+        "Longitude": -81.650048
+      },
+      "LowerRight": {
+        "Latitude": 40.4247,
+        "Longitude": -80.8608218
+      }
+    }
+  },
+  {
+    "marketKeyId": 246,
+    "name": "Cape Girardeau - MO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.606461,
+        "Longitude": -90.2232299
+      },
+      "LowerRight": {
+        "Latitude": 36.970298,
+        "Longitude": -89.134272
+      }
+    }
+  },
+  {
+    "marketKeyId": 247,
+    "name": "Carbondale-Marion - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.95531,
+        "Longitude": -89.680919
+      },
+      "LowerRight": {
+        "Latitude": 37.561982,
+        "Longitude": -88.706741
+      }
+    }
+  },
+  {
+    "marketKeyId": 250,
+    "name": "Carson City - NV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.250871,
+        "Longitude": -120.0042968
+      },
+      "LowerRight": {
+        "Latitude": 39.084796,
+        "Longitude": -119.5483079
+      }
+    }
+  },
+  {
+    "marketKeyId": 251,
+    "name": "Casper - WY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.501897,
+        "Longitude": -107.5435261
+      },
+      "LowerRight": {
+        "Latitude": 42.430488,
+        "Longitude": -106.0705688
+      }
+    }
+  },
+  {
+    "marketKeyId": 253,
+    "name": "Cedar Rapids - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.299063,
+        "Longitude": -92.299329
+      },
+      "LowerRight": {
+        "Latitude": 41.859836,
+        "Longitude": -90.8980139
+      }
+    }
+  },
+  {
+    "marketKeyId": 1263,
+    "name": "Central New Jersey",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.82357,
+        "Longitude": -75.1951148
+      },
+      "LowerRight": {
+        "Latitude": 40.079129,
+        "Longitude": -73.984923
+      }
+    }
+  },
+  {
+    "marketKeyId": 259,
+    "name": "Chambersburg-Waynesboro - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.289885,
+        "Longitude": -78.099403
+      },
+      "LowerRight": {
+        "Latitude": 39.71987,
+        "Longitude": -77.4541091
+      }
+    }
+  },
+  {
+    "marketKeyId": 260,
+    "name": "Champaign-Urbana - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.997839,
+        "Longitude": -88.745967
+      },
+      "LowerRight": {
+        "Latitude": 39.79182,
+        "Longitude": -87.9287602
+      }
+    }
+  },
+  {
+    "marketKeyId": 263,
+    "name": "Charleston - SC",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.507172,
+        "Longitude": -80.7919679
+      },
+      "LowerRight": {
+        "Latitude": 32.493328,
+        "Longitude": -79.2691459
+      }
+    }
+  },
+  {
+    "marketKeyId": 261,
+    "name": "Charleston - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.667839,
+        "Longitude": -81.980348
+      },
+      "LowerRight": {
+        "Latitude": 37.76331,
+        "Longitude": -80.8174238
+      }
+    }
+  },
+  {
+    "marketKeyId": 70,
+    "name": "Charlotte - NC",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.863425,
+        "Longitude": -81.537862
+      },
+      "LowerRight": {
+        "Latitude": 34.814002,
+        "Longitude": -80.1826819
+      }
+    }
+  },
+  {
+    "marketKeyId": 264,
+    "name": "Charlotte - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.057875,
+        "Longitude": -81.5377601
+      },
+      "LowerRight": {
+        "Latitude": 34.457776,
+        "Longitude": -80.1826819
+      }
+    }
+  },
+  {
+    "marketKeyId": 265,
+    "name": "Charlottesville - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.475508,
+        "Longitude": -79.1719261
+      },
+      "LowerRight": {
+        "Latitude": 37.329553,
+        "Longitude": -78.062481
+      }
+    }
+  },
+  {
+    "marketKeyId": 266,
+    "name": "Chattanooga - TN",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.567422,
+        "Longitude": -85.873032
+      },
+      "LowerRight": {
+        "Latitude": 34.581799,
+        "Longitude": -84.9423301
+      }
+    }
+  },
+  {
+    "marketKeyId": 267,
+    "name": "Cheyenne - WY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.656655,
+        "Longitude": -105.2806748
+      },
+      "LowerRight": {
+        "Latitude": 40.998048,
+        "Longitude": -104.052245
+      }
+    }
+  },
+  {
+    "marketKeyId": 268,
+    "name": "Chicago - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.669906,
+        "Longitude": -88.9421468
+      },
+      "LowerRight": {
+        "Latitude": 40.73651,
+        "Longitude": -86.9293519
+      }
+    }
+  },
+  {
+    "marketKeyId": 1264,
+    "name": "Chicago - IL",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.496229,
+        "Longitude": -89.0007329
+      },
+      "LowerRight": {
+        "Latitude": 41.108299,
+        "Longitude": -87.52401
+      }
+    }
+  },
+  {
+    "marketKeyId": 269,
+    "name": "Chico - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.152032,
+        "Longitude": -122.0694311
+      },
+      "LowerRight": {
+        "Latitude": 39.295621,
+        "Longitude": -121.0766951
+      }
+    }
+  },
+  {
+    "marketKeyId": 271,
+    "name": "Cincinnati - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.729263,
+        "Longitude": -85.1403121
+      },
+      "LowerRight": {
+        "Latitude": 38.472805,
+        "Longitude": -83.673018
+      }
+    }
+  },
+  {
+    "marketKeyId": 1740,
+    "name": "Cincinnati - OH",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.591024,
+        "Longitude": -85.1403121
+      },
+      "LowerRight": {
+        "Latitude": 38.472805,
+        "Longitude": -83.673018
+      }
+    }
+  },
+  {
+    "marketKeyId": 275,
+    "name": "Clarksville - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.159345,
+        "Longitude": -88.1573029
+      },
+      "LowerRight": {
+        "Latitude": 36.312442,
+        "Longitude": -87.1132439
+      }
+    }
+  },
+  {
+    "marketKeyId": 279,
+    "name": "Cleveland - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.853243,
+        "Longitude": -82.3480819
+      },
+      "LowerRight": {
+        "Latitude": 40.988196,
+        "Longitude": -81.0022399
+      }
+    }
+  },
+  {
+    "marketKeyId": 1265,
+    "name": "Cleveland - OH",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.977233,
+        "Longitude": -82.3367279
+      },
+      "LowerRight": {
+        "Latitude": 40.980547,
+        "Longitude": -80.519153
+      }
+    }
+  },
+  {
+    "marketKeyId": 278,
+    "name": "Cleveland - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.357871,
+        "Longitude": -85.0267372
+      },
+      "LowerRight": {
+        "Latitude": 34.987366,
+        "Longitude": -84.292321
+      }
+    }
+  },
+  {
+    "marketKeyId": 283,
+    "name": "Coeur d'Alene - ID",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.991628,
+        "Longitude": -117.0426571
+      },
+      "LowerRight": {
+        "Latitude": 47.36592,
+        "Longitude": -116.3227792
+      }
+    }
+  },
+  {
+    "marketKeyId": 286,
+    "name": "College Station-Bryan - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.357129,
+        "Longitude": -96.963629
+      },
+      "LowerRight": {
+        "Latitude": 30.295549,
+        "Longitude": -96.0799691
+      }
+    }
+  },
+  {
+    "marketKeyId": 71,
+    "name": "Colorado Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.003445,
+        "Longitude": -109.0602569
+      },
+      "LowerRight": {
+        "Latitude": 36.992427,
+        "Longitude": -102.0415241
+      }
+    }
+  },
+  {
+    "marketKeyId": 287,
+    "name": "Colorado Springs - CO",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.129917,
+        "Longitude": -105.3306439
+      },
+      "LowerRight": {
+        "Latitude": 38.519441,
+        "Longitude": -104.0515679
+      }
+    }
+  },
+  {
+    "marketKeyId": 288,
+    "name": "Columbia - MO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.249804,
+        "Longitude": -92.5702448
+      },
+      "LowerRight": {
+        "Latitude": 38.643167,
+        "Longitude": -92.1043739
+      }
+    }
+  },
+  {
+    "marketKeyId": 289,
+    "name": "Columbia - SC",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.614765,
+        "Longitude": -82.010272
+      },
+      "LowerRight": {
+        "Latitude": 33.466006,
+        "Longitude": -80.283965
+      }
+    }
+  },
+  {
+    "marketKeyId": 1689,
+    "name": "Columbus",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.71273,
+        "Longitude": -83.6533861
+      },
+      "LowerRight": {
+        "Latitude": 39.361566,
+        "Longitude": -82.0242191
+      }
+    }
+  },
+  {
+    "marketKeyId": 290,
+    "name": "Columbus - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.872496,
+        "Longitude": -85.4347471
+      },
+      "LowerRight": {
+        "Latitude": 32.061708,
+        "Longitude": -84.389927
+      }
+    }
+  },
+  {
+    "marketKeyId": 291,
+    "name": "Columbus - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.350258,
+        "Longitude": -86.0856008
+      },
+      "LowerRight": {
+        "Latitude": 39.035896,
+        "Longitude": -85.6845151
+      }
+    }
+  },
+  {
+    "marketKeyId": 294,
+    "name": "Columbus - OH",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.71273,
+        "Longitude": -83.6533861
+      },
+      "LowerRight": {
+        "Latitude": 39.361566,
+        "Longitude": -82.0242191
+      }
+    }
+  },
+  {
+    "marketKeyId": 1266,
+    "name": "Connecticut Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.050588,
+        "Longitude": -73.7277761
+      },
+      "LowerRight": {
+        "Latitude": 40.980601,
+        "Longitude": -71.7869941
+      }
+    }
+  },
+  {
+    "marketKeyId": 303,
+    "name": "Corpus Christi - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.319238,
+        "Longitude": -97.9421461
+      },
+      "LowerRight": {
+        "Latitude": 27.558358,
+        "Longitude": -96.790437
+      }
+    }
+  },
+  {
+    "marketKeyId": 306,
+    "name": "Corvallis - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.721296,
+        "Longitude": -123.8169341
+      },
+      "LowerRight": {
+        "Latitude": 44.276564,
+        "Longitude": -123.073132
+      }
+    }
+  },
+  {
+    "marketKeyId": 315,
+    "name": "Cumberland - MD",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.723037,
+        "Longitude": -79.2716951
+      },
+      "LowerRight": {
+        "Latitude": 39.237624,
+        "Longitude": -78.3133222
+      }
+    }
+  },
+  {
+    "marketKeyId": 1267,
+    "name": "Dallas - TX",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.473834,
+        "Longitude": -97.4111569
+      },
+      "LowerRight": {
+        "Latitude": 31.919345,
+        "Longitude": -95.4465149
+      }
+    }
+  },
+  {
+    "marketKeyId": 316,
+    "name": "Dallas-Fort Worth - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.434642,
+        "Longitude": -98.068545
+      },
+      "LowerRight": {
+        "Latitude": 32.052087,
+        "Longitude": -95.858645
+      }
+    }
+  },
+  {
+    "marketKeyId": 317,
+    "name": "Dalton - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.988329,
+        "Longitude": -85.1688511
+      },
+      "LowerRight": {
+        "Latitude": 34.583187,
+        "Longitude": -84.5821951
+      }
+    }
+  },
+  {
+    "marketKeyId": 318,
+    "name": "Danville - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.491237,
+        "Longitude": -87.9421028
+      },
+      "LowerRight": {
+        "Latitude": 39.868384,
+        "Longitude": -87.5263658
+      }
+    }
+  },
+  {
+    "marketKeyId": 321,
+    "name": "Daphne-Fairhope-Foley - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.319017,
+        "Longitude": -88.0292261
+      },
+      "LowerRight": {
+        "Latitude": 30.223313,
+        "Longitude": -87.387876
+      }
+    }
+  },
+  {
+    "marketKeyId": 322,
+    "name": "Davenport - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.782964,
+        "Longitude": -91.114186
+      },
+      "LowerRight": {
+        "Latitude": 41.063645,
+        "Longitude": -89.8566131
+      }
+    }
+  },
+  {
+    "marketKeyId": 323,
+    "name": "Dayton - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.200004,
+        "Longitude": -84.4856528
+      },
+      "LowerRight": {
+        "Latitude": 39.550254,
+        "Longitude": -83.6466098
+      }
+    }
+  },
+  {
+    "marketKeyId": 72,
+    "name": "Dayton/Springfield - OH",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.200004,
+        "Longitude": -84.4856528
+      },
+      "LowerRight": {
+        "Latitude": 39.550254,
+        "Longitude": -83.5121549
+      }
+    }
+  },
+  {
+    "marketKeyId": 330,
+    "name": "Daytona Beach - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.67067,
+        "Longitude": -81.6809029
+      },
+      "LowerRight": {
+        "Latitude": 28.612662,
+        "Longitude": -80.7328181
+      }
+    }
+  },
+  {
+    "marketKeyId": 325,
+    "name": "Decatur - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.804992,
+        "Longitude": -87.5310239
+      },
+      "LowerRight": {
+        "Latitude": 34.299096,
+        "Longitude": -86.5497499
+      }
+    }
+  },
+  {
+    "marketKeyId": 326,
+    "name": "Decatur - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.055344,
+        "Longitude": -89.2178741
+      },
+      "LowerRight": {
+        "Latitude": 39.652678,
+        "Longitude": -88.7450512
+      }
+    }
+  },
+  {
+    "marketKeyId": 1268,
+    "name": "Delaware",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.839516,
+        "Longitude": -76.225851
+      },
+      "LowerRight": {
+        "Latitude": 38.45104,
+        "Longitude": -75.0487579
+      }
+    }
+  },
+  {
+    "marketKeyId": 332,
+    "name": "Denver - CO",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.044227,
+        "Longitude": -106.2101729
+      },
+      "LowerRight": {
+        "Latitude": 38.693089,
+        "Longitude": -103.705695
+      }
+    }
+  },
+  {
+    "marketKeyId": 334,
+    "name": "Des Moines - IA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.863728,
+        "Longitude": -94.744876
+      },
+      "LowerRight": {
+        "Latitude": 41.156535,
+        "Longitude": -93.3278861
+      }
+    }
+  },
+  {
+    "marketKeyId": 335,
+    "name": "Detroit - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.327049,
+        "Longitude": -84.1581889
+      },
+      "LowerRight": {
+        "Latitude": 42.03202,
+        "Longitude": -82.418521
+      }
+    }
+  },
+  {
+    "marketKeyId": 1379,
+    "name": "Detroit - MI",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.327049,
+        "Longitude": -84.1581889
+      },
+      "LowerRight": {
+        "Latitude": 42.03202,
+        "Longitude": -82.418368
+      }
+    }
+  },
+  {
+    "marketKeyId": 339,
+    "name": "Dothan - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.774364,
+        "Longitude": -86.1934759
+      },
+      "LowerRight": {
+        "Latitude": 30.992859,
+        "Longitude": -84.9994279
+      }
+    }
+  },
+  {
+    "marketKeyId": 341,
+    "name": "Dover - DE",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.365447,
+        "Longitude": -75.759988
+      },
+      "LowerRight": {
+        "Latitude": 38.828745,
+        "Longitude": -75.3114622
+      }
+    }
+  },
+  {
+    "marketKeyId": 344,
+    "name": "Dubuque - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.675082,
+        "Longitude": -91.1344388
+      },
+      "LowerRight": {
+        "Latitude": 42.294634,
+        "Longitude": -90.4737982
+      }
+    }
+  },
+  {
+    "marketKeyId": 345,
+    "name": "Duluth - MN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.631494,
+        "Longitude": -93.0976661
+      },
+      "LowerRight": {
+        "Latitude": 46.156926,
+        "Longitude": -91.5507889
+      }
+    }
+  },
+  {
+    "marketKeyId": 351,
+    "name": "Durham - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.542164,
+        "Longitude": -79.5557318
+      },
+      "LowerRight": {
+        "Latitude": 35.515088,
+        "Longitude": -78.69793
+      }
+    }
+  },
+  {
+    "marketKeyId": 727,
+    "name": "East Bay - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.099878,
+        "Longitude": -122.4294379
+      },
+      "LowerRight": {
+        "Latitude": 37.454389,
+        "Longitude": -121.4692139
+      }
+    }
+  },
+  {
+    "marketKeyId": 356,
+    "name": "East Stroudsburg - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.252765,
+        "Longitude": -75.6496372
+      },
+      "LowerRight": {
+        "Latitude": 40.814746,
+        "Longitude": -74.9667589
+      }
+    }
+  },
+  {
+    "marketKeyId": 357,
+    "name": "Eau Claire - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.292221,
+        "Longitude": -91.6664191
+      },
+      "LowerRight": {
+        "Latitude": 44.595773,
+        "Longitude": -90.9213638
+      }
+    }
+  },
+  {
+    "marketKeyId": 361,
+    "name": "El Centro - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.433814,
+        "Longitude": -116.1062719
+      },
+      "LowerRight": {
+        "Latitude": 32.618592,
+        "Longitude": -114.4628899
+      }
+    }
+  },
+  {
+    "marketKeyId": 371,
+    "name": "El Paso - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.002533,
+        "Longitude": -106.6456462
+      },
+      "LowerRight": {
+        "Latitude": 30.629258,
+        "Longitude": -104.9071219
+      }
+    }
+  },
+  {
+    "marketKeyId": 1774,
+    "name": "El Paso - TX",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.002449,
+        "Longitude": -106.6456462
+      },
+      "LowerRight": {
+        "Latitude": 31.387181,
+        "Longitude": -105.9543371
+      }
+    }
+  },
+  {
+    "marketKeyId": 364,
+    "name": "Elizabethtown-Fort Knox - KY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.006368,
+        "Longitude": -86.2774949
+      },
+      "LowerRight": {
+        "Latitude": 37.422,
+        "Longitude": -85.4658968
+      }
+    }
+  },
+  {
+    "marketKeyId": 366,
+    "name": "Elkhart - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.760513,
+        "Longitude": -86.0625749
+      },
+      "LowerRight": {
+        "Latitude": 41.434909,
+        "Longitude": -85.6534612
+      }
+    }
+  },
+  {
+    "marketKeyId": 370,
+    "name": "Elmira - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.294424,
+        "Longitude": -76.9661089
+      },
+      "LowerRight": {
+        "Latitude": 42.000149,
+        "Longitude": -76.535779
+      }
+    }
+  },
+  {
+    "marketKeyId": 373,
+    "name": "Enid - OK",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.593664,
+        "Longitude": -98.1045749
+      },
+      "LowerRight": {
+        "Latitude": 36.164462,
+        "Longitude": -97.460505
+      }
+    }
+  },
+  {
+    "marketKeyId": 375,
+    "name": "Erie - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.269337,
+        "Longitude": -80.5194169
+      },
+      "LowerRight": {
+        "Latitude": 41.849428,
+        "Longitude": -79.6099799
+      }
+    }
+  },
+  {
+    "marketKeyId": 379,
+    "name": "Eugene - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.290548,
+        "Longitude": -124.1586068
+      },
+      "LowerRight": {
+        "Latitude": 43.437142,
+        "Longitude": -121.7676848
+      }
+    }
+  },
+  {
+    "marketKeyId": 382,
+    "name": "Evansville - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.246123,
+        "Longitude": -88.0978921
+      },
+      "LowerRight": {
+        "Latitude": 37.638245,
+        "Longitude": -87.017423
+      }
+    }
+  },
+  {
+    "marketKeyId": 383,
+    "name": "Fairbanks - AK",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 65.454475,
+        "Longitude": -148.6671638
+      },
+      "LowerRight": {
+        "Latitude": 64.257854,
+        "Longitude": -143.884795
+      }
+    }
+  },
+  {
+    "marketKeyId": 388,
+    "name": "Fargo - ND",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.239978,
+        "Longitude": -97.7061791
+      },
+      "LowerRight": {
+        "Latitude": 46.628654,
+        "Longitude": -96.1722698
+      }
+    }
+  },
+  {
+    "marketKeyId": 391,
+    "name": "Farmington - NM",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.000032,
+        "Longitude": -109.046183
+      },
+      "LowerRight": {
+        "Latitude": 36.00032,
+        "Longitude": -107.4209141
+      }
+    }
+  },
+  {
+    "marketKeyId": 392,
+    "name": "Fayetteville - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.266884,
+        "Longitude": -79.4591759
+      },
+      "LowerRight": {
+        "Latitude": 34.833379,
+        "Longitude": -78.494602
+      }
+    }
+  },
+  {
+    "marketKeyId": 398,
+    "name": "Flagstaff - AZ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.003273,
+        "Longitude": -113.354176
+      },
+      "LowerRight": {
+        "Latitude": 34.258411,
+        "Longitude": -110.7506711
+      }
+    }
+  },
+  {
+    "marketKeyId": 399,
+    "name": "Flint - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.223209,
+        "Longitude": -83.9320711
+      },
+      "LowerRight": {
+        "Latitude": 42.780821,
+        "Longitude": -83.453297
+      }
+    }
+  },
+  {
+    "marketKeyId": 400,
+    "name": "Florence - SC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.53522,
+        "Longitude": -80.2887869
+      },
+      "LowerRight": {
+        "Latitude": 33.775357,
+        "Longitude": -79.3137802
+      }
+    }
+  },
+  {
+    "marketKeyId": 401,
+    "name": "Florence-Muscle Shoals - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.008028,
+        "Longitude": -88.2029588
+      },
+      "LowerRight": {
+        "Latitude": 34.56623,
+        "Longitude": -87.2107589
+      }
+    }
+  },
+  {
+    "marketKeyId": 1269,
+    "name": "Florida Central North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.634406,
+        "Longitude": -83.4085418
+      },
+      "LowerRight": {
+        "Latitude": 28.304558,
+        "Longitude": -81.4335829
+      }
+    }
+  },
+  {
+    "marketKeyId": 1736,
+    "name": "Florida Central South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.361868,
+        "Longitude": -82.374404
+      },
+      "LowerRight": {
+        "Latitude": 26.252951,
+        "Longitude": -80.0803912
+      }
+    }
+  },
+  {
+    "marketKeyId": 1270,
+    "name": "Florida Keys",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 25.352445,
+        "Longitude": -82.9269011
+      },
+      "LowerRight": {
+        "Latitude": 24.521051,
+        "Longitude": -80.25264
+      }
+    }
+  },
+  {
+    "marketKeyId": 1271,
+    "name": "Florida Panhandle",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.001056,
+        "Longitude": -87.634643
+      },
+      "LowerRight": {
+        "Latitude": 29.28969,
+        "Longitude": -83.1437381
+      }
+    }
+  },
+  {
+    "marketKeyId": 402,
+    "name": "Fond du Lac - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.9382,
+        "Longitude": -88.886052
+      },
+      "LowerRight": {
+        "Latitude": 43.542843,
+        "Longitude": -88.159892
+      }
+    }
+  },
+  {
+    "marketKeyId": 405,
+    "name": "Fort Collins - CO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.998441,
+        "Longitude": -106.1954381
+      },
+      "LowerRight": {
+        "Latitude": 40.257784,
+        "Longitude": -104.9430521
+      }
+    }
+  },
+  {
+    "marketKeyId": 407,
+    "name": "Fort Lauderdale - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.334698,
+        "Longitude": -80.8812331
+      },
+      "LowerRight": {
+        "Latitude": 25.95675,
+        "Longitude": -80.074805
+      }
+    }
+  },
+  {
+    "marketKeyId": 245,
+    "name": "Fort Myers - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.789551,
+        "Longitude": -82.2723289
+      },
+      "LowerRight": {
+        "Latitude": 26.316234,
+        "Longitude": -81.56218
+      }
+    }
+  },
+  {
+    "marketKeyId": 413,
+    "name": "Fort Smith - AR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.764636,
+        "Longitude": -95.1325549
+      },
+      "LowerRight": {
+        "Latitude": 34.506459,
+        "Longitude": -93.8922458
+      }
+    }
+  },
+  {
+    "marketKeyId": 414,
+    "name": "Fort Wayne - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.295373,
+        "Longitude": -85.686574
+      },
+      "LowerRight": {
+        "Latitude": 40.566832,
+        "Longitude": -84.8029219
+      }
+    }
+  },
+  {
+    "marketKeyId": 1272,
+    "name": "Fort Worth/Arlington - TX",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.076431,
+        "Longitude": -98.2263848
+      },
+      "LowerRight": {
+        "Latitude": 32.1098,
+        "Longitude": -96.9750101
+      }
+    }
+  },
+  {
+    "marketKeyId": 421,
+    "name": "Fresno - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.585837,
+        "Longitude": -120.918731
+      },
+      "LowerRight": {
+        "Latitude": 35.906914,
+        "Longitude": -118.3605862
+      }
+    }
+  },
+  {
+    "marketKeyId": 311,
+    "name": "Ft Walton Beach - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.99698,
+        "Longitude": -86.8002689
+      },
+      "LowerRight": {
+        "Latitude": 30.269313,
+        "Longitude": -85.844421
+      }
+    }
+  },
+  {
+    "marketKeyId": 422,
+    "name": "Gadsden - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.200756,
+        "Longitude": -86.370152
+      },
+      "LowerRight": {
+        "Latitude": 33.841598,
+        "Longitude": -85.737137
+      }
+    }
+  },
+  {
+    "marketKeyId": 424,
+    "name": "Gainesville - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.945254,
+        "Longitude": -82.9730542
+      },
+      "LowerRight": {
+        "Latitude": 29.417057,
+        "Longitude": -82.0490519
+      }
+    }
+  },
+  {
+    "marketKeyId": 425,
+    "name": "Gainesville - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.514096,
+        "Longitude": -84.0628411
+      },
+      "LowerRight": {
+        "Latitude": 34.098281,
+        "Longitude": -83.6152898
+      }
+    }
+  },
+  {
+    "marketKeyId": 1382,
+    "name": "Gatlinburg/Pigeon Forge - TN",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.043119,
+        "Longitude": -83.794275
+      },
+      "LowerRight": {
+        "Latitude": 35.562684,
+        "Longitude": -83.2506959
+      }
+    }
+  },
+  {
+    "marketKeyId": 1273,
+    "name": "Georgia North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.000771,
+        "Longitude": -85.527261
+      },
+      "LowerRight": {
+        "Latitude": 33.080184,
+        "Longitude": -82.4795179
+      }
+    }
+  },
+  {
+    "marketKeyId": 1274,
+    "name": "Georgia South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.343708,
+        "Longitude": -85.2365182
+      },
+      "LowerRight": {
+        "Latitude": 30.355757,
+        "Longitude": -81.130954
+      }
+    }
+  },
+  {
+    "marketKeyId": 432,
+    "name": "Gettysburg - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.069945,
+        "Longitude": -77.4710849
+      },
+      "LowerRight": {
+        "Latitude": 39.719816,
+        "Longitude": -76.954932
+      }
+    }
+  },
+  {
+    "marketKeyId": 435,
+    "name": "Glens Falls - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.808481,
+        "Longitude": -74.214625
+      },
+      "LowerRight": {
+        "Latitude": 42.941222,
+        "Longitude": -73.2413909
+      }
+    }
+  },
+  {
+    "marketKeyId": 438,
+    "name": "Goldsboro - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.59777,
+        "Longitude": -78.304662
+      },
+      "LowerRight": {
+        "Latitude": 35.146451,
+        "Longitude": -77.7999611
+      }
+    }
+  },
+  {
+    "marketKeyId": 439,
+    "name": "Grand Forks - ND",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.195102,
+        "Longitude": -97.903751
+      },
+      "LowerRight": {
+        "Latitude": 47.498625,
+        "Longitude": -95.5532891
+      }
+    }
+  },
+  {
+    "marketKeyId": 440,
+    "name": "Grand Island - NE",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.395153,
+        "Longitude": -98.7491671
+      },
+      "LowerRight": {
+        "Latitude": 40.698276,
+        "Longitude": -97.5981848
+      }
+    }
+  },
+  {
+    "marketKeyId": 441,
+    "name": "Grand Junction - CO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.366711,
+        "Longitude": -109.0602529
+      },
+      "LowerRight": {
+        "Latitude": 38.499985,
+        "Longitude": -107.377479
+      }
+    }
+  },
+  {
+    "marketKeyId": 73,
+    "name": "Grand Rapids & Michigan West",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.536242,
+        "Longitude": -86.475784
+      },
+      "LowerRight": {
+        "Latitude": 42.391042,
+        "Longitude": -85.2527171
+      }
+    }
+  },
+  {
+    "marketKeyId": 443,
+    "name": "Grand Rapids - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.468319,
+        "Longitude": -86.2712741
+      },
+      "LowerRight": {
+        "Latitude": 42.419722,
+        "Longitude": -84.835305
+      }
+    }
+  },
+  {
+    "marketKeyId": 445,
+    "name": "Grants Pass - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.784234,
+        "Longitude": -124.041983
+      },
+      "LowerRight": {
+        "Latitude": 41.995096,
+        "Longitude": -123.2278081
+      }
+    }
+  },
+  {
+    "marketKeyId": 447,
+    "name": "Great Falls - MT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.698721,
+        "Longitude": -112.047664
+      },
+      "LowerRight": {
+        "Latitude": 46.818063,
+        "Longitude": -110.6362861
+      }
+    }
+  },
+  {
+    "marketKeyId": 448,
+    "name": "Greeley - CO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.002054,
+        "Longitude": -105.0567199
+      },
+      "LowerRight": {
+        "Latitude": 40.000251,
+        "Longitude": -103.5733061
+      }
+    }
+  },
+  {
+    "marketKeyId": 449,
+    "name": "Green Bay - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.378682,
+        "Longitude": -88.6800661
+      },
+      "LowerRight": {
+        "Latitude": 44.24038,
+        "Longitude": -87.374993
+      }
+    }
+  },
+  {
+    "marketKeyId": 452,
+    "name": "Greensboro - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.542865,
+        "Longitude": -80.0668418
+      },
+      "LowerRight": {
+        "Latitude": 35.505661,
+        "Longitude": -79.510802
+      }
+    }
+  },
+  {
+    "marketKeyId": 74,
+    "name": "Greensboro/Winston Salem - NC",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.544702,
+        "Longitude": -80.9330879
+      },
+      "LowerRight": {
+        "Latitude": 35.417817,
+        "Longitude": -79.181914
+      }
+    }
+  },
+  {
+    "marketKeyId": 455,
+    "name": "Greenville - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.83292,
+        "Longitude": -77.7005021
+      },
+      "LowerRight": {
+        "Latitude": 35.327988,
+        "Longitude": -77.084716
+      }
+    }
+  },
+  {
+    "marketKeyId": 457,
+    "name": "Greenville - SC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.21554,
+        "Longitude": -82.9922321
+      },
+      "LowerRight": {
+        "Latitude": 34.203148,
+        "Longitude": -81.64354
+      }
+    }
+  },
+  {
+    "marketKeyId": 75,
+    "name": "Greenville/Spartanburg - SC",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.215449,
+        "Longitude": -82.947816
+      },
+      "LowerRight": {
+        "Latitude": 34.149223,
+        "Longitude": -81.366624
+      }
+    }
+  },
+  {
+    "marketKeyId": 461,
+    "name": "Gulfport-Biloxi-Pascagoula - MS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.736048,
+        "Longitude": -89.690589
+      },
+      "LowerRight": {
+        "Latitude": 30.173943,
+        "Longitude": -88.393981
+      }
+    }
+  },
+  {
+    "marketKeyId": 463,
+    "name": "Hagerstown - MD",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.722877,
+        "Longitude": -78.3634838
+      },
+      "LowerRight": {
+        "Latitude": 39.264612,
+        "Longitude": -77.46907
+      }
+    }
+  },
+  {
+    "marketKeyId": 465,
+    "name": "Hammond - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.00053,
+        "Longitude": -90.5675288
+      },
+      "LowerRight": {
+        "Latitude": 30.224447,
+        "Longitude": -90.2430338
+      }
+    }
+  },
+  {
+    "marketKeyId": 466,
+    "name": "Hanford-Corcoran - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.488962,
+        "Longitude": -120.3150679
+      },
+      "LowerRight": {
+        "Latitude": 35.788678,
+        "Longitude": -119.4743542
+      }
+    }
+  },
+  {
+    "marketKeyId": 468,
+    "name": "Harrisburg - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.659595,
+        "Longitude": -77.6717611
+      },
+      "LowerRight": {
+        "Latitude": 39.944077,
+        "Longitude": -76.5354139
+      }
+    }
+  },
+  {
+    "marketKeyId": 1275,
+    "name": "Harrisburg - PA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.674278,
+        "Longitude": -77.671498
+      },
+      "LowerRight": {
+        "Latitude": 39.944064,
+        "Longitude": -76.184352
+      }
+    }
+  },
+  {
+    "marketKeyId": 470,
+    "name": "Harrisonburg - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.850102,
+        "Longitude": -79.224341
+      },
+      "LowerRight": {
+        "Latitude": 38.206721,
+        "Longitude": -78.486003
+      }
+    }
+  },
+  {
+    "marketKeyId": 471,
+    "name": "Hartford - CT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.038854,
+        "Longitude": -73.029537
+      },
+      "LowerRight": {
+        "Latitude": 41.254774,
+        "Longitude": -72.099229
+      }
+    }
+  },
+  {
+    "marketKeyId": 1732,
+    "name": "Hartford - CT",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.038855,
+        "Longitude": -73.029537
+      },
+      "LowerRight": {
+        "Latitude": 41.423297,
+        "Longitude": -72.099229
+      }
+    }
+  },
+  {
+    "marketKeyId": 473,
+    "name": "Hattiesburg - MS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.434444,
+        "Longitude": -89.6544
+      },
+      "LowerRight": {
+        "Latitude": 30.909831,
+        "Longitude": -88.8343391
+      }
+    }
+  },
+  {
+    "marketKeyId": 1330,
+    "name": "Hawaii/Kauai Islands",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 22.235406,
+        "Longitude": -160.2468461
+      },
+      "LowerRight": {
+        "Latitude": 18.910787,
+        "Longitude": -154.8061718
+      }
+    }
+  },
+  {
+    "marketKeyId": 481,
+    "name": "Hickory - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.122482,
+        "Longitude": -81.987035
+      },
+      "LowerRight": {
+        "Latitude": 35.54781,
+        "Longitude": -80.9239741
+      }
+    }
+  },
+  {
+    "marketKeyId": 484,
+    "name": "Hilton Head Island - SC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.753058,
+        "Longitude": -81.2812702
+      },
+      "LowerRight": {
+        "Latitude": 32.036719,
+        "Longitude": -80.4284021
+      }
+    }
+  },
+  {
+    "marketKeyId": 485,
+    "name": "Hinesville - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.092551,
+        "Longitude": -81.981621
+      },
+      "LowerRight": {
+        "Latitude": 31.538667,
+        "Longitude": -81.1304201
+      }
+    }
+  },
+  {
+    "marketKeyId": 488,
+    "name": "Homosassa Springs - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.052659,
+        "Longitude": -82.7763491
+      },
+      "LowerRight": {
+        "Latitude": 28.665671,
+        "Longitude": -82.169141
+      }
+    }
+  },
+  {
+    "marketKeyId": 973,
+    "name": "Honolulu - HI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 21.713038,
+        "Longitude": -158.2815661
+      },
+      "LowerRight": {
+        "Latitude": 21.254822,
+        "Longitude": -157.648702
+      }
+    }
+  },
+  {
+    "marketKeyId": 491,
+    "name": "Hot Springs - AR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.773493,
+        "Longitude": -93.407278
+      },
+      "LowerRight": {
+        "Latitude": 34.389255,
+        "Longitude": -92.791498
+      }
+    }
+  },
+  {
+    "marketKeyId": 493,
+    "name": "Houma-Thibodaux - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.922029,
+        "Longitude": -91.3530679
+      },
+      "LowerRight": {
+        "Latitude": 29.036672,
+        "Longitude": -90.0357329
+      }
+    }
+  },
+  {
+    "marketKeyId": 494,
+    "name": "Houston - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.630284,
+        "Longitude": -96.62198
+      },
+      "LowerRight": {
+        "Latitude": 28.82506,
+        "Longitude": -94.3534361
+      }
+    }
+  },
+  {
+    "marketKeyId": 1276,
+    "name": "Houston - TX",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.563507,
+        "Longitude": -96.192598
+      },
+      "LowerRight": {
+        "Latitude": 29.083597,
+        "Longitude": -94.2239599
+      }
+    }
+  },
+  {
+    "marketKeyId": 498,
+    "name": "Huntington - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.849073,
+        "Longitude": -83.1676478
+      },
+      "LowerRight": {
+        "Latitude": 37.84242,
+        "Longitude": -81.696348
+      }
+    }
+  },
+  {
+    "marketKeyId": 499,
+    "name": "Huntsville - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.999024,
+        "Longitude": -87.2786362
+      },
+      "LowerRight": {
+        "Latitude": 34.475633,
+        "Longitude": -86.255771
+      }
+    }
+  },
+  {
+    "marketKeyId": 76,
+    "name": "Idaho",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.001121,
+        "Longitude": -117.243027
+      },
+      "LowerRight": {
+        "Latitude": 41.988005,
+        "Longitude": -111.0434969
+      }
+    }
+  },
+  {
+    "marketKeyId": 504,
+    "name": "Idaho Falls - ID",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.234156,
+        "Longitude": -113.7980311
+      },
+      "LowerRight": {
+        "Latitude": 43.019284,
+        "Longitude": -111.0439372
+      }
+    }
+  },
+  {
+    "marketKeyId": 1277,
+    "name": "Illinois North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.508303,
+        "Longitude": -91.51308
+      },
+      "LowerRight": {
+        "Latitude": 39.791929,
+        "Longitude": -87.5256829
+      }
+    }
+  },
+  {
+    "marketKeyId": 1278,
+    "name": "Illinois South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.213748,
+        "Longitude": -91.510839
+      },
+      "LowerRight": {
+        "Latitude": 36.970298,
+        "Longitude": -87.4951988
+      }
+    }
+  },
+  {
+    "marketKeyId": 1279,
+    "name": "Indiana North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.760686,
+        "Longitude": -87.5320189
+      },
+      "LowerRight": {
+        "Latitude": 39.842196,
+        "Longitude": -84.802036
+      }
+    }
+  },
+  {
+    "marketKeyId": 1280,
+    "name": "Indiana South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.096886,
+        "Longitude": -88.0978921
+      },
+      "LowerRight": {
+        "Latitude": 37.615679,
+        "Longitude": -84.784662
+      }
+    }
+  },
+  {
+    "marketKeyId": 506,
+    "name": "Indianapolis - IN",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.379799,
+        "Longitude": -87.014727
+      },
+      "LowerRight": {
+        "Latitude": 39.048353,
+        "Longitude": -85.575541
+      }
+    }
+  },
+  {
+    "marketKeyId": 825,
+    "name": "Inland Empire - CA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.809236,
+        "Longitude": -117.8028911
+      },
+      "LowerRight": {
+        "Latitude": 33.425888,
+        "Longitude": -114.1312111
+      }
+    }
+  },
+  {
+    "marketKeyId": 1281,
+    "name": "Iowa Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.50102,
+        "Longitude": -96.6396668
+      },
+      "LowerRight": {
+        "Latitude": 40.375437,
+        "Longitude": -89.856626
+      }
+    }
+  },
+  {
+    "marketKeyId": 509,
+    "name": "Iowa City - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.862091,
+        "Longitude": -91.946939
+      },
+      "LowerRight": {
+        "Latitude": 41.161514,
+        "Longitude": -91.3658969
+      }
+    }
+  },
+  {
+    "marketKeyId": 511,
+    "name": "Ithaca - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.627419,
+        "Longitude": -76.696655
+      },
+      "LowerRight": {
+        "Latitude": 42.262976,
+        "Longitude": -76.237695
+      }
+    }
+  },
+  {
+    "marketKeyId": 512,
+    "name": "Jackson - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.424867,
+        "Longitude": -84.7186319
+      },
+      "LowerRight": {
+        "Latitude": 42.070337,
+        "Longitude": -84.130771
+      }
+    }
+  },
+  {
+    "marketKeyId": 513,
+    "name": "Jackson - MS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.022385,
+        "Longitude": -90.759753
+      },
+      "LowerRight": {
+        "Latitude": 31.685147,
+        "Longitude": -89.6530252
+      }
+    }
+  },
+  {
+    "marketKeyId": 1282,
+    "name": "Jackson - MS",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.885554,
+        "Longitude": -90.8582872
+      },
+      "LowerRight": {
+        "Latitude": 31.933628,
+        "Longitude": -89.7072509
+      }
+    }
+  },
+  {
+    "marketKeyId": 515,
+    "name": "Jackson - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.000213,
+        "Longitude": -89.3616199
+      },
+      "LowerRight": {
+        "Latitude": 35.247339,
+        "Longitude": -88.3517648
+      }
+    }
+  },
+  {
+    "marketKeyId": 517,
+    "name": "Jacksonville - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.829924,
+        "Longitude": -82.4597932
+      },
+      "LowerRight": {
+        "Latitude": 29.622432,
+        "Longitude": -81.212836
+      }
+    }
+  },
+  {
+    "marketKeyId": 519,
+    "name": "Jacksonville - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.984419,
+        "Longitude": -77.6852881
+      },
+      "LowerRight": {
+        "Latitude": 34.440499,
+        "Longitude": -77.11249
+      }
+    }
+  },
+  {
+    "marketKeyId": 523,
+    "name": "Janesville-Beloit - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.847576,
+        "Longitude": -89.3720819
+      },
+      "LowerRight": {
+        "Latitude": 42.491912,
+        "Longitude": -88.7762992
+      }
+    }
+  },
+  {
+    "marketKeyId": 526,
+    "name": "Jefferson City - MO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.064493,
+        "Longitude": -92.84198
+      },
+      "LowerRight": {
+        "Latitude": 38.28814,
+        "Longitude": -91.6339979
+      }
+    }
+  },
+  {
+    "marketKeyId": 529,
+    "name": "Johnson City - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.510614,
+        "Longitude": -82.702566
+      },
+      "LowerRight": {
+        "Latitude": 35.953901,
+        "Longitude": -81.932994
+      }
+    }
+  },
+  {
+    "marketKeyId": 530,
+    "name": "Johnstown - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.72604,
+        "Longitude": -79.0560608
+      },
+      "LowerRight": {
+        "Latitude": 40.242579,
+        "Longitude": -78.348389
+      }
+    }
+  },
+  {
+    "marketKeyId": 531,
+    "name": "Jonesboro - AR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.99641,
+        "Longitude": -91.03923
+      },
+      "LowerRight": {
+        "Latitude": 35.438573,
+        "Longitude": -90.2862608
+      }
+    }
+  },
+  {
+    "marketKeyId": 532,
+    "name": "Joplin - MO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.364173,
+        "Longitude": -94.6195942
+      },
+      "LowerRight": {
+        "Latitude": 36.747799,
+        "Longitude": -94.052313
+      }
+    }
+  },
+  {
+    "marketKeyId": 535,
+    "name": "Kahului-Wailuku-Lahaina - HI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 21.224165,
+        "Longitude": -157.3105349
+      },
+      "LowerRight": {
+        "Latitude": 20.499784,
+        "Longitude": -155.9790511
+      }
+    }
+  },
+  {
+    "marketKeyId": 536,
+    "name": "Kalamazoo - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.421523,
+        "Longitude": -86.3643301
+      },
+      "LowerRight": {
+        "Latitude": 42.06928,
+        "Longitude": -85.2936232
+      }
+    }
+  },
+  {
+    "marketKeyId": 538,
+    "name": "Kankakee - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.298052,
+        "Longitude": -88.2519952
+      },
+      "LowerRight": {
+        "Latitude": 40.99456,
+        "Longitude": -87.5262049
+      }
+    }
+  },
+  {
+    "marketKeyId": 1283,
+    "name": "Kansas",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.003282,
+        "Longitude": -102.051769
+      },
+      "LowerRight": {
+        "Latitude": 36.99311,
+        "Longitude": -94.6140019
+      }
+    }
+  },
+  {
+    "marketKeyId": 539,
+    "name": "Kansas City - MO",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.789058,
+        "Longitude": -95.1879629
+      },
+      "LowerRight": {
+        "Latitude": 38.025952,
+        "Longitude": -93.4772332
+      }
+    }
+  },
+  {
+    "marketKeyId": 545,
+    "name": "Kennewick-Richland - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.7391,
+        "Longitude": -119.8768792
+      },
+      "LowerRight": {
+        "Latitude": 45.835962,
+        "Longitude": -118.198228
+      }
+    }
+  },
+  {
+    "marketKeyId": 1284,
+    "name": "Kentucky Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.768006,
+        "Longitude": -89.57151
+      },
+      "LowerRight": {
+        "Latitude": 36.497129,
+        "Longitude": -81.964971
+      }
+    }
+  },
+  {
+    "marketKeyId": 550,
+    "name": "Killeen - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.711019,
+        "Longitude": -98.5696448
+      },
+      "LowerRight": {
+        "Latitude": 30.752371,
+        "Longitude": -97.070188
+      }
+    }
+  },
+  {
+    "marketKeyId": 551,
+    "name": "Kingsport - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.929013,
+        "Longitude": -83.2888958
+      },
+      "LowerRight": {
+        "Latitude": 36.241923,
+        "Longitude": -81.605335
+      }
+    }
+  },
+  {
+    "marketKeyId": 552,
+    "name": "Kingston - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.176992,
+        "Longitude": -74.7806929
+      },
+      "LowerRight": {
+        "Latitude": 41.58061,
+        "Longitude": -73.9106752
+      }
+    }
+  },
+  {
+    "marketKeyId": 77,
+    "name": "Knoxville - TN",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.59211,
+        "Longitude": -84.9141518
+      },
+      "LowerRight": {
+        "Latitude": 35.46074,
+        "Longitude": -83.65091
+      }
+    }
+  },
+  {
+    "marketKeyId": 557,
+    "name": "Knoxville - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.59211,
+        "Longitude": -84.9141518
+      },
+      "LowerRight": {
+        "Latitude": 35.46074,
+        "Longitude": -83.255292
+      }
+    }
+  },
+  {
+    "marketKeyId": 558,
+    "name": "Kokomo - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.565525,
+        "Longitude": -86.3757619
+      },
+      "LowerRight": {
+        "Latitude": 40.373635,
+        "Longitude": -85.8621172
+      }
+    }
+  },
+  {
+    "marketKeyId": 560,
+    "name": "La Crosse-Onalaska - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.090584,
+        "Longitude": -91.7307472
+      },
+      "LowerRight": {
+        "Latitude": 43.500437,
+        "Longitude": -90.9074362
+      }
+    }
+  },
+  {
+    "marketKeyId": 561,
+    "name": "Lafayette - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.497738,
+        "Longitude": -92.7386039
+      },
+      "LowerRight": {
+        "Latitude": 29.473811,
+        "Longitude": -91.0894651
+      }
+    }
+  },
+  {
+    "marketKeyId": 562,
+    "name": "Lafayette-West Lafayette - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.737589,
+        "Longitude": -87.526589
+      },
+      "LowerRight": {
+        "Latitude": 40.214365,
+        "Longitude": -86.3734388
+      }
+    }
+  },
+  {
+    "marketKeyId": 565,
+    "name": "Lake Charles - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.490523,
+        "Longitude": -93.9292081
+      },
+      "LowerRight": {
+        "Latitude": 29.579184,
+        "Longitude": -92.6136788
+      }
+    }
+  },
+  {
+    "marketKeyId": 567,
+    "name": "Lake Havasu - AZ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.000819,
+        "Longitude": -114.7546811
+      },
+      "LowerRight": {
+        "Latitude": 34.209626,
+        "Longitude": -112.5289681
+      }
+    }
+  },
+  {
+    "marketKeyId": 568,
+    "name": "Lakeland - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.361868,
+        "Longitude": -82.1062361
+      },
+      "LowerRight": {
+        "Latitude": 27.643238,
+        "Longitude": -81.131045
+      }
+    }
+  },
+  {
+    "marketKeyId": 570,
+    "name": "Lancaster - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.315695,
+        "Longitude": -76.72162
+      },
+      "LowerRight": {
+        "Latitude": 39.721131,
+        "Longitude": -75.8737739
+      }
+    }
+  },
+  {
+    "marketKeyId": 571,
+    "name": "Lansing - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.118851,
+        "Longitude": -85.0755848
+      },
+      "LowerRight": {
+        "Latitude": 42.421428,
+        "Longitude": -84.1406011
+      }
+    }
+  },
+  {
+    "marketKeyId": 573,
+    "name": "Laredo - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.204627,
+        "Longitude": -100.2121891
+      },
+      "LowerRight": {
+        "Latitude": 27.259603,
+        "Longitude": -98.7980872
+      }
+    }
+  },
+  {
+    "marketKeyId": 574,
+    "name": "Las Cruces - NM",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.052795,
+        "Longitude": -107.2996808
+      },
+      "LowerRight": {
+        "Latitude": 31.783148,
+        "Longitude": -106.3404731
+      }
+    }
+  },
+  {
+    "marketKeyId": 576,
+    "name": "Las Vegas - NV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.853662,
+        "Longitude": -115.8969251
+      },
+      "LowerRight": {
+        "Latitude": 35.001857,
+        "Longitude": -114.042771
+      }
+    }
+  },
+  {
+    "marketKeyId": 1285,
+    "name": "Las Vegas - NV",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.853474,
+        "Longitude": -115.8969251
+      },
+      "LowerRight": {
+        "Latitude": 35.002001,
+        "Longitude": -114.0454861
+      }
+    }
+  },
+  {
+    "marketKeyId": 579,
+    "name": "Lawrence - KS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.069783,
+        "Longitude": -95.5019002
+      },
+      "LowerRight": {
+        "Latitude": 38.738272,
+        "Longitude": -95.0558479
+      }
+    }
+  },
+  {
+    "marketKeyId": 581,
+    "name": "Lawton - OK",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.855673,
+        "Longitude": -98.8263331
+      },
+      "LowerRight": {
+        "Latitude": 34.06227,
+        "Longitude": -98.088912
+      }
+    }
+  },
+  {
+    "marketKeyId": 583,
+    "name": "Lebanon - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.555157,
+        "Longitude": -76.6780402
+      },
+      "LowerRight": {
+        "Latitude": 40.195549,
+        "Longitude": -76.151475
+      }
+    }
+  },
+  {
+    "marketKeyId": 121,
+    "name": "Lehigh Valley - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.134023,
+        "Longitude": -75.9973478
+      },
+      "LowerRight": {
+        "Latitude": 40.418451,
+        "Longitude": -74.767874
+      }
+    }
+  },
+  {
+    "marketKeyId": 587,
+    "name": "Lewiston - ID",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.630813,
+        "Longitude": -117.480141
+      },
+      "LowerRight": {
+        "Latitude": 45.855206,
+        "Longitude": -116.360194
+      }
+    }
+  },
+  {
+    "marketKeyId": 588,
+    "name": "Lewiston-Auburn - ME",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.487305,
+        "Longitude": -70.4852921
+      },
+      "LowerRight": {
+        "Latitude": 43.906713,
+        "Longitude": -69.993553
+      }
+    }
+  },
+  {
+    "marketKeyId": 78,
+    "name": "Lexington - KY",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.512458,
+        "Longitude": -84.8495318
+      },
+      "LowerRight": {
+        "Latitude": 37.466699,
+        "Longitude": -83.9665598
+      }
+    }
+  },
+  {
+    "marketKeyId": 591,
+    "name": "Lexington - KY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.493015,
+        "Longitude": -84.8669512
+      },
+      "LowerRight": {
+        "Latitude": 37.728536,
+        "Longitude": -83.9662679
+      }
+    }
+  },
+  {
+    "marketKeyId": 593,
+    "name": "Lima - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.920429,
+        "Longitude": -84.3973801
+      },
+      "LowerRight": {
+        "Latitude": 40.643069,
+        "Longitude": -83.8798279
+      }
+    }
+  },
+  {
+    "marketKeyId": 595,
+    "name": "Lincoln - NE",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.046947,
+        "Longitude": -97.3686449
+      },
+      "LowerRight": {
+        "Latitude": 40.523013,
+        "Longitude": -96.4636178
+      }
+    }
+  },
+  {
+    "marketKeyId": 596,
+    "name": "Little Rock - AR",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.368395,
+        "Longitude": -93.305885
+      },
+      "LowerRight": {
+        "Latitude": 34.059633,
+        "Longitude": -91.6327721
+      }
+    }
+  },
+  {
+    "marketKeyId": 598,
+    "name": "Logan - UT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.430589,
+        "Longitude": -112.1659909
+      },
+      "LowerRight": {
+        "Latitude": 41.369149,
+        "Longitude": -111.4015759
+      }
+    }
+  },
+  {
+    "marketKeyId": 701,
+    "name": "Long Island - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.292422,
+        "Longitude": -73.7667551
+      },
+      "LowerRight": {
+        "Latitude": 40.57302,
+        "Longitude": -71.8561379
+      }
+    }
+  },
+  {
+    "marketKeyId": 1286,
+    "name": "Long Island - NY",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.295293,
+        "Longitude": -73.7656981
+      },
+      "LowerRight": {
+        "Latitude": 40.572973,
+        "Longitude": -71.8561501
+      }
+    }
+  },
+  {
+    "marketKeyId": 602,
+    "name": "Longview - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.904502,
+        "Longitude": -95.1534101
+      },
+      "LowerRight": {
+        "Latitude": 31.843718,
+        "Longitude": -94.4518331
+      }
+    }
+  },
+  {
+    "marketKeyId": 603,
+    "name": "Longview - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.388048,
+        "Longitude": -123.2178412
+      },
+      "LowerRight": {
+        "Latitude": 45.850536,
+        "Longitude": -122.239706
+      }
+    }
+  },
+  {
+    "marketKeyId": 605,
+    "name": "Los Angeles - CA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.823193,
+        "Longitude": -118.944864
+      },
+      "LowerRight": {
+        "Latitude": 32.799469,
+        "Longitude": -117.6456038
+      }
+    }
+  },
+  {
+    "marketKeyId": 1287,
+    "name": "Louisiana North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.019544,
+        "Longitude": -94.043628
+      },
+      "LowerRight": {
+        "Latitude": 30.749487,
+        "Longitude": -90.8756212
+      }
+    }
+  },
+  {
+    "marketKeyId": 1288,
+    "name": "Louisiana South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.075029,
+        "Longitude": -93.9292088
+      },
+      "LowerRight": {
+        "Latitude": 29.036581,
+        "Longitude": -89.7269231
+      }
+    }
+  },
+  {
+    "marketKeyId": 606,
+    "name": "Louisville - KY",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.831812,
+        "Longitude": -86.3299091
+      },
+      "LowerRight": {
+        "Latitude": 37.805837,
+        "Longitude": -84.8672611
+      }
+    }
+  },
+  {
+    "marketKeyId": 1289,
+    "name": "Lower Hudson Valley - NY",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.209014,
+        "Longitude": -75.213846
+      },
+      "LowerRight": {
+        "Latitude": 40.876587,
+        "Longitude": -73.482642
+      }
+    }
+  },
+  {
+    "marketKeyId": 607,
+    "name": "Lubbock - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.833625,
+        "Longitude": -102.0857681
+      },
+      "LowerRight": {
+        "Latitude": 32.959702,
+        "Longitude": -101.0387722
+      }
+    }
+  },
+  {
+    "marketKeyId": 611,
+    "name": "Lynchburg - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.814152,
+        "Longitude": -79.858058
+      },
+      "LowerRight": {
+        "Latitude": 37.005876,
+        "Longitude": -78.5943518
+      }
+    }
+  },
+  {
+    "marketKeyId": 613,
+    "name": "Macon - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.202634,
+        "Longitude": -84.202628
+      },
+      "LowerRight": {
+        "Latitude": 32.452198,
+        "Longitude": -83.2265359
+      }
+    }
+  },
+  {
+    "marketKeyId": 79,
+    "name": "Macon/Warner Robins - GA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.186105,
+        "Longitude": -84.0711481
+      },
+      "LowerRight": {
+        "Latitude": 32.284082,
+        "Longitude": -83.0858288
+      }
+    }
+  },
+  {
+    "marketKeyId": 614,
+    "name": "Madera - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.777986,
+        "Longitude": -120.545536
+      },
+      "LowerRight": {
+        "Latitude": 36.763047,
+        "Longitude": -119.022363
+      }
+    }
+  },
+  {
+    "marketKeyId": 80,
+    "name": "Madison - WI",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.310452,
+        "Longitude": -89.8980059
+      },
+      "LowerRight": {
+        "Latitude": 42.777289,
+        "Longitude": -88.924212
+      }
+    }
+  },
+  {
+    "marketKeyId": 616,
+    "name": "Madison - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.643541,
+        "Longitude": -90.430042
+      },
+      "LowerRight": {
+        "Latitude": 42.500081,
+        "Longitude": -89.0044769
+      }
+    }
+  },
+  {
+    "marketKeyId": 1290,
+    "name": "Maine Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.459687,
+        "Longitude": -71.084335
+      },
+      "LowerRight": {
+        "Latitude": 43.100164,
+        "Longitude": -66.9499988
+      }
+    }
+  },
+  {
+    "marketKeyId": 621,
+    "name": "Manchester - NH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.207263,
+        "Longitude": -72.062374
+      },
+      "LowerRight": {
+        "Latitude": 42.696985,
+        "Longitude": -71.2455041
+      }
+    }
+  },
+  {
+    "marketKeyId": 622,
+    "name": "Manhattan - KS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.566587,
+        "Longitude": -96.961707
+      },
+      "LowerRight": {
+        "Latitude": 39.043232,
+        "Longitude": -96.034612
+      }
+    }
+  },
+  {
+    "marketKeyId": 624,
+    "name": "Mankato - MN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.456946,
+        "Longitude": -94.7867062
+      },
+      "LowerRight": {
+        "Latitude": 43.847781,
+        "Longitude": -93.7677352
+      }
+    }
+  },
+  {
+    "marketKeyId": 625,
+    "name": "Mansfield - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.995638,
+        "Longitude": -82.7271641
+      },
+      "LowerRight": {
+        "Latitude": 40.549879,
+        "Longitude": -82.3368949
+      }
+    }
+  },
+  {
+    "marketKeyId": 1291,
+    "name": "Maryland Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.723688,
+        "Longitude": -79.4876519
+      },
+      "LowerRight": {
+        "Latitude": 37.888644,
+        "Longitude": -75.0491399
+      }
+    }
+  },
+  {
+    "marketKeyId": 81,
+    "name": "Massachusetts Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.74594,
+        "Longitude": -73.508143
+      },
+      "LowerRight": {
+        "Latitude": 41.238757,
+        "Longitude": -69.9268741
+      }
+    }
+  },
+  {
+    "marketKeyId": 1329,
+    "name": "Maui Island - HI",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 21.224012,
+        "Longitude": -157.3101601
+      },
+      "LowerRight": {
+        "Latitude": 20.500928,
+        "Longitude": -155.972565
+      }
+    }
+  },
+  {
+    "marketKeyId": 643,
+    "name": "McAllen - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.783081,
+        "Longitude": -98.586715
+      },
+      "LowerRight": {
+        "Latitude": 26.03643,
+        "Longitude": -97.861675
+      }
+    }
+  },
+  {
+    "marketKeyId": 82,
+    "name": "McAllen/Brownsville - TX",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.783081,
+        "Longitude": -98.5865501
+      },
+      "LowerRight": {
+        "Latitude": 25.837092,
+        "Longitude": -97.1465951
+      }
+    }
+  },
+  {
+    "marketKeyId": 648,
+    "name": "Medford - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.996897,
+        "Longitude": -123.2316292
+      },
+      "LowerRight": {
+        "Latitude": 42.002634,
+        "Longitude": -122.2818368
+      }
+    }
+  },
+  {
+    "marketKeyId": 761,
+    "name": "Melbourne - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.791396,
+        "Longitude": -80.9872499
+      },
+      "LowerRight": {
+        "Latitude": 27.822058,
+        "Longitude": -80.4470519
+      }
+    }
+  },
+  {
+    "marketKeyId": 83,
+    "name": "Memphis - TN",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.65241,
+        "Longitude": -90.5618261
+      },
+      "LowerRight": {
+        "Latitude": 34.707933,
+        "Longitude": -89.1872449
+      }
+    }
+  },
+  {
+    "marketKeyId": 649,
+    "name": "Memphis - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.652346,
+        "Longitude": -90.5885359
+      },
+      "LowerRight": {
+        "Latitude": 34.423807,
+        "Longitude": -89.0165858
+      }
+    }
+  },
+  {
+    "marketKeyId": 651,
+    "name": "Merced - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.633364,
+        "Longitude": -121.2486469
+      },
+      "LowerRight": {
+        "Latitude": 36.740381,
+        "Longitude": -120.0520552
+      }
+    }
+  },
+  {
+    "marketKeyId": 656,
+    "name": "Miami - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 25.979434,
+        "Longitude": -80.8736
+      },
+      "LowerRight": {
+        "Latitude": 25.137597,
+        "Longitude": -80.1177412
+      }
+    }
+  },
+  {
+    "marketKeyId": 657,
+    "name": "Michigan City-La Porte - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.760299,
+        "Longitude": -86.9327341
+      },
+      "LowerRight": {
+        "Latitude": 41.236798,
+        "Longitude": -86.4862628
+      }
+    }
+  },
+  {
+    "marketKeyId": 1292,
+    "name": "Michigan North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.262632,
+        "Longitude": -90.418108
+      },
+      "LowerRight": {
+        "Latitude": 42.777615,
+        "Longitude": -82.503194
+      }
+    }
+  },
+  {
+    "marketKeyId": 1293,
+    "name": "Michigan South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.956069,
+        "Longitude": -86.8252838
+      },
+      "LowerRight": {
+        "Latitude": 41.696088,
+        "Longitude": -83.1929119
+      }
+    }
+  },
+  {
+    "marketKeyId": 659,
+    "name": "Midland - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.828434,
+        "Longitude": -84.6081061
+      },
+      "LowerRight": {
+        "Latitude": 43.466006,
+        "Longitude": -84.1669312
+      }
+    }
+  },
+  {
+    "marketKeyId": 660,
+    "name": "Midland - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.525325,
+        "Longitude": -102.2875279
+      },
+      "LowerRight": {
+        "Latitude": 31.651276,
+        "Longitude": -101.688656
+      }
+    }
+  },
+  {
+    "marketKeyId": 662,
+    "name": "Milwaukee - WI",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.543532,
+        "Longitude": -88.5422768
+      },
+      "LowerRight": {
+        "Latitude": 42.841356,
+        "Longitude": -87.790919
+      }
+    }
+  },
+  {
+    "marketKeyId": 664,
+    "name": "Minneapolis - MN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.24715,
+        "Longitude": -94.6295708
+      },
+      "LowerRight": {
+        "Latitude": 44.195836,
+        "Longitude": -92.1347849
+      }
+    }
+  },
+  {
+    "marketKeyId": 1745,
+    "name": "Minneapolis - MN",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.734326,
+        "Longitude": -94.2615202
+      },
+      "LowerRight": {
+        "Latitude": 44.471149,
+        "Longitude": -92.6252021
+      }
+    }
+  },
+  {
+    "marketKeyId": 1294,
+    "name": "Minnesota Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.384359,
+        "Longitude": -97.2392558
+      },
+      "LowerRight": {
+        "Latitude": 43.499362,
+        "Longitude": -89.491793
+      }
+    }
+  },
+  {
+    "marketKeyId": 1295,
+    "name": "Mississippi",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.995968,
+        "Longitude": -91.6550089
+      },
+      "LowerRight": {
+        "Latitude": 30.173943,
+        "Longitude": -88.0978889
+      }
+    }
+  },
+  {
+    "marketKeyId": 666,
+    "name": "Missoula - MT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.600538,
+        "Longitude": -114.7972349
+      },
+      "LowerRight": {
+        "Latitude": 46.63153,
+        "Longitude": -113.302413
+      }
+    }
+  },
+  {
+    "marketKeyId": 1296,
+    "name": "Missouri North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.613641,
+        "Longitude": -95.7747038
+      },
+      "LowerRight": {
+        "Latitude": 38.244427,
+        "Longitude": -90.721188
+      }
+    }
+  },
+  {
+    "marketKeyId": 1297,
+    "name": "Missouri South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.82507,
+        "Longitude": -94.6184749
+      },
+      "LowerRight": {
+        "Latitude": 35.995476,
+        "Longitude": -89.098843
+      }
+    }
+  },
+  {
+    "marketKeyId": 84,
+    "name": "Mobile - AL",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.318811,
+        "Longitude": -88.4320081
+      },
+      "LowerRight": {
+        "Latitude": 30.223313,
+        "Longitude": -87.3889931
+      }
+    }
+  },
+  {
+    "marketKeyId": 669,
+    "name": "Mobile - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.173306,
+        "Longitude": -88.432007
+      },
+      "LowerRight": {
+        "Latitude": 30.228031,
+        "Longitude": -87.9239441
+      }
+    }
+  },
+  {
+    "marketKeyId": 670,
+    "name": "Modesto - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.077421,
+        "Longitude": -121.486775
+      },
+      "LowerRight": {
+        "Latitude": 37.134774,
+        "Longitude": -120.3873289
+      }
+    }
+  },
+  {
+    "marketKeyId": 671,
+    "name": "Monroe - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.014489,
+        "Longitude": -92.7340571
+      },
+      "LowerRight": {
+        "Latitude": 32.258552,
+        "Longitude": -91.90328
+      }
+    }
+  },
+  {
+    "marketKeyId": 672,
+    "name": "Monroe - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.09438,
+        "Longitude": -83.773922
+      },
+      "LowerRight": {
+        "Latitude": 41.723546,
+        "Longitude": -83.1926261
+      }
+    }
+  },
+  {
+    "marketKeyId": 85,
+    "name": "Montana",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.00139,
+        "Longitude": -116.0500039
+      },
+      "LowerRight": {
+        "Latitude": 44.35821,
+        "Longitude": -104.039563
+      }
+    }
+  },
+  {
+    "marketKeyId": 673,
+    "name": "Montgomery - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.769225,
+        "Longitude": -86.9212372
+      },
+      "LowerRight": {
+        "Latitude": 31.961601,
+        "Longitude": -85.852625
+      }
+    }
+  },
+  {
+    "marketKeyId": 677,
+    "name": "Morgantown - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.72143,
+        "Longitude": -80.42224
+      },
+      "LowerRight": {
+        "Latitude": 39.194906,
+        "Longitude": -79.476575
+      }
+    }
+  },
+  {
+    "marketKeyId": 678,
+    "name": "Morristown - TN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.345292,
+        "Longitude": -83.7102899
+      },
+      "LowerRight": {
+        "Latitude": 35.895846,
+        "Longitude": -83.0817259
+      }
+    }
+  },
+  {
+    "marketKeyId": 690,
+    "name": "Mount Vernon - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.657833,
+        "Longitude": -122.74052
+      },
+      "LowerRight": {
+        "Latitude": 48.295548,
+        "Longitude": -120.685392
+      }
+    }
+  },
+  {
+    "marketKeyId": 691,
+    "name": "Muncie - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.379524,
+        "Longitude": -85.5789188
+      },
+      "LowerRight": {
+        "Latitude": 40.076362,
+        "Longitude": -85.2143861
+      }
+    }
+  },
+  {
+    "marketKeyId": 694,
+    "name": "Muskegon - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.472487,
+        "Longitude": -86.4613069
+      },
+      "LowerRight": {
+        "Latitude": 43.117395,
+        "Longitude": -85.790448
+      }
+    }
+  },
+  {
+    "marketKeyId": 696,
+    "name": "Myrtle Beach - SC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.371814,
+        "Longitude": -79.3391101
+      },
+      "LowerRight": {
+        "Latitude": 33.569108,
+        "Longitude": -77.930937
+      }
+    }
+  },
+  {
+    "marketKeyId": 1298,
+    "name": "Myrtle Beach - SC",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.299978,
+        "Longitude": -79.3391789
+      },
+      "LowerRight": {
+        "Latitude": 33.206407,
+        "Longitude": -78.540907
+      }
+    }
+  },
+  {
+    "marketKeyId": 698,
+    "name": "Napa - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.864245,
+        "Longitude": -122.6464211
+      },
+      "LowerRight": {
+        "Latitude": 38.154894,
+        "Longitude": -122.061379
+      }
+    }
+  },
+  {
+    "marketKeyId": 699,
+    "name": "Naples - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.518302,
+        "Longitude": -81.845388
+      },
+      "LowerRight": {
+        "Latitude": 25.78815,
+        "Longitude": -80.8727479
+      }
+    }
+  },
+  {
+    "marketKeyId": 1737,
+    "name": "Naples - FL",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.517069,
+        "Longitude": -81.845388
+      },
+      "LowerRight": {
+        "Latitude": 24.907313,
+        "Longitude": -80.5302029
+      }
+    }
+  },
+  {
+    "marketKeyId": 700,
+    "name": "Nashville - TN",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.652557,
+        "Longitude": -87.74375
+      },
+      "LowerRight": {
+        "Latitude": 35.408175,
+        "Longitude": -85.7786339
+      }
+    }
+  },
+  {
+    "marketKeyId": 1299,
+    "name": "Nebraska",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.001708,
+        "Longitude": -104.0535151
+      },
+      "LowerRight": {
+        "Latitude": 39.999751,
+        "Longitude": -95.30829
+      }
+    }
+  },
+  {
+    "marketKeyId": 1300,
+    "name": "Nevada Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.002208,
+        "Longitude": -120.0063229
+      },
+      "LowerRight": {
+        "Latitude": 35.964186,
+        "Longitude": -114.0396491
+      }
+    }
+  },
+  {
+    "marketKeyId": 705,
+    "name": "New Bern - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.418955,
+        "Longitude": -77.7310301
+      },
+      "LowerRight": {
+        "Latitude": 34.780306,
+        "Longitude": -76.466997
+      }
+    }
+  },
+  {
+    "marketKeyId": 86,
+    "name": "New Hampshire",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.305476,
+        "Longitude": -72.5572469
+      },
+      "LowerRight": {
+        "Latitude": 42.696984,
+        "Longitude": -70.6014259
+      }
+    }
+  },
+  {
+    "marketKeyId": 709,
+    "name": "New Haven - CT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.644311,
+        "Longitude": -73.3271141
+      },
+      "LowerRight": {
+        "Latitude": 41.171127,
+        "Longitude": -72.536224
+      }
+    }
+  },
+  {
+    "marketKeyId": 1301,
+    "name": "New Jersey Shore",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.477709,
+        "Longitude": -75.4195619
+      },
+      "LowerRight": {
+        "Latitude": 38.928579,
+        "Longitude": -73.9714309
+      }
+    }
+  },
+  {
+    "marketKeyId": 1302,
+    "name": "New Mexico North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.00049,
+        "Longitude": -109.046795
+      },
+      "LowerRight": {
+        "Latitude": 34.319777,
+        "Longitude": -103.0020649
+      }
+    }
+  },
+  {
+    "marketKeyId": 1303,
+    "name": "New Mexico South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.010918,
+        "Longitude": -109.0501729
+      },
+      "LowerRight": {
+        "Latitude": 31.332176,
+        "Longitude": -103.0426621
+      }
+    }
+  },
+  {
+    "marketKeyId": 710,
+    "name": "New Orleans - LA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.711995,
+        "Longitude": -90.963693
+      },
+      "LowerRight": {
+        "Latitude": 28.926451,
+        "Longitude": -88.8165158
+      }
+    }
+  },
+  {
+    "marketKeyId": 87,
+    "name": "New York - NY",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.917499,
+        "Longitude": -74.2556408
+      },
+      "LowerRight": {
+        "Latitude": 40.495865,
+        "Longitude": -73.6514978
+      }
+    }
+  },
+  {
+    "marketKeyId": 716,
+    "name": "New York - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.632738,
+        "Longitude": -74.7626231
+      },
+      "LowerRight": {
+        "Latitude": 39.50181,
+        "Longitude": -73.482709
+      }
+    }
+  },
+  {
+    "marketKeyId": 1304,
+    "name": "New York State Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.016112,
+        "Longitude": -79.7621069
+      },
+      "LowerRight": {
+        "Latitude": 41.857457,
+        "Longitude": -73.2413909
+      }
+    }
+  },
+  {
+    "marketKeyId": 88,
+    "name": "Newark - NJ",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.357424,
+        "Longitude": -75.2036789
+      },
+      "LowerRight": {
+        "Latitude": 40.592141,
+        "Longitude": -74.1169879
+      }
+    }
+  },
+  {
+    "marketKeyId": 717,
+    "name": "Niles-Benton Harbor - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.243541,
+        "Longitude": -86.8246621
+      },
+      "LowerRight": {
+        "Latitude": 41.759487,
+        "Longitude": -86.222817
+      }
+    }
+  },
+  {
+    "marketKeyId": 989,
+    "name": "Norfolk - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.603174,
+        "Longitude": -76.9505602
+      },
+      "LowerRight": {
+        "Latitude": 36.071787,
+        "Longitude": -75.7729991
+      }
+    }
+  },
+  {
+    "marketKeyId": 1380,
+    "name": "Norfolk/Virginia Beach - VA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.603174,
+        "Longitude": -76.9309358
+      },
+      "LowerRight": {
+        "Latitude": 36.550344,
+        "Longitude": -75.867044
+      }
+    }
+  },
+  {
+    "marketKeyId": 1305,
+    "name": "North Carolina East",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.552093,
+        "Longitude": -80.506291
+      },
+      "LowerRight": {
+        "Latitude": 33.834365,
+        "Longitude": -75.4594229
+      }
+    }
+  },
+  {
+    "marketKeyId": 1306,
+    "name": "North Carolina West",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.588118,
+        "Longitude": -84.3219479
+      },
+      "LowerRight": {
+        "Latitude": 34.986592,
+        "Longitude": -80.2484449
+      }
+    }
+  },
+  {
+    "marketKeyId": 1307,
+    "name": "North Dakota",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.000691,
+        "Longitude": -104.0489179
+      },
+      "LowerRight": {
+        "Latitude": 45.935008,
+        "Longitude": -95.9764
+      }
+    }
+  },
+  {
+    "marketKeyId": 704,
+    "name": "Northern New Jersey - NJ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.602002,
+        "Longitude": -75.3587651
+      },
+      "LowerRight": {
+        "Latitude": 40.339427,
+        "Longitude": -74.116993
+      }
+    }
+  },
+  {
+    "marketKeyId": 393,
+    "name": "Northwest Arkansas - AR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.76656,
+        "Longitude": -94.6184648
+      },
+      "LowerRight": {
+        "Latitude": 35.750426,
+        "Longitude": -93.445619
+      }
+    }
+  },
+  {
+    "marketKeyId": 725,
+    "name": "Norwich - CT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.714414,
+        "Longitude": -72.4667299
+      },
+      "LowerRight": {
+        "Latitude": 41.277886,
+        "Longitude": -71.787658
+      }
+    }
+  },
+  {
+    "marketKeyId": 1328,
+    "name": "Oahu Island - HI",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 21.713038,
+        "Longitude": -158.2815848
+      },
+      "LowerRight": {
+        "Latitude": 21.254837,
+        "Longitude": -157.648702
+      }
+    }
+  },
+  {
+    "marketKeyId": 89,
+    "name": "Oakland - CA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.099878,
+        "Longitude": -122.4294451
+      },
+      "LowerRight": {
+        "Latitude": 37.271783,
+        "Longitude": -121.405325
+      }
+    }
+  },
+  {
+    "marketKeyId": 728,
+    "name": "Ocala - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.521678,
+        "Longitude": -82.5362201
+      },
+      "LowerRight": {
+        "Latitude": 28.959778,
+        "Longitude": -81.6386962
+      }
+    }
+  },
+  {
+    "marketKeyId": 729,
+    "name": "Ocean City - NJ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.324383,
+        "Longitude": -74.9720272
+      },
+      "LowerRight": {
+        "Latitude": 38.928796,
+        "Longitude": -74.5512109
+      }
+    }
+  },
+  {
+    "marketKeyId": 730,
+    "name": "Odessa - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.08721,
+        "Longitude": -102.799138
+      },
+      "LowerRight": {
+        "Latitude": 31.651085,
+        "Longitude": -102.287048
+      }
+    }
+  },
+  {
+    "marketKeyId": 731,
+    "name": "Ogden - UT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.001246,
+        "Longitude": -114.0425528
+      },
+      "LowerRight": {
+        "Latitude": 40.77345,
+        "Longitude": -111.2213779
+      }
+    }
+  },
+  {
+    "marketKeyId": 1308,
+    "name": "Ohio Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.742511,
+        "Longitude": -84.8151641
+      },
+      "LowerRight": {
+        "Latitude": 38.403186,
+        "Longitude": -80.518626
+      }
+    }
+  },
+  {
+    "marketKeyId": 1309,
+    "name": "Oklahoma Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.002328,
+        "Longitude": -103.002651
+      },
+      "LowerRight": {
+        "Latitude": 33.615765,
+        "Longitude": -94.4313322
+      }
+    }
+  },
+  {
+    "marketKeyId": 735,
+    "name": "Oklahoma City - OK",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.164777,
+        "Longitude": -98.3136359
+      },
+      "LowerRight": {
+        "Latitude": 34.681119,
+        "Longitude": -96.619181
+      }
+    }
+  },
+  {
+    "marketKeyId": 737,
+    "name": "Olympia - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.186844,
+        "Longitude": -123.202066
+      },
+      "LowerRight": {
+        "Latitude": 46.76204,
+        "Longitude": -122.2027211
+      }
+    }
+  },
+  {
+    "marketKeyId": 738,
+    "name": "Omaha - NE",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.866308,
+        "Longitude": -96.9091121
+      },
+      "LowerRight": {
+        "Latitude": 40.78347,
+        "Longitude": -95.1546139
+      }
+    }
+  },
+  {
+    "marketKeyId": 130,
+    "name": "Orange County - CA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.947512,
+        "Longitude": -118.1158672
+      },
+      "LowerRight": {
+        "Latitude": 33.386629,
+        "Longitude": -117.412987
+      }
+    }
+  },
+  {
+    "marketKeyId": 1310,
+    "name": "Oregon Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.299078,
+        "Longitude": -124.6067881
+      },
+      "LowerRight": {
+        "Latitude": 41.991794,
+        "Longitude": -116.463262
+      }
+    }
+  },
+  {
+    "marketKeyId": 743,
+    "name": "Orlando - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.276766,
+        "Longitude": -81.957641
+      },
+      "LowerRight": {
+        "Latitude": 27.64199,
+        "Longitude": -80.861395
+      }
+    }
+  },
+  {
+    "marketKeyId": 744,
+    "name": "Oshkosh-Neenah - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.244386,
+        "Longitude": -88.886758
+      },
+      "LowerRight": {
+        "Latitude": 43.892977,
+        "Longitude": -88.4031952
+      }
+    }
+  },
+  {
+    "marketKeyId": 751,
+    "name": "Owensboro - KY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.999366,
+        "Longitude": -87.4997179
+      },
+      "LowerRight": {
+        "Latitude": 37.380416,
+        "Longitude": -86.622093
+      }
+    }
+  },
+  {
+    "marketKeyId": 1014,
+    "name": "Palm Beach - FL",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 26.970943,
+        "Longitude": -80.8862321
+      },
+      "LowerRight": {
+        "Latitude": 26.320755,
+        "Longitude": -80.0313232
+      }
+    }
+  },
+  {
+    "marketKeyId": 763,
+    "name": "Panama City - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.567682,
+        "Longitude": -85.9960699
+      },
+      "LowerRight": {
+        "Latitude": 29.654991,
+        "Longitude": -85.0179391
+      }
+    }
+  },
+  {
+    "marketKeyId": 767,
+    "name": "Parkersburg - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.410374,
+        "Longitude": -81.7563848
+      },
+      "LowerRight": {
+        "Latitude": 38.895633,
+        "Longitude": -81.162455
+      }
+    }
+  },
+  {
+    "marketKeyId": 1311,
+    "name": "Pennsylvania Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.269336,
+        "Longitude": -80.519697
+      },
+      "LowerRight": {
+        "Latitude": 39.720669,
+        "Longitude": -75.0717511
+      }
+    }
+  },
+  {
+    "marketKeyId": 1312,
+    "name": "Pennsylvania Northeast",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.813781,
+        "Longitude": -76.628804
+      },
+      "LowerRight": {
+        "Latitude": 40.632335,
+        "Longitude": -74.6895172
+      }
+    }
+  },
+  {
+    "marketKeyId": 1313,
+    "name": "Pennsylvania South Central",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.31233,
+        "Longitude": -78.3803351
+      },
+      "LowerRight": {
+        "Latitude": 39.719799,
+        "Longitude": -75.9167111
+      }
+    }
+  },
+  {
+    "marketKeyId": 772,
+    "name": "Pensacola - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.999547,
+        "Longitude": -87.6348961
+      },
+      "LowerRight": {
+        "Latitude": 30.279909,
+        "Longitude": -86.7856921
+      }
+    }
+  },
+  {
+    "marketKeyId": 773,
+    "name": "Peoria - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.234483,
+        "Longitude": -89.9890178
+      },
+      "LowerRight": {
+        "Latitude": 40.319212,
+        "Longitude": -88.9293308
+      }
+    }
+  },
+  {
+    "marketKeyId": 90,
+    "name": "Philadelphia - PA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.60858,
+        "Longitude": -76.1469862
+      },
+      "LowerRight": {
+        "Latitude": 39.380157,
+        "Longitude": -74.3897509
+      }
+    }
+  },
+  {
+    "marketKeyId": 775,
+    "name": "Philadelphia - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.60858,
+        "Longitude": -76.2332789
+      },
+      "LowerRight": {
+        "Latitude": 39.290264,
+        "Longitude": -74.3897902
+      }
+    }
+  },
+  {
+    "marketKeyId": 776,
+    "name": "Phoenix - AZ",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.04817,
+        "Longitude": -113.3344361
+      },
+      "LowerRight": {
+        "Latitude": 32.501202,
+        "Longitude": -110.4483539
+      }
+    }
+  },
+  {
+    "marketKeyId": 779,
+    "name": "Pine Bluff - AR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.492765,
+        "Longitude": -92.4756019
+      },
+      "LowerRight": {
+        "Latitude": 33.704194,
+        "Longitude": -91.4217149
+      }
+    }
+  },
+  {
+    "marketKeyId": 782,
+    "name": "Pittsburgh - PA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.173134,
+        "Longitude": -80.5192801
+      },
+      "LowerRight": {
+        "Latitude": 39.720678,
+        "Longitude": -78.974649
+      }
+    }
+  },
+  {
+    "marketKeyId": 783,
+    "name": "Pittsfield - MA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.74594,
+        "Longitude": -73.5081419
+      },
+      "LowerRight": {
+        "Latitude": 42.039861,
+        "Longitude": -72.948753
+      }
+    }
+  },
+  {
+    "marketKeyId": 788,
+    "name": "Pocatello - ID",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.022379,
+        "Longitude": -112.7522441
+      },
+      "LowerRight": {
+        "Latitude": 42.256571,
+        "Longitude": -111.8754281
+      }
+    }
+  },
+  {
+    "marketKeyId": 799,
+    "name": "Port St. Lucie - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 27.558714,
+        "Longitude": -80.8856392
+      },
+      "LowerRight": {
+        "Latitude": 26.956537,
+        "Longitude": -80.0803912
+      }
+    }
+  },
+  {
+    "marketKeyId": 91,
+    "name": "Portland - ME",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.198717,
+        "Longitude": -70.8987532
+      },
+      "LowerRight": {
+        "Latitude": 43.527127,
+        "Longitude": -69.856736
+      }
+    }
+  },
+  {
+    "marketKeyId": 796,
+    "name": "Portland - ME",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.171169,
+        "Longitude": -70.9890671
+      },
+      "LowerRight": {
+        "Latitude": 43.064592,
+        "Longitude": -69.700099
+      }
+    }
+  },
+  {
+    "marketKeyId": 797,
+    "name": "Portland - OR",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.389235,
+        "Longitude": -123.7848188
+      },
+      "LowerRight": {
+        "Latitude": 44.884935,
+        "Longitude": -121.514765
+      }
+    }
+  },
+  {
+    "marketKeyId": 352,
+    "name": "Poughkeepsie - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.080906,
+        "Longitude": -74.000115
+      },
+      "LowerRight": {
+        "Latitude": 41.321693,
+        "Longitude": -73.4873141
+      }
+    }
+  },
+  {
+    "marketKeyId": 802,
+    "name": "Prescott - AZ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.531137,
+        "Longitude": -113.334161
+      },
+      "LowerRight": {
+        "Latitude": 33.882312,
+        "Longitude": -111.4612988
+      }
+    }
+  },
+  {
+    "marketKeyId": 805,
+    "name": "Providence - RI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.095699,
+        "Longitude": -71.8865359
+      },
+      "LowerRight": {
+        "Latitude": 41.146493,
+        "Longitude": -70.815811
+      }
+    }
+  },
+  {
+    "marketKeyId": 806,
+    "name": "Provo - UT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.578003,
+        "Longitude": -114.0477829
+      },
+      "LowerRight": {
+        "Latitude": 39.314455,
+        "Longitude": -110.8573211
+      }
+    }
+  },
+  {
+    "marketKeyId": 807,
+    "name": "Pueblo - CO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.522435,
+        "Longitude": -105.050678
+      },
+      "LowerRight": {
+        "Latitude": 37.734704,
+        "Longitude": -104.0539208
+      }
+    }
+  },
+  {
+    "marketKeyId": 809,
+    "name": "Punta Gorda - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 27.035287,
+        "Longitude": -82.3744148
+      },
+      "LowerRight": {
+        "Latitude": 26.769552,
+        "Longitude": -81.5622019
+      }
+    }
+  },
+  {
+    "marketKeyId": 811,
+    "name": "Racine - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.843609,
+        "Longitude": -88.3080601
+      },
+      "LowerRight": {
+        "Latitude": 42.610817,
+        "Longitude": -87.7575341
+      }
+    }
+  },
+  {
+    "marketKeyId": 812,
+    "name": "Raleigh - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.266159,
+        "Longitude": -78.9950542
+      },
+      "LowerRight": {
+        "Latitude": 35.256375,
+        "Longitude": -78.0065539
+      }
+    }
+  },
+  {
+    "marketKeyId": 92,
+    "name": "Raleigh/Durham/Chapel Hill - NC",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.352744,
+        "Longitude": -79.616632
+      },
+      "LowerRight": {
+        "Latitude": 35.28145,
+        "Longitude": -78.0066169
+      }
+    }
+  },
+  {
+    "marketKeyId": 813,
+    "name": "Rapid City - SD",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.039866,
+        "Longitude": -104.0554868
+      },
+      "LowerRight": {
+        "Latitude": 43.476844,
+        "Longitude": -101.9999812
+      }
+    }
+  },
+  {
+    "marketKeyId": 815,
+    "name": "Reading - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.67727,
+        "Longitude": -76.440181
+      },
+      "LowerRight": {
+        "Latitude": 40.137376,
+        "Longitude": -75.5296229
+      }
+    }
+  },
+  {
+    "marketKeyId": 817,
+    "name": "Redding - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.184978,
+        "Longitude": -123.0688379
+      },
+      "LowerRight": {
+        "Latitude": 40.285375,
+        "Longitude": -121.3199719
+      }
+    }
+  },
+  {
+    "marketKeyId": 819,
+    "name": "Reno - NV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.997544,
+        "Longitude": -120.006473
+      },
+      "LowerRight": {
+        "Latitude": 39.165509,
+        "Longitude": -119.170544
+      }
+    }
+  },
+  {
+    "marketKeyId": 93,
+    "name": "Rhode Island",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.018808,
+        "Longitude": -71.8951151
+      },
+      "LowerRight": {
+        "Latitude": 41.146493,
+        "Longitude": -71.12057
+      }
+    }
+  },
+  {
+    "marketKeyId": 822,
+    "name": "Richmond - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.252742,
+        "Longitude": -78.240748
+      },
+      "LowerRight": {
+        "Latitude": 36.707658,
+        "Longitude": -76.756298
+      }
+    }
+  },
+  {
+    "marketKeyId": 1314,
+    "name": "Richmond/Petersburg - VA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.018446,
+        "Longitude": -78.248016
+      },
+      "LowerRight": {
+        "Latitude": 36.873753,
+        "Longitude": -76.7419852
+      }
+    }
+  },
+  {
+    "marketKeyId": 827,
+    "name": "Roanoke - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.800989,
+        "Longitude": -80.475601
+      },
+      "LowerRight": {
+        "Latitude": 36.780752,
+        "Longitude": -79.498553
+      }
+    }
+  },
+  {
+    "marketKeyId": 830,
+    "name": "Rochester - MN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.455308,
+        "Longitude": -93.0459661
+      },
+      "LowerRight": {
+        "Latitude": 43.50044,
+        "Longitude": -91.730192
+      }
+    }
+  },
+  {
+    "marketKeyId": 94,
+    "name": "Rochester - NY",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.37633,
+        "Longitude": -78.4664291
+      },
+      "LowerRight": {
+        "Latitude": 42.4711,
+        "Longitude": -76.702306
+      }
+    }
+  },
+  {
+    "marketKeyId": 831,
+    "name": "Rochester - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.376304,
+        "Longitude": -78.4664291
+      },
+      "LowerRight": {
+        "Latitude": 42.459186,
+        "Longitude": -76.7023099
+      }
+    }
+  },
+  {
+    "marketKeyId": 832,
+    "name": "Rockford - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.500563,
+        "Longitude": -89.401423
+      },
+      "LowerRight": {
+        "Latitude": 42.150273,
+        "Longitude": -88.7051858
+      }
+    }
+  },
+  {
+    "marketKeyId": 835,
+    "name": "Rocky Mount - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.202663,
+        "Longitude": -78.2569012
+      },
+      "LowerRight": {
+        "Latitude": 35.677321,
+        "Longitude": -77.3424652
+      }
+    }
+  },
+  {
+    "marketKeyId": 837,
+    "name": "Rome - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.587483,
+        "Longitude": -85.4622068
+      },
+      "LowerRight": {
+        "Latitude": 34.079133,
+        "Longitude": -85.0052351
+      }
+    }
+  },
+  {
+    "marketKeyId": 844,
+    "name": "Sacramento - CA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.316496,
+        "Longitude": -122.4220478
+      },
+      "LowerRight": {
+        "Latitude": 38.018421,
+        "Longitude": -119.8772482
+      }
+    }
+  },
+  {
+    "marketKeyId": 846,
+    "name": "Saginaw - MI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.568899,
+        "Longitude": -84.3699769
+      },
+      "LowerRight": {
+        "Latitude": 43.128452,
+        "Longitude": -83.6952052
+      }
+    }
+  },
+  {
+    "marketKeyId": 850,
+    "name": "Saint Louis - MO",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.523369,
+        "Longitude": -91.535305
+      },
+      "LowerRight": {
+        "Latitude": 37.697198,
+        "Longitude": -89.1383371
+      }
+    }
+  },
+  {
+    "marketKeyId": 854,
+    "name": "Salem - OR",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.285091,
+        "Longitude": -123.726087
+      },
+      "LowerRight": {
+        "Latitude": 44.68384,
+        "Longitude": -121.733082
+      }
+    }
+  },
+  {
+    "marketKeyId": 856,
+    "name": "Salinas - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.919683,
+        "Longitude": -121.9787111
+      },
+      "LowerRight": {
+        "Latitude": 35.788977,
+        "Longitude": -120.2139788
+      }
+    }
+  },
+  {
+    "marketKeyId": 857,
+    "name": "Salisbury - MD",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.961835,
+        "Longitude": -76.061696
+      },
+      "LowerRight": {
+        "Latitude": 37.912023,
+        "Longitude": -75.0491899
+      }
+    }
+  },
+  {
+    "marketKeyId": 858,
+    "name": "Salt Lake City - UT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.076735,
+        "Longitude": -114.0471338
+      },
+      "LowerRight": {
+        "Latitude": 39.903244,
+        "Longitude": -111.5530841
+      }
+    }
+  },
+  {
+    "marketKeyId": 95,
+    "name": "Salt Lake City/Ogden - UT",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.433675,
+        "Longitude": -112.4933929
+      },
+      "LowerRight": {
+        "Latitude": 40.414307,
+        "Longitude": -111.42005
+      }
+    }
+  },
+  {
+    "marketKeyId": 859,
+    "name": "San Angelo - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.705418,
+        "Longitude": -101.274799
+      },
+      "LowerRight": {
+        "Latitude": 31.079379,
+        "Longitude": -100.111234
+      }
+    }
+  },
+  {
+    "marketKeyId": 860,
+    "name": "San Antonio - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.138954,
+        "Longitude": -99.6033229
+      },
+      "LowerRight": {
+        "Latitude": 28.612658,
+        "Longitude": -97.6309852
+      }
+    }
+  },
+  {
+    "marketKeyId": 1315,
+    "name": "San Antonio - TX",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.018872,
+        "Longitude": -98.8857709
+      },
+      "LowerRight": {
+        "Latitude": 28.947745,
+        "Longitude": -97.630974
+      }
+    }
+  },
+  {
+    "marketKeyId": 861,
+    "name": "San Diego - CA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.505025,
+        "Longitude": -117.5958799
+      },
+      "LowerRight": {
+        "Latitude": 32.534157,
+        "Longitude": -116.0809402
+      }
+    }
+  },
+  {
+    "marketKeyId": 865,
+    "name": "San Francisco - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.833229,
+        "Longitude": -122.521153
+      },
+      "LowerRight": {
+        "Latitude": 37.107116,
+        "Longitude": -122.1153109
+      }
+    }
+  },
+  {
+    "marketKeyId": 96,
+    "name": "San Francisco/San Mateo - CA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.321232,
+        "Longitude": -123.1080278
+      },
+      "LowerRight": {
+        "Latitude": 37.107116,
+        "Longitude": -122.11596
+      }
+    }
+  },
+  {
+    "marketKeyId": 866,
+    "name": "San Jose - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.484637,
+        "Longitude": -122.202653
+      },
+      "LowerRight": {
+        "Latitude": 36.196848,
+        "Longitude": -120.596562
+      }
+    }
+  },
+  {
+    "marketKeyId": 97,
+    "name": "San Jose/Santa Cruz - CA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.643239,
+        "Longitude": -122.31527
+      },
+      "LowerRight": {
+        "Latitude": 36.814337,
+        "Longitude": -121.3997332
+      }
+    }
+  },
+  {
+    "marketKeyId": 867,
+    "name": "San Luis Obispo - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.79519,
+        "Longitude": -121.3480282
+      },
+      "LowerRight": {
+        "Latitude": 34.897475,
+        "Longitude": -119.4725149
+      }
+    }
+  },
+  {
+    "marketKeyId": 868,
+    "name": "San Rafael - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.321227,
+        "Longitude": -123.0238631
+      },
+      "LowerRight": {
+        "Latitude": 37.815128,
+        "Longitude": -122.4186772
+      }
+    }
+  },
+  {
+    "marketKeyId": 871,
+    "name": "Santa Barbara - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.114678,
+        "Longitude": -120.6720889
+      },
+      "LowerRight": {
+        "Latitude": 33.893733,
+        "Longitude": -119.4403838
+      }
+    }
+  },
+  {
+    "marketKeyId": 869,
+    "name": "Santa Cruz - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.286055,
+        "Longitude": -122.317682
+      },
+      "LowerRight": {
+        "Latitude": 36.850549,
+        "Longitude": -121.5811541
+      }
+    }
+  },
+  {
+    "marketKeyId": 870,
+    "name": "Santa Fe - NM",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.002356,
+        "Longitude": -106.2492188
+      },
+      "LowerRight": {
+        "Latitude": 35.040015,
+        "Longitude": -105.7144748
+      }
+    }
+  },
+  {
+    "marketKeyId": 872,
+    "name": "Santa Rosa - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.852916,
+        "Longitude": -123.5335381
+      },
+      "LowerRight": {
+        "Latitude": 38.108972,
+        "Longitude": -122.349564
+      }
+    }
+  },
+  {
+    "marketKeyId": 721,
+    "name": "Sarasota - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 27.64668,
+        "Longitude": -82.7474918
+      },
+      "LowerRight": {
+        "Latitude": 26.945255,
+        "Longitude": -82.0543489
+      }
+    }
+  },
+  {
+    "marketKeyId": 1731,
+    "name": "Sarasota - FL",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 27.646638,
+        "Longitude": -82.7646098
+      },
+      "LowerRight": {
+        "Latitude": 26.945255,
+        "Longitude": -82.0543489
+      }
+    }
+  },
+  {
+    "marketKeyId": 874,
+    "name": "Savannah - GA",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.595416,
+        "Longitude": -81.7817119
+      },
+      "LowerRight": {
+        "Latitude": 31.720934,
+        "Longitude": -80.840227
+      }
+    }
+  },
+  {
+    "marketKeyId": 878,
+    "name": "Scranton - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.652175,
+        "Longitude": -76.319735
+      },
+      "LowerRight": {
+        "Latitude": 40.901986,
+        "Longitude": -75.440389
+      }
+    }
+  },
+  {
+    "marketKeyId": 98,
+    "name": "Seattle - WA",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.41147,
+        "Longitude": -122.845271
+      },
+      "LowerRight": {
+        "Latitude": 46.783515,
+        "Longitude": -120.906212
+      }
+    }
+  },
+  {
+    "marketKeyId": 880,
+    "name": "Seattle - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.299232,
+        "Longitude": -122.841396
+      },
+      "LowerRight": {
+        "Latitude": 46.727986,
+        "Longitude": -120.906211
+      }
+    }
+  },
+  {
+    "marketKeyId": 881,
+    "name": "Sebastian-Vero Beach - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 27.860104,
+        "Longitude": -80.8815719
+      },
+      "LowerRight": {
+        "Latitude": 27.557213,
+        "Longitude": -80.3212661
+      }
+    }
+  },
+  {
+    "marketKeyId": 882,
+    "name": "Sebring - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 27.646647,
+        "Longitude": -81.5640901
+      },
+      "LowerRight": {
+        "Latitude": 27.032288,
+        "Longitude": -80.9418082
+      }
+    }
+  },
+  {
+    "marketKeyId": 892,
+    "name": "Sheboygan - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.89237,
+        "Longitude": -88.1622742
+      },
+      "LowerRight": {
+        "Latitude": 43.542348,
+        "Longitude": -87.6955979
+      }
+    }
+  },
+  {
+    "marketKeyId": 897,
+    "name": "Sherman-Denison - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.959579,
+        "Longitude": -96.9451268
+      },
+      "LowerRight": {
+        "Latitude": 33.397826,
+        "Longitude": -96.379452
+      }
+    }
+  },
+  {
+    "marketKeyId": 899,
+    "name": "Shreveport - LA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.019543,
+        "Longitude": -94.0433519
+      },
+      "LowerRight": {
+        "Latitude": 31.844237,
+        "Longitude": -93.1464461
+      }
+    }
+  },
+  {
+    "marketKeyId": 901,
+    "name": "Sierra Vista-Douglas - AZ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.427652,
+        "Longitude": -110.4609172
+      },
+      "LowerRight": {
+        "Latitude": 31.332502,
+        "Longitude": -109.0476119
+      }
+    }
+  },
+  {
+    "marketKeyId": 904,
+    "name": "Sioux City - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.08387,
+        "Longitude": -97.0179908
+      },
+      "LowerRight": {
+        "Latitude": 42.211261,
+        "Longitude": -95.669141
+      }
+    }
+  },
+  {
+    "marketKeyId": 905,
+    "name": "Sioux Falls - SD",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.849507,
+        "Longitude": -97.6090961
+      },
+      "LowerRight": {
+        "Latitude": 43.083124,
+        "Longitude": -96.436472
+      }
+    }
+  },
+  {
+    "marketKeyId": 910,
+    "name": "South Bend - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.071484,
+        "Longitude": -86.5266818
+      },
+      "LowerRight": {
+        "Latitude": 41.432792,
+        "Longitude": -85.7601169
+      }
+    }
+  },
+  {
+    "marketKeyId": 1316,
+    "name": "South Carolina Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.056054,
+        "Longitude": -83.353955
+      },
+      "LowerRight": {
+        "Latitude": 32.046921,
+        "Longitude": -79.0712809
+      }
+    }
+  },
+  {
+    "marketKeyId": 1317,
+    "name": "South Dakota",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.945628,
+        "Longitude": -104.057127
+      },
+      "LowerRight": {
+        "Latitude": 42.479686,
+        "Longitude": -96.4365901
+      }
+    }
+  },
+  {
+    "marketKeyId": 911,
+    "name": "Spartanburg - SC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 35.196044,
+        "Longitude": -82.2265729
+      },
+      "LowerRight": {
+        "Latitude": 34.445027,
+        "Longitude": -81.415894
+      }
+    }
+  },
+  {
+    "marketKeyId": 915,
+    "name": "Spokane - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.000843,
+        "Longitude": -118.402407
+      },
+      "LowerRight": {
+        "Latitude": 47.259272,
+        "Longitude": -117.032107
+      }
+    }
+  },
+  {
+    "marketKeyId": 916,
+    "name": "Springfield - IL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.160726,
+        "Longitude": -89.995041
+      },
+      "LowerRight": {
+        "Latitude": 39.522104,
+        "Longitude": -89.217374
+      }
+    }
+  },
+  {
+    "marketKeyId": 917,
+    "name": "Springfield - MA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.555933,
+        "Longitude": -73.075117
+      },
+      "LowerRight": {
+        "Latitude": 41.997595,
+        "Longitude": -72.1347998
+      }
+    }
+  },
+  {
+    "marketKeyId": 918,
+    "name": "Springfield - MO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.904232,
+        "Longitude": -93.6324389
+      },
+      "LowerRight": {
+        "Latitude": 36.809178,
+        "Longitude": -92.6789699
+      }
+    }
+  },
+  {
+    "marketKeyId": 919,
+    "name": "Springfield - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.04019,
+        "Longitude": -84.053736
+      },
+      "LowerRight": {
+        "Latitude": 39.76866,
+        "Longitude": -83.5121549
+      }
+    }
+  },
+  {
+    "marketKeyId": 847,
+    "name": "St. Cloud - MN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.824252,
+        "Longitude": -95.1398561
+      },
+      "LowerRight": {
+        "Latitude": 45.282298,
+        "Longitude": -93.759435
+      }
+    }
+  },
+  {
+    "marketKeyId": 848,
+    "name": "St. George - UT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.618486,
+        "Longitude": -114.0529979
+      },
+      "LowerRight": {
+        "Latitude": 36.999923,
+        "Longitude": -112.899366
+      }
+    }
+  },
+  {
+    "marketKeyId": 849,
+    "name": "St. Joseph - MO",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.130096,
+        "Longitude": -95.3399588
+      },
+      "LowerRight": {
+        "Latitude": 39.530372,
+        "Longitude": -94.2034568
+      }
+    }
+  },
+  {
+    "marketKeyId": 220,
+    "name": "Stamford - CT",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.666723,
+        "Longitude": -73.727775
+      },
+      "LowerRight": {
+        "Latitude": 40.986703,
+        "Longitude": -73.065051
+      }
+    }
+  },
+  {
+    "marketKeyId": 921,
+    "name": "State College - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.252752,
+        "Longitude": -78.3766739
+      },
+      "LowerRight": {
+        "Latitude": 40.691557,
+        "Longitude": -77.1438038
+      }
+    }
+  },
+  {
+    "marketKeyId": 923,
+    "name": "Staunton-Waynesboro - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.477844,
+        "Longitude": -79.533311
+      },
+      "LowerRight": {
+        "Latitude": 37.881587,
+        "Longitude": -78.7492958
+      }
+    }
+  },
+  {
+    "marketKeyId": 930,
+    "name": "Stockton - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.299471,
+        "Longitude": -121.5850792
+      },
+      "LowerRight": {
+        "Latitude": 37.481783,
+        "Longitude": -120.920665
+      }
+    }
+  },
+  {
+    "marketKeyId": 936,
+    "name": "Sumter - SC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.168696,
+        "Longitude": -80.646714
+      },
+      "LowerRight": {
+        "Latitude": 33.643911,
+        "Longitude": -79.8933769
+      }
+    }
+  },
+  {
+    "marketKeyId": 99,
+    "name": "Syracuse - NY",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.700246,
+        "Longitude": -76.740331
+      },
+      "LowerRight": {
+        "Latitude": 42.575156,
+        "Longitude": -75.346447
+      }
+    }
+  },
+  {
+    "marketKeyId": 940,
+    "name": "Syracuse - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 43.707018,
+        "Longitude": -76.616941
+      },
+      "LowerRight": {
+        "Latitude": 42.723844,
+        "Longitude": -75.239541
+      }
+    }
+  },
+  {
+    "marketKeyId": 943,
+    "name": "Tallahassee - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 30.711542,
+        "Longitude": -84.932519
+      },
+      "LowerRight": {
+        "Latitude": 29.968888,
+        "Longitude": -83.6041208
+      }
+    }
+  },
+  {
+    "marketKeyId": 944,
+    "name": "Tampa - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.694908,
+        "Longitude": -82.8519739
+      },
+      "LowerRight": {
+        "Latitude": 27.576317,
+        "Longitude": -82.054012
+      }
+    }
+  },
+  {
+    "marketKeyId": 1691,
+    "name": "Tampa Bay - FL",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.694908,
+        "Longitude": -82.852376
+      },
+      "LowerRight": {
+        "Latitude": 27.594156,
+        "Longitude": -82.020208
+      }
+    }
+  },
+  {
+    "marketKeyId": 1318,
+    "name": "Tennessee Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 37.135484,
+        "Longitude": -89.9588819
+      },
+      "LowerRight": {
+        "Latitude": 34.987525,
+        "Longitude": -81.6053231
+      }
+    }
+  },
+  {
+    "marketKeyId": 947,
+    "name": "Terre Haute - IN",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.148422,
+        "Longitude": -87.658745
+      },
+      "LowerRight": {
+        "Latitude": 38.901591,
+        "Longitude": -86.9399809
+      }
+    }
+  },
+  {
+    "marketKeyId": 948,
+    "name": "Texarkana - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.945281,
+        "Longitude": -94.747063
+      },
+      "LowerRight": {
+        "Latitude": 33.019067,
+        "Longitude": -93.6655132
+      }
+    }
+  },
+  {
+    "marketKeyId": 1655,
+    "name": "Texas Central",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.579274,
+        "Longitude": -100.3112219
+      },
+      "LowerRight": {
+        "Latitude": 29.247804,
+        "Longitude": -95.8040791
+      }
+    }
+  },
+  {
+    "marketKeyId": 1319,
+    "name": "Texas East",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.962002,
+        "Longitude": -97.4868379
+      },
+      "LowerRight": {
+        "Latitude": 29.561015,
+        "Longitude": -93.5081309
+      }
+    }
+  },
+  {
+    "marketKeyId": 1320,
+    "name": "Texas North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.500695,
+        "Longitude": -103.0650401
+      },
+      "LowerRight": {
+        "Latitude": 31.945951,
+        "Longitude": -99.4712699
+      }
+    }
+  },
+  {
+    "marketKeyId": 1321,
+    "name": "Texas South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.829599,
+        "Longitude": -100.6672921
+      },
+      "LowerRight": {
+        "Latitude": 26.235332,
+        "Longitude": -95.056497
+      }
+    }
+  },
+  {
+    "marketKeyId": 1322,
+    "name": "Texas West",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.087534,
+        "Longitude": -105.9980159
+      },
+      "LowerRight": {
+        "Latitude": 28.971546,
+        "Longitude": -99.4839919
+      }
+    }
+  },
+  {
+    "marketKeyId": 950,
+    "name": "The Villages - FL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 28.96053,
+        "Longitude": -82.3116971
+      },
+      "LowerRight": {
+        "Latitude": 28.305265,
+        "Longitude": -81.9532912
+      }
+    }
+  },
+  {
+    "marketKeyId": 956,
+    "name": "Toledo - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.732846,
+        "Longitude": -84.3995509
+      },
+      "LowerRight": {
+        "Latitude": 41.165751,
+        "Longitude": -83.164964
+      }
+    }
+  },
+  {
+    "marketKeyId": 957,
+    "name": "Topeka - KS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.65318,
+        "Longitude": -96.5017699
+      },
+      "LowerRight": {
+        "Latitude": 38.433544,
+        "Longitude": -95.1798269
+      }
+    }
+  },
+  {
+    "marketKeyId": 960,
+    "name": "Trenton - NJ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.424156,
+        "Longitude": -74.9429089
+      },
+      "LowerRight": {
+        "Latitude": 40.136843,
+        "Longitude": -74.4812021
+      }
+    }
+  },
+  {
+    "marketKeyId": 963,
+    "name": "Tucson - AZ",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.514188,
+        "Longitude": -113.3341049
+      },
+      "LowerRight": {
+        "Latitude": 31.426075,
+        "Longitude": -110.4473221
+      }
+    }
+  },
+  {
+    "marketKeyId": 965,
+    "name": "Tulsa - OK",
+    "propertyTypeIds": [
+      1,
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.999414,
+        "Longitude": -97.0645972
+      },
+      "LowerRight": {
+        "Latitude": 35.376631,
+        "Longitude": -95.207918
+      }
+    }
+  },
+  {
+    "marketKeyId": 967,
+    "name": "Tuscaloosa - AL",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.609833,
+        "Longitude": -88.340432
+      },
+      "LowerRight": {
+        "Latitude": 32.48068,
+        "Longitude": -87.0657379
+      }
+    }
+  },
+  {
+    "marketKeyId": 969,
+    "name": "Tyler - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.687026,
+        "Longitude": -95.5945411
+      },
+      "LowerRight": {
+        "Latitude": 32.135399,
+        "Longitude": -94.9852649
+      }
+    }
+  },
+  {
+    "marketKeyId": 1735,
+    "name": "Utah North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.001618,
+        "Longitude": -114.0489472
+      },
+      "LowerRight": {
+        "Latitude": 38.755465,
+        "Longitude": -109.048045
+      }
+    }
+  },
+  {
+    "marketKeyId": 1323,
+    "name": "Utah South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.35335,
+        "Longitude": -114.0542611
+      },
+      "LowerRight": {
+        "Latitude": 36.527113,
+        "Longitude": -109.0410592
+      }
+    }
+  },
+  {
+    "marketKeyId": 974,
+    "name": "Utica - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.096959,
+        "Longitude": -75.8867558
+      },
+      "LowerRight": {
+        "Latitude": 42.824943,
+        "Longitude": -74.6959849
+      }
+    }
+  },
+  {
+    "marketKeyId": 976,
+    "name": "Valdosta - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.184208,
+        "Longitude": -83.7437288
+      },
+      "LowerRight": {
+        "Latitude": 30.591548,
+        "Longitude": -82.5786922
+      }
+    }
+  },
+  {
+    "marketKeyId": 977,
+    "name": "Vallejo-Fairfield - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.53905,
+        "Longitude": -122.4062161
+      },
+      "LowerRight": {
+        "Latitude": 38.031721,
+        "Longitude": -121.5932731
+      }
+    }
+  },
+  {
+    "marketKeyId": 755,
+    "name": "Ventura - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.901274,
+        "Longitude": -119.579521
+      },
+      "LowerRight": {
+        "Latitude": 33.214272,
+        "Longitude": -118.6324949
+      }
+    }
+  },
+  {
+    "marketKeyId": 100,
+    "name": "Vermont",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.01666,
+        "Longitude": -73.437741
+      },
+      "LowerRight": {
+        "Latitude": 42.726853,
+        "Longitude": -71.4651131
+      }
+    }
+  },
+  {
+    "marketKeyId": 984,
+    "name": "Victoria - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 29.104046,
+        "Longitude": -97.7785178
+      },
+      "LowerRight": {
+        "Latitude": 28.388684,
+        "Longitude": -96.6423229
+      }
+    }
+  },
+  {
+    "marketKeyId": 987,
+    "name": "Vineland - NJ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.568643,
+        "Longitude": -75.4195619
+      },
+      "LowerRight": {
+        "Latitude": 39.176361,
+        "Longitude": -74.8518548
+      }
+    }
+  },
+  {
+    "marketKeyId": 1324,
+    "name": "Virginia Area",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.466012,
+        "Longitude": -83.67529
+      },
+      "LowerRight": {
+        "Latitude": 36.540263,
+        "Longitude": -75.24139
+      }
+    }
+  },
+  {
+    "marketKeyId": 990,
+    "name": "Visalia - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.744821,
+        "Longitude": -119.573194
+      },
+      "LowerRight": {
+        "Latitude": 35.789161,
+        "Longitude": -117.980761
+      }
+    }
+  },
+  {
+    "marketKeyId": 992,
+    "name": "Waco - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 31.863079,
+        "Longitude": -97.60523
+      },
+      "LowerRight": {
+        "Latitude": 30.98622,
+        "Longitude": -96.5968621
+      }
+    }
+  },
+  {
+    "marketKeyId": 994,
+    "name": "Walla Walla - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 46.624773,
+        "Longitude": -119.0414182
+      },
+      "LowerRight": {
+        "Latitude": 45.998887,
+        "Longitude": -117.603113
+      }
+    }
+  },
+  {
+    "marketKeyId": 996,
+    "name": "Warner Robins - GA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 32.692815,
+        "Longitude": -84.018168
+      },
+      "LowerRight": {
+        "Latitude": 32.102843,
+        "Longitude": -83.2911059
+      }
+    }
+  },
+  {
+    "marketKeyId": 1002,
+    "name": "Washington - DC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.720045,
+        "Longitude": -78.3866819
+      },
+      "LowerRight": {
+        "Latitude": 37.991157,
+        "Longitude": -76.3808839
+      }
+    }
+  },
+  {
+    "marketKeyId": 1703,
+    "name": "Washington - DC",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.720045,
+        "Longitude": -78.3383198
+      },
+      "LowerRight": {
+        "Latitude": 37.991157,
+        "Longitude": -76.3807921
+      }
+    }
+  },
+  {
+    "marketKeyId": 1325,
+    "name": "Washington State",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 49.002491,
+        "Longitude": -124.7625781
+      },
+      "LowerRight": {
+        "Latitude": 45.640045,
+        "Longitude": -116.915989
+      }
+    }
+  },
+  {
+    "marketKeyId": 1004,
+    "name": "Waterloo-Cedar Falls - IA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.907271,
+        "Longitude": -93.0271151
+      },
+      "LowerRight": {
+        "Latitude": 42.209267,
+        "Longitude": -92.064096
+      }
+    }
+  },
+  {
+    "marketKeyId": 1007,
+    "name": "Watertown-Fort Drum - NY",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.398279,
+        "Longitude": -76.446995
+      },
+      "LowerRight": {
+        "Latitude": 43.668143,
+        "Longitude": -75.4461241
+      }
+    }
+  },
+  {
+    "marketKeyId": 1009,
+    "name": "Wausau - WI",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.120608,
+        "Longitude": -90.3169822
+      },
+      "LowerRight": {
+        "Latitude": 44.681235,
+        "Longitude": -89.2233281
+      }
+    }
+  },
+  {
+    "marketKeyId": 1012,
+    "name": "Weirton-Steubenville - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.638801,
+        "Longitude": -80.9419111
+      },
+      "LowerRight": {
+        "Latitude": 40.155111,
+        "Longitude": -80.5176889
+      }
+    }
+  },
+  {
+    "marketKeyId": 1013,
+    "name": "Wenatchee - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 48.550725,
+        "Longitude": -121.1807131
+      },
+      "LowerRight": {
+        "Latitude": 47.220053,
+        "Longitude": -118.9507489
+      }
+    }
+  },
+  {
+    "marketKeyId": 101,
+    "name": "West Virginia",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.638802,
+        "Longitude": -82.6447388
+      },
+      "LowerRight": {
+        "Latitude": 37.201483,
+        "Longitude": -77.719527
+      }
+    }
+  },
+  {
+    "marketKeyId": 1017,
+    "name": "Wheeling - WV",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.186156,
+        "Longitude": -81.237316
+      },
+      "LowerRight": {
+        "Latitude": 39.720812,
+        "Longitude": -80.518891
+      }
+    }
+  },
+  {
+    "marketKeyId": 1019,
+    "name": "Wichita - KS",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 38.175081,
+        "Longitude": -98.4650378
+      },
+      "LowerRight": {
+        "Latitude": 36.998546,
+        "Longitude": -96.522782
+      }
+    }
+  },
+  {
+    "marketKeyId": 1020,
+    "name": "Wichita Falls - TX",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.212497,
+        "Longitude": -98.953938
+      },
+      "LowerRight": {
+        "Latitude": 33.39542,
+        "Longitude": -97.9457299
+      }
+    }
+  },
+  {
+    "marketKeyId": 1021,
+    "name": "Williamsport - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.596868,
+        "Longitude": -77.5996049
+      },
+      "LowerRight": {
+        "Latitude": 41.068708,
+        "Longitude": -76.447597
+      }
+    }
+  },
+  {
+    "marketKeyId": 1024,
+    "name": "Wilmington - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 34.732587,
+        "Longitude": -78.272221
+      },
+      "LowerRight": {
+        "Latitude": 33.928558,
+        "Longitude": -77.5179749
+      }
+    }
+  },
+  {
+    "marketKeyId": 1027,
+    "name": "Winchester - VA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.539695,
+        "Longitude": -78.9798982
+      },
+      "LowerRight": {
+        "Latitude": 39.007884,
+        "Longitude": -78.033191
+      }
+    }
+  },
+  {
+    "marketKeyId": 1030,
+    "name": "Winston-Salem - NC",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 36.55063,
+        "Longitude": -80.8821799
+      },
+      "LowerRight": {
+        "Latitude": 35.504335,
+        "Longitude": -80.0272688
+      }
+    }
+  },
+  {
+    "marketKeyId": 1326,
+    "name": "Wisconsin North",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.080876,
+        "Longitude": -92.8894331
+      },
+      "LowerRight": {
+        "Latitude": 43.836514,
+        "Longitude": -86.764117
+      }
+    }
+  },
+  {
+    "marketKeyId": 1327,
+    "name": "Wisconsin South",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 44.327539,
+        "Longitude": -91.4251882
+      },
+      "LowerRight": {
+        "Latitude": 42.491921,
+        "Longitude": -87.506636
+      }
+    }
+  },
+  {
+    "marketKeyId": 1034,
+    "name": "Worcester - MA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 42.721549,
+        "Longitude": -72.315994
+      },
+      "LowerRight": {
+        "Latitude": 41.634328,
+        "Longitude": -71.477743
+      }
+    }
+  },
+  {
+    "marketKeyId": 102,
+    "name": "Wyoming",
+    "propertyTypeIds": [
+      1
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 45.090326,
+        "Longitude": -111.0568882
+      },
+      "LowerRight": {
+        "Latitude": 40.994746,
+        "Longitude": -104.0397109
+      }
+    }
+  },
+  {
+    "marketKeyId": 1036,
+    "name": "Yakima - WA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 47.088954,
+        "Longitude": -121.5239378
+      },
+      "LowerRight": {
+        "Latitude": 46.040098,
+        "Longitude": -119.8653779
+      }
+    }
+  },
+  {
+    "marketKeyId": 1038,
+    "name": "York - PA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 40.226328,
+        "Longitude": -77.137425
+      },
+      "LowerRight": {
+        "Latitude": 39.719799,
+        "Longitude": -76.23869
+      }
+    }
+  },
+  {
+    "marketKeyId": 1039,
+    "name": "Youngstown - OH",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 41.501687,
+        "Longitude": -81.0869191
+      },
+      "LowerRight": {
+        "Latitude": 40.899385,
+        "Longitude": -79.999763
+      }
+    }
+  },
+  {
+    "marketKeyId": 1040,
+    "name": "Yuba City - CA",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 39.639459,
+        "Longitude": -121.948294
+      },
+      "LowerRight": {
+        "Latitude": 38.734598,
+        "Longitude": -121.009477
+      }
+    }
+  },
+  {
+    "marketKeyId": 1041,
+    "name": "Yuma - AZ",
+    "propertyTypeIds": [
+      2,
+      5,
+      6,
+      11
+    ],
+    "boundingBox": {
+      "UpperLeft": {
+        "Latitude": 33.464657,
+        "Longitude": -114.816591
+      },
+      "LowerRight": {
+        "Latitude": 32.038607,
+        "Longitude": -113.3332121
+      }
+    }
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "_description": "Exclusion flags for 0.Sale.SaleComp.Exclusions",
+  "_note": "Values are integers: 1 = exclude, 0 = include",
+
+  "fields": {
+    "BulkPortfolios": "Exclude bulk portfolio sales",
+    "MultiplePropertySales": "Exclude multi-property sales",
+    "BusinessParkSales": "Exclude business park sales",
+    "Condos": "Exclude condo sales",
+    "LandValueSale": "Exclude properties sold for land value only"
+  },
+
+  "defaultForOffMarket": {
+    "BulkPortfolios": 1,
+    "MultiplePropertySales": 1,
+    "BusinessParkSales": 1,
+    "Condos": 1,
+    "LandValueSale": 1
+  }
+}

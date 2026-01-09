@@ -1,0 +1,125 @@
+{
+  "_description": "Loan filters for 0.Property.Loan object",
+  "_verified": "2026-01-08 - From CoStar source files and live payloads",
+
+  "interestRateTypes": {
+    "byId": {
+      "1": "Fixed",
+      "2": "Variable"
+    },
+    "byName": {
+      "Fixed": 1,
+      "Variable": 2
+    }
+  },
+
+  "loanTypes": {
+    "byId": {
+      "1": "Acquisition & Development",
+      "2": "Wrap Around",
+      "3": "Assumed",
+      "4": "Bond Financing",
+      "5": "Construction",
+      "6": "Interim Financing",
+      "7": "Line of Credit",
+      "8": "SBA",
+      "9": "Short Term",
+      "10": "Conventional"
+    },
+    "byName": {
+      "Acquisition & Development": 1,
+      "Wrap Around": 2,
+      "Assumed": 3,
+      "Bond Financing": 4,
+      "Construction": 5,
+      "Interim Financing": 6,
+      "Line of Credit": 7,
+      "SBA": 8,
+      "Short Term": 9,
+      "Conventional": 10
+    }
+  },
+
+  "paymentStatuses": {
+    "byId": {
+      "1": "Performing",
+      "2": "30 Days Delinquent",
+      "3": "60 Days Delinquent",
+      "4": "90+ Days Delinquent",
+      "5": "Maturity Default",
+      "6": "In Foreclosure",
+      "7": "Defeased",
+      "8": "Bankrupt",
+      "9": "Real Estate Owned"
+    },
+    "byName": {
+      "Performing": 1,
+      "30 Days Delinquent": 2,
+      "60 Days Delinquent": 3,
+      "90+ Days Delinquent": 4,
+      "Maturity Default": 5,
+      "In Foreclosure": 6,
+      "Defeased": 7,
+      "Bankrupt": 8,
+      "Real Estate Owned": 9
+    },
+    "distressed": [2, 3, 4, 5, 6, 8, 9]
+  },
+
+  "specialServicingStatuses": {
+    "byId": {
+      "1": "Current",
+      "2": "Previous",
+      "3": "Never"
+    },
+    "byName": {
+      "Current": 1,
+      "Previous": 2,
+      "Never": 3
+    }
+  },
+
+  "watchlistStatuses": {
+    "byId": {
+      "1": "Current",
+      "2": "Previous",
+      "3": "Never"
+    },
+    "byName": {
+      "Current": 1,
+      "Previous": 2,
+      "Never": 3
+    }
+  },
+
+  "status": {
+    "_note": "CMBS Status - verify additional values",
+    "byId": {
+      "1": "Active"
+    }
+  },
+
+  "fieldReference": {
+    "HasLoan": "boolean",
+    "Original": "{ Minimum/Maximum: { Value, Code: 'USD' } } - origination amount",
+    "Current": "{ Minimum/Maximum: { Value, Code: 'USD' } } - current balance",
+    "OriginationDate": "{ Minimum/Maximum: ISO date string }",
+    "MaturityDate": "{ Minimum/Maximum: ISO date string }",
+    "MortgageTerm": "{ Minimum/Maximum: integer months }",
+    "InterestRate": "{ Minimum/Maximum: string percentage }",
+    "InterestRateIncludeUnknown": "boolean",
+    "InterestRateTypes": "array [1=Fixed, 2=Variable]",
+    "LoanTypes": "array of loan type IDs",
+    "PaymentStatuses": "array of payment status IDs",
+    "Status": "array of CMBS status IDs",
+    "SpecialServicingStatuses": "array [1=Current, 2=Previous, 3=Never]",
+    "WatchlistStatuses": "array [1=Current, 2=Previous, 3=Never]",
+    "IsModification": "boolean",
+    "IsBalloonMaturity": "boolean",
+    "IsMultiCollateral": "boolean - false=single, true=multiple",
+    "DscrOriginal": "{ Minimum/Maximum: string }",
+    "DscrCurrent": "{ Minimum/Maximum: string }",
+    "LtvOriginal": "{ Minimum/Maximum: string percentage }",
+    "LtvCurrent": "{ Minimum/Maximum: string percentage }"
+  }
+}

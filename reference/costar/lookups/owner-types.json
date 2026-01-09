@@ -1,0 +1,67 @@
+{
+  "_description": "Owner types for 0.Property.OwnerTypes array",
+
+  "byId": {
+    "1": "Corporation",
+    "2": "Public REIT",
+    "3": "Individual",
+    "4": "Government",
+    "5": "Bank",
+    "6": "Developer - National",
+    "7": "Pension Fund",
+    "8": "Insurance Company",
+    "9": "Non Profit",
+    "10": "Endowment",
+    "11": "Investment Manager",
+    "12": "Other/Unknown-Instl",
+    "13": "Sovereign Wealth Fund",
+    "14": "REOC",
+    "15": "Listed Funds",
+    "16": "Developer - Regional",
+    "17": "Trust",
+    "18": "Tenants In Common",
+    "19": "Private REIT",
+    "20": "Other - Private",
+    "21": "Equity Funds",
+    "22": "Educational",
+    "24": "Religious",
+    "25": "Medical",
+    "26": "Special Servicer"
+  },
+
+  "byName": {
+    "Corporation": 1,
+    "Public REIT": 2,
+    "Individual": 3,
+    "Government": 4,
+    "Bank": 5,
+    "Developer - National": 6,
+    "Pension Fund": 7,
+    "Insurance Company": 8,
+    "Non Profit": 9,
+    "Endowment": 10,
+    "Investment Manager": 11,
+    "Other/Unknown-Instl": 12,
+    "Sovereign Wealth Fund": 13,
+    "REOC": 14,
+    "Listed Funds": 15,
+    "Developer - Regional": 16,
+    "Trust": 17,
+    "Tenants In Common": 18,
+    "Private REIT": 19,
+    "Other - Private": 20,
+    "Equity Funds": 21,
+    "Educational": 22,
+    "Religious": 24,
+    "Medical": 25,
+    "Special Servicer": 26
+  },
+
+  "bySuperType": {
+    "Institutional": [7, 8, 10, 11, 12, 13],
+    "Private": [3, 16, 17, 18, 20],
+    "Private Equity": [6, 19, 21],
+    "Public": [2, 14, 15],
+    "User": [1, 4, 5, 9, 22, 24, 25, 26]
+  }
+}
