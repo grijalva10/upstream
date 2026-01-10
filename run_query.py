@@ -37,11 +37,20 @@ async def main():
 
     print(f"\nStarting extraction (batch of {len(payloads)} queries)...")
 
+    # Safe for large extractions (up to 10k)
+    # - 3 concurrent requests
+    # - 0.5-2.0s random delays between requests
+    # - 5s+ pause every 50 properties
     contacts = await extract_contacts(
         payloads,
-        max_properties=10,  # Limit per query for testing
+        max_properties=10000,  # Safe for up to 10k properties
         include_parcel=True,
-        headless=False
+        headless=False,
+        concurrency=3,  # Conservative parallelism
+        min_delay=0.5,
+        max_delay=2.0,
+        burst_size=50,  # Pause every 50 properties
+        burst_delay=5.0,  # 5s+ pause
     )
 
     print(f"\n{'='*60}")

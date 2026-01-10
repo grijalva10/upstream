@@ -85,9 +85,11 @@ class ContactExtractor:
         require_phone: bool = False,
         include_parcel: bool = False,
         include_market: bool = False,
-        concurrency: int = 5,  # Max parallel requests
-        min_delay: float = 0.3,  # Min delay between requests (evasion)
-        max_delay: float = 1.2,  # Max delay between requests (evasion)
+        concurrency: int = 3,  # Max parallel requests (conservative for safety)
+        min_delay: float = 0.5,  # Min delay between requests (evasion)
+        max_delay: float = 2.0,  # Max delay between requests (evasion)
+        burst_size: int = 50,  # Properties before taking a break
+        burst_delay: float = 5.0,  # Seconds to pause between bursts
     ):
         self.client = client
         self.require_email = require_email
@@ -97,19 +99,31 @@ class ContactExtractor:
         self.concurrency = concurrency
         self.min_delay = min_delay
         self.max_delay = max_delay
+        self.burst_size = burst_size
+        self.burst_delay = burst_delay
         self._seen_emails: set = set()
         self._semaphore: Optional[asyncio.Semaphore] = None
+        self._properties_since_burst: int = 0
 
     async def extract_from_payloads(
         self,
         payloads: List[Dict],
         max_properties: Optional[int] = None
     ) -> List[Dict]:
-        """Extract contacts from multiple search payloads, deduplicated by email."""
+        """Extract contacts from multiple search payloads, deduplicated by email.
+
+        Safe for large extractions (10k+) with:
+        - Conservative concurrency (3 parallel requests)
+        - Burst pauses every 50 properties
+        - Variable delays between requests
+        - Progress logging every 100 properties
+        """
         all_contacts = []
         properties_processed = 0
         self._semaphore = asyncio.Semaphore(self.concurrency)
+        self._properties_since_burst = 0
 
+        total_pins = 0
         for i, payload in enumerate(payloads):
             logger.info(f"Processing payload {i+1}/{len(payloads)}")
 
@@ -117,6 +131,7 @@ class ContactExtractor:
             market_ids = self._extract_market_ids(payload)
 
             pins = await self.client.search_properties(payload)
+            total_pins += len(pins)
 
             # Apply max_properties limit across all payloads
             if max_properties:
@@ -125,7 +140,7 @@ class ContactExtractor:
                     break
                 pins = pins[:remaining]
 
-            # Process properties in batches for parallel execution
+            # Process properties in small batches for parallel execution
             batch_size = self.concurrency * 2  # Process 2x concurrency at a time
             for batch_start in range(0, len(pins), batch_size):
                 batch = pins[batch_start:batch_start + batch_size]
@@ -146,10 +161,20 @@ class ContactExtractor:
                         continue
                     if result:
                         all_contacts.extend(result)
-                        properties_processed += len(result) > 0
 
-                if properties_processed % 50 == 0 and properties_processed > 0:
-                    logger.info(f"Processed {properties_processed} properties, {len(all_contacts)} contacts")
+                properties_processed += len(batch)
+                self._properties_since_burst += len(batch)
+
+                # Progress logging every 100 properties
+                if properties_processed % 100 == 0 and properties_processed > 0:
+                    logger.info(f"Progress: {properties_processed}/{total_pins} properties, {len(all_contacts)} contacts")
+
+                # Burst pause for safety - take a break every N properties
+                if self._properties_since_burst >= self.burst_size:
+                    pause = self.burst_delay + random.uniform(0, 2)  # Add randomness
+                    logger.info(f"Burst pause: {pause:.1f}s after {self._properties_since_burst} properties")
+                    await asyncio.sleep(pause)
+                    self._properties_since_burst = 0
 
         logger.info(f"Extraction complete: {properties_processed} properties, {len(all_contacts)} unique contacts")
         return all_contacts
