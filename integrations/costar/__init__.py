@@ -19,15 +19,24 @@ async def extract_contacts(
     rate_limit: float = 1.0,
     include_parcel: bool = False,
     include_market: bool = False,
-    headless: bool = True
+    headless: bool = True,
+    concurrency: int = 5,  # Max parallel property requests
+    min_delay: float = 0.3,  # Min delay between requests (evasion)
+    max_delay: float = 1.2,  # Max delay between requests (evasion)
 ) -> List[Dict]:
-    """Extract property owner contacts from CoStar search payloads."""
+    """Extract property owner contacts from CoStar search payloads.
+
+    Optimizations:
+    - Parallel processing with semaphore-limited concurrency
+    - Skips parcel fetch if no valid contacts found
+    - Variable delays between requests for evasion
+    """
     payload_list = [payloads] if isinstance(payloads, dict) else payloads
 
     if not payload_list:
         raise ValueError("At least one payload required")
 
-    logger.info(f"Starting extraction: {len(payload_list)} payload(s), headless={headless}")
+    logger.info(f"Starting extraction: {len(payload_list)} payload(s), headless={headless}, concurrency={concurrency}")
 
     async with CoStarSession(headless=headless) as session:
         client = CoStarClient(session.tab, rate_limit=rate_limit)
@@ -36,7 +45,10 @@ async def extract_contacts(
             require_email=require_email,
             require_phone=require_phone,
             include_parcel=include_parcel,
-            include_market=include_market
+            include_market=include_market,
+            concurrency=concurrency,
+            min_delay=min_delay,
+            max_delay=max_delay,
         )
         contacts = await extractor.extract_from_payloads(payload_list, max_properties)
 

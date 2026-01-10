@@ -1,6 +1,8 @@
 """CoStar Contact Extraction - GraphQL Queries and Data Mapping."""
 
+import asyncio
 import logging
+import random
 from typing import Any, Dict, List, Optional
 
 from .client import CoStarClient
@@ -82,14 +84,21 @@ class ContactExtractor:
         require_email: bool = True,
         require_phone: bool = False,
         include_parcel: bool = False,
-        include_market: bool = False
+        include_market: bool = False,
+        concurrency: int = 5,  # Max parallel requests
+        min_delay: float = 0.3,  # Min delay between requests (evasion)
+        max_delay: float = 1.2,  # Max delay between requests (evasion)
     ):
         self.client = client
         self.require_email = require_email
         self.require_phone = require_phone
         self.include_parcel = include_parcel
         self.include_market = include_market
+        self.concurrency = concurrency
+        self.min_delay = min_delay
+        self.max_delay = max_delay
         self._seen_emails: set = set()
+        self._semaphore: Optional[asyncio.Semaphore] = None
 
     async def extract_from_payloads(
         self,
@@ -99,31 +108,66 @@ class ContactExtractor:
         """Extract contacts from multiple search payloads, deduplicated by email."""
         all_contacts = []
         properties_processed = 0
+        self._semaphore = asyncio.Semaphore(self.concurrency)
 
         for i, payload in enumerate(payloads):
             logger.info(f"Processing payload {i+1}/{len(payloads)}")
+
+            # Extract market_id from payload geography filter
+            market_ids = self._extract_market_ids(payload)
+
             pins = await self.client.search_properties(payload)
 
-            for pin in pins:
-                if max_properties and properties_processed >= max_properties:
-                    logger.info(f"Reached max properties limit ({max_properties})")
-                    return all_contacts
+            # Apply max_properties limit across all payloads
+            if max_properties:
+                remaining = max_properties - properties_processed
+                if remaining <= 0:
+                    break
+                pins = pins[:remaining]
 
-                property_id = pin.get("i")  # 'i' = property ID in pin format
-                if not property_id:
-                    continue
+            # Process properties in batches for parallel execution
+            batch_size = self.concurrency * 2  # Process 2x concurrency at a time
+            for batch_start in range(0, len(pins), batch_size):
+                batch = pins[batch_start:batch_start + batch_size]
 
-                contacts = await self._extract_property_contacts(property_id)
-                all_contacts.extend(contacts)
-                properties_processed += 1
+                # Create tasks for parallel execution
+                tasks = []
+                for pin in batch:
+                    property_id = pin.get("i")
+                    if property_id:
+                        tasks.append(self._extract_property_contacts_with_evasion(property_id, market_ids))
 
-                if properties_processed % 50 == 0:
+                # Execute batch in parallel with semaphore limiting
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                for result in results:
+                    if isinstance(result, Exception):
+                        logger.warning(f"Batch extraction error: {result}")
+                        continue
+                    if result:
+                        all_contacts.extend(result)
+                        properties_processed += len(result) > 0
+
+                if properties_processed % 50 == 0 and properties_processed > 0:
                     logger.info(f"Processed {properties_processed} properties, {len(all_contacts)} contacts")
 
         logger.info(f"Extraction complete: {properties_processed} properties, {len(all_contacts)} unique contacts")
         return all_contacts
 
-    async def _extract_property_contacts(self, property_id: int) -> List[Dict]:
+    async def _extract_property_contacts_with_evasion(
+        self,
+        property_id: int,
+        market_ids: Optional[List[int]] = None
+    ) -> List[Dict]:
+        """Wrapper that adds rate limiting and variable delays for evasion."""
+        async with self._semaphore:
+            # Variable delay before request (evasion)
+            delay = random.uniform(self.min_delay, self.max_delay)
+            await asyncio.sleep(delay)
+
+            return await self._extract_property_contacts(property_id, market_ids)
+
+    async def _extract_property_contacts(self, property_id: int, market_ids: Optional[List[int]] = None) -> List[Dict]:
         try:
             data = await self.client.graphql(CONTACTS_QUERY, {"propertyId": property_id})
 
@@ -141,8 +185,7 @@ class ContactExtractor:
             if not true_owner:
                 return []
 
-            parcel_data = await self._get_parcel_data(property_id) if self.include_parcel else {}
-
+            # Build base property data (without parcel yet)
             base = {
                 "property_id": header.get("propertyId"),
                 "property_address": header.get("addressHeader"),
@@ -150,17 +193,34 @@ class ContactExtractor:
                 "building_size": header.get("buildingSize"),
                 "land_size": header.get("landSize"),
                 "year_built": header.get("yearBuilt"),
+                "market_id": market_ids[0] if market_ids else None,
                 "company_id": true_owner.get("companyId"),
                 "company_name": true_owner.get("name"),
                 "company_address": true_owner.get("address"),
                 "company_phone": self._format_phones(true_owner.get("phoneNumbers")),
-                **parcel_data
             }
 
-            return [
-                contact for person in true_owner.get("contacts", [])
-                if (contact := self._build_contact(base, person))
-            ]
+            # First check if we have any valid contacts with email BEFORE fetching parcel
+            raw_contacts = true_owner.get("contacts", [])
+            valid_contacts = []
+
+            for person in raw_contacts:
+                contact = self._build_contact(base, person)
+                if contact:
+                    valid_contacts.append((person, contact))
+
+            # Skip parcel fetch if no valid contacts (optimization)
+            if not valid_contacts:
+                return []
+
+            # Only fetch parcel data if we have valid contacts and parcel is requested
+            if self.include_parcel:
+                parcel_data = await self._get_parcel_data(property_id)
+                # Merge parcel data into each contact
+                for _, contact in valid_contacts:
+                    contact.update(parcel_data)
+
+            return [contact for _, contact in valid_contacts]
 
         except Exception as e:
             logger.warning(f"Failed to extract property {property_id}: {e}")
@@ -196,6 +256,9 @@ class ContactExtractor:
 
     async def _get_parcel_data(self, property_id: int) -> Dict:
         try:
+            # Small delay between parcel requests (evasion)
+            await asyncio.sleep(random.uniform(0.1, 0.3))
+
             pins_data = await self.client.graphql(PARCEL_PINS_QUERY, {"propertyId": property_id})
             parcel_pins = pins_data.get("parcelPinsFromProperty", {}).get("parcelPins", [])
 
@@ -203,6 +266,10 @@ class ContactExtractor:
                 return {}
 
             parcel_id = str(parcel_pins[0]["id"])
+
+            # Another small delay before details request
+            await asyncio.sleep(random.uniform(0.1, 0.3))
+
             parcel_data = await self.client.graphql(PARCEL_DETAILS_QUERY, {"parcelId": parcel_id})
 
             pr_detail = parcel_data.get("publicRecordDetailNew", {})
@@ -250,3 +317,15 @@ class ContactExtractor:
     @staticmethod
     def _valid_email(email: str) -> bool:
         return bool(email and "@" in email and "." in email)
+
+    @staticmethod
+    def _extract_market_ids(payload: Dict) -> List[int]:
+        """Extract market IDs from payload geography filter."""
+        try:
+            filter_data = payload.get("0", {})
+            geography = filter_data.get("Geography", {})
+            geo_filter = geography.get("Filter", {})
+            ids = geo_filter.get("Ids", [])
+            return ids if isinstance(ids, list) else [ids]
+        except (KeyError, TypeError):
+            return []
