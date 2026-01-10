@@ -91,11 +91,23 @@ class CoStarClient:
 
                 if not response or not response.ok:
                     if page == 1:
-                        logger.error("Property search failed")
+                        logger.error(f"Property search failed: status={getattr(response, 'status', 'No response')}")
                         return []
                     break
 
-                pins = response.json().get("searchResult", {}).get("Pins", [])
+                data = response.json()
+
+                # Handle different response structures
+                pins = []
+                if "searchResult" in data:
+                    sr = data.get("searchResult", {})
+                    pins = sr.get("Pins", []) or sr.get("pins", [])
+                elif "Pins" in data:
+                    pins = data.get("Pins", [])
+                elif "pins" in data:
+                    pins = data.get("pins", [])
+                elif isinstance(data, list):
+                    pins = data
                 if not pins:
                     break
 

@@ -106,7 +106,6 @@ async def save_contacts(
                     "building_size_sqft": parse_building_size(contact.get("building_size")),
                     "lot_size_acres": parse_land_size(contact.get("land_size")),
                     "year_built": parse_year_built(contact.get("year_built")),
-                    "building_class": contact.get("building_class"),
                     "last_seen_at": datetime.utcnow().isoformat(),
                 }
 

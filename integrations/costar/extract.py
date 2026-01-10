@@ -17,7 +17,6 @@ query ContactsDetail($propertyId: Int!) {
       buildingSize
       landSize
       yearBuilt
-      buildingClass
     }
     propertyContactDetails_info(propertyId: $propertyId) {
       trueOwner {
@@ -151,7 +150,6 @@ class ContactExtractor:
                 "building_size": header.get("buildingSize"),
                 "land_size": header.get("landSize"),
                 "year_built": header.get("yearBuilt"),
-                "building_class": header.get("buildingClass"),
                 "company_id": true_owner.get("companyId"),
                 "company_name": true_owner.get("name"),
                 "company_address": true_owner.get("address"),
