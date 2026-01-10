@@ -32,3 +32,4 @@ reference/costar-extract-sample-output/
 # Supabase local
 supabase/.branches/
 supabase/.temp/
+.claude/mcp.json
