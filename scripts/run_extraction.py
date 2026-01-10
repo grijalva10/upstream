@@ -7,6 +7,9 @@ Full pipeline: payloads file → CoStar extraction → DB with proper linking
 Usage:
     python scripts/run_extraction.py output/queries/TestCo_Capital_payloads.json
 
+    # Sample extraction (for validation)
+    python scripts/run_extraction.py output/queries/TestCo_Capital_payloads.json --sample
+
     # With options
     python scripts/run_extraction.py output/queries/TestCo_Capital_payloads.json \
         --max-properties 100 \
@@ -19,6 +22,7 @@ import asyncio
 import json
 import logging
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -29,6 +33,10 @@ from integrations.costar import extract_contacts, save_contacts
 from integrations.costar.db import (
     setup_extraction_from_payloads_file,
     get_supabase_client,
+    log_agent_execution,
+    update_agent_execution,
+    save_strategy_summary,
+    update_criteria_with_results,
 )
 
 logging.basicConfig(
@@ -46,6 +54,8 @@ async def run_extraction(
     query_index: Optional[int] = None,
     headless: bool = True,
     dry_run: bool = False,
+    is_sample: bool = False,
+    strategy_file: Optional[str] = None,
 ) -> dict:
     """
     Run the full extraction pipeline.
@@ -57,23 +67,37 @@ async def run_extraction(
         query_index: Run only this query index (None = all)
         headless: Run browser in background
         dry_run: Set up DB records but don't run extraction
+        is_sample: Mark extraction lists as 'sample' (for validation runs)
+        strategy_file: Path to strategy MD file to save to DB
 
     Returns:
-        Summary dict with counts
+        Summary dict with counts and metrics
     """
+    start_time = time.time()
     logger.info(f"Starting extraction pipeline: {payloads_file}")
 
     # 1. Verify payloads file exists
     if not Path(payloads_file).exists():
         raise FileNotFoundError(f"Payloads file not found: {payloads_file}")
 
-    # 2. Set up DB records
+    # 2. Set up DB records (reuses existing criteria if same file)
     logger.info("Setting up DB records (client, criteria, extraction lists)...")
-    client_id, criteria_id, extraction_lists = setup_extraction_from_payloads_file(payloads_file)
+    client_id, criteria_id, extraction_lists, is_new_criteria = setup_extraction_from_payloads_file(
+        payloads_file, is_sample=is_sample
+    )
 
     logger.info(f"  Client ID: {client_id}")
-    logger.info(f"  Criteria ID: {criteria_id}")
+    logger.info(f"  Criteria ID: {criteria_id} ({'new' if is_new_criteria else 'existing'})")
     logger.info(f"  Queries: {len(extraction_lists)}")
+    logger.info(f"  Mode: {'sample' if is_sample else 'full'}")
+
+    # 3. Save strategy summary to DB if provided
+    if strategy_file and Path(strategy_file).exists():
+        db = get_supabase_client()
+        with open(strategy_file, "r") as f:
+            strategy_content = f.read()
+        save_strategy_summary(db, criteria_id, strategy_content)
+        logger.info(f"  Saved strategy summary from {strategy_file}")
 
     if dry_run:
         logger.info("DRY RUN - skipping extraction")
@@ -81,17 +105,19 @@ async def run_extraction(
             "client_id": client_id,
             "criteria_id": criteria_id,
             "queries": len(extraction_lists),
+            "is_new_criteria": is_new_criteria,
             "dry_run": True,
         }
 
-    # 3. Filter queries if specific index requested
+    # 4. Filter queries if specific index requested
+    original_query_count = len(extraction_lists)
     if query_index is not None:
         if query_index >= len(extraction_lists):
             raise ValueError(f"Query index {query_index} out of range (0-{len(extraction_lists)-1})")
         extraction_lists = [extraction_lists[query_index]]
         logger.info(f"Running only query index {query_index}")
 
-    # 4. Run extraction for each query
+    # 5. Run extraction for each query
     total_counts = {
         "properties": 0,
         "companies": 0,
@@ -99,10 +125,12 @@ async def run_extraction(
         "loans": 0,
         "list_links": 0,
     }
+    query_results = []
 
     for list_id, idx, payload in extraction_lists:
+        query_start = time.time()
         logger.info(f"\n{'='*60}")
-        logger.info(f"Query {idx + 1}/{len(extraction_lists)}: {payload.get('0', {}).get('Property', {}).get('PropertyTypes', 'Unknown')}")
+        logger.info(f"Query {idx + 1}/{original_query_count}: {payload.get('0', {}).get('Property', {}).get('PropertyTypes', 'Unknown')}")
         logger.info(f"Extraction List ID: {list_id}")
 
         # Run CoStar extraction
@@ -123,27 +151,77 @@ async def run_extraction(
             client_criteria_id=criteria_id,
         )
 
+        # Track per-query results
+        query_duration = int((time.time() - query_start) * 1000)
+        query_results.append({
+            "query_index": idx,
+            "extraction_list_id": list_id,
+            "properties": counts.get("properties", 0),
+            "contacts": counts.get("contacts", 0),
+            "contact_rate": round(counts.get("contacts", 0) / max(counts.get("properties", 1), 1) * 100, 1),
+            "duration_ms": query_duration,
+        })
+
         # Accumulate totals
         for key in total_counts:
             total_counts[key] += counts.get(key, 0)
 
         logger.info(f"Query complete: {counts}")
 
-    # 5. Summary
+    # 6. Calculate metrics
+    duration_ms = int((time.time() - start_time) * 1000)
+    contact_yield_rate = round(
+        total_counts["contacts"] / max(total_counts["properties"], 1) * 100, 1
+    )
+
+    metrics = {
+        "queries_run": len(extraction_lists),
+        "properties_found": total_counts["properties"],
+        "contacts_found": total_counts["contacts"],
+        "contact_yield_rate": contact_yield_rate,
+        "is_sample": is_sample,
+        "query_results": query_results,
+    }
+
+    # 7. Log agent execution
+    db = get_supabase_client()
+    execution_id = log_agent_execution(
+        db=db,
+        agent_name="extraction-pipeline",
+        status="completed",
+        metrics=metrics,
+        duration_ms=duration_ms,
+        trigger_entity_type="client_criteria",
+        trigger_entity_id=criteria_id,
+        metadata={
+            "payloads_file": payloads_file,
+            "max_properties": max_properties,
+            "is_sample": is_sample,
+        }
+    )
+
+    # 8. Summary
     logger.info(f"\n{'='*60}")
     logger.info("EXTRACTION COMPLETE")
+    logger.info(f"  Execution ID: {execution_id}")
     logger.info(f"  Client: {client_id}")
     logger.info(f"  Criteria: {criteria_id}")
+    logger.info(f"  Mode: {'SAMPLE' if is_sample else 'FULL'}")
+    logger.info(f"  Duration: {duration_ms}ms")
     logger.info(f"  Total Properties: {total_counts['properties']}")
-    logger.info(f"  Total Companies: {total_counts['companies']}")
     logger.info(f"  Total Contacts: {total_counts['contacts']}")
-    logger.info(f"  Total Loans: {total_counts['loans']}")
-    logger.info(f"  List Links: {total_counts['list_links']}")
+    logger.info(f"  Contact Yield: {contact_yield_rate}%")
 
     return {
         "client_id": client_id,
         "criteria_id": criteria_id,
+        "execution_id": execution_id,
+        "is_new_criteria": is_new_criteria,
+        "is_sample": is_sample,
+        "duration_ms": duration_ms,
+        "contact_yield_rate": contact_yield_rate,
         **total_counts,
+        "query_results": query_results,
     }
 
 
@@ -284,17 +362,35 @@ def main():
         action="store_true",
         help="Set up DB records but don't run extraction",
     )
+    parser.add_argument(
+        "--sample",
+        action="store_true",
+        help="Mark as sample extraction (for validation). Implies --max-properties 10 if not set.",
+    )
+    parser.add_argument(
+        "--strategy-file",
+        type=str,
+        default=None,
+        help="Path to strategy MD file to save to DB",
+    )
 
     args = parser.parse_args()
+
+    # Sample mode defaults to 10 properties if not specified
+    max_properties = args.max_properties
+    if args.sample and max_properties is None:
+        max_properties = 10
 
     result = asyncio.run(
         run_extraction(
             payloads_file=args.payloads_file,
-            max_properties=args.max_properties,
+            max_properties=max_properties,
             include_parcel=args.include_parcel,
             query_index=args.query_index,
             headless=not args.no_headless,
             dry_run=args.dry_run,
+            is_sample=args.sample,
+            strategy_file=args.strategy_file,
         )
     )
 
