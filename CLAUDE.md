@@ -18,10 +18,11 @@ The filter mappings in `reference/costar/` may be inaccurate. We need to validat
 upstream/
 ├── .claude/agents/      # Subagent definitions (6 agents)
 ├── apps/web/            # Next.js UI (placeholder for now)
-├── packages/db/         # Supabase schema (placeholder)
+├── packages/db/         # Supabase schema source files
 ├── packages/shared/     # Shared types (placeholder)
 ├── orchestrator/        # Python orchestrator (placeholder)
 ├── reference/costar/    # CoStar API lookups and payload docs
+├── supabase/            # Supabase local dev (migrations, seed, config)
 ├── docs/                # Documentation
 ├── scripts/             # Utility scripts
 ├── PRD.md               # High-level product requirements
@@ -32,8 +33,7 @@ upstream/
 
 | Agent | Purpose |
 |-------|---------|
-| `@query-builder` | Translates buyer criteria → CoStar API payload |
-| `@prospect-list-gen` | Determines search strategy from criteria |
+| `@sourcing-agent` | Analyzes buyer criteria → strategy + CoStar payloads |
 | `@outreach-copy-gen` | Writes personalized cold emails |
 | `@drip-campaign-exec` | Sends emails via Outlook COM |
 | `@response-classifier` | Classifies email replies |
@@ -56,6 +56,90 @@ Key files:
 - Numeric ranges use `{ "Value": 5000, "Code": "[sft_i]" }` format
 - Exclusions use integers (1=exclude), not booleans
 
+## Database (Supabase PostgreSQL)
+
+### Local Connection
+```
+URL:      postgresql://postgres:postgres@127.0.0.1:55322/postgres
+API:      http://127.0.0.1:55321
+Studio:   http://127.0.0.1:55323
+```
+
+### Quick Commands
+```bash
+npx supabase start          # Start local Supabase
+npx supabase stop           # Stop (preserves data)
+npx supabase db reset       # Reset and re-seed
+npx supabase db diff        # Generate migration from changes
+```
+
+### Schema Overview (28 tables)
+
+**Core Entities:**
+| Table | Purpose |
+|-------|---------|
+| `properties` | CRE assets from CoStar (address, type, size, class) |
+| `companies` | Owner organizations = leads (status: new→contacted→qualified→handed_off) |
+| `contacts` | People at companies who receive outreach |
+| `property_loans` | Loan/distress data (maturity, LTV, DSCR, payment status) |
+| `property_companies` | Junction: property ↔ company (owner/manager/lender) |
+
+**Sourcing:**
+| Table | Purpose |
+|-------|---------|
+| `markets` | CoStar market reference (id, name, state) |
+| `sourcing_strategies` | Predefined query strategies (hold_period, financial_distress, etc.) |
+| `extraction_lists` | Results of CoStar queries (batches of properties) |
+| `list_properties` | Junction: extraction_list ↔ property |
+
+**Outreach (CRM):**
+| Table | Purpose |
+|-------|---------|
+| `email_templates` | Reusable email templates with merge tags |
+| `sequences` | Drip campaigns (schedule, timezone, stop_on_reply) |
+| `sequence_steps` | Steps in a sequence (email/call/task, delay) |
+| `sequence_subscriptions` | Contact enrolled in a sequence |
+| `activities` | All touchpoints (email_sent, email_received, call, note) |
+| `dnc_entries` | Do Not Contact list |
+
+**Agent Automation:**
+| Table | Purpose |
+|-------|---------|
+| `agent_definitions` | Registry of Claude agents (name, model, tools) |
+| `agent_executions` | Logs of agent runs (prompt, response, tokens) |
+| `agent_tasks` | Work queue for scheduled agent execution |
+| `agent_workflows` | Multi-step pipelines chaining agents |
+| `agent_workflow_steps` | Steps in a workflow |
+| `agent_workflow_runs` | Workflow execution instances |
+| `agent_workflow_step_runs` | Step execution within a run |
+
+**Email Sync:**
+| Table | Purpose |
+|-------|---------|
+| `email_sync_state` | Outlook sync cursor (last_sync_at, last_entry_id) |
+| `synced_emails` | Raw emails synced from Outlook |
+
+**Other:**
+| Table | Purpose |
+|-------|---------|
+| `users` | App users |
+| `settings` | Config key-value store |
+| `email_events` | Open/click tracking events |
+
+### Key Relationships
+```
+properties ←→ companies (via property_companies)
+companies → contacts (1:many)
+properties → property_loans (1:many)
+contacts → sequence_subscriptions → sequences
+activities → contacts, companies, properties
+```
+
+### Key Status Flows
+- **Company**: `new` → `contacted` → `engaged` → `qualified` → `handed_off` | `dnc` | `rejected`
+- **Contact**: `active` → `dnc` | `bounced` | `unsubscribed`
+- **Sequence Subscription**: `active` → `completed` | `replied` | `unsubscribed`
+
 ## Local Requirements
 
 These MUST run on the operator's machine:
@@ -71,4 +155,28 @@ These MUST run on the operator's machine:
 
 ## Commands
 
-None yet. Add as we build.
+```bash
+# Supabase
+npx supabase start          # Start local instance
+npx supabase stop           # Stop (keeps data)
+npx supabase db reset       # Reset DB and apply migrations + seed
+
+# Direct DB access (when Supabase is running)
+psql postgresql://postgres:postgres@127.0.0.1:55322/postgres
+```
+
+## MCP Integration
+
+If using Supabase MCP server, add to Claude settings:
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server", "--url", "http://127.0.0.1:55321"]
+    }
+  }
+}
+```
+
+This enables Claude to query the database directly via MCP tools.
