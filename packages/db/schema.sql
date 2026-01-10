@@ -148,6 +148,52 @@ CREATE TABLE property_companies (
 CREATE INDEX idx_property_companies_company ON property_companies(company_id);
 
 -- =============================================================================
+-- CLIENT ENTITIES (Buyers we source deals for)
+-- =============================================================================
+
+-- Clients (Buyers/Investors)
+CREATE TABLE clients (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    company_name TEXT,
+    email TEXT,
+    phone TEXT,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN (
+        'active', 'paused', 'churned'
+    )),
+    notes TEXT,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_clients_status ON clients(status);
+CREATE INDEX idx_clients_name ON clients(name);
+
+-- Client Criteria (Search profiles for each client)
+CREATE TABLE client_criteria (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    criteria_json JSONB NOT NULL,  -- {capital, property_types, markets, size_range, ...}
+    queries_json JSONB,  -- [{name, strategy, rationale, expected_volume, payload}, ...]
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN (
+        'draft', 'active', 'paused', 'archived'
+    )),
+    strategy_summary TEXT,
+    source_file TEXT,
+    total_properties INTEGER DEFAULT 0,
+    total_contacts INTEGER DEFAULT 0,
+    last_extracted_at TIMESTAMPTZ,
+    created_by UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_client_criteria_client ON client_criteria(client_id);
+CREATE INDEX idx_client_criteria_status ON client_criteria(status);
+
+-- =============================================================================
 -- SOURCING ENTITIES
 -- =============================================================================
 
@@ -168,7 +214,10 @@ CREATE TABLE sourcing_strategies (
 CREATE TABLE extraction_lists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     sourcing_strategy_id UUID REFERENCES sourcing_strategies(id),
+    client_criteria_id UUID REFERENCES client_criteria(id),
     name TEXT NOT NULL,
+    query_name TEXT,  -- Name of specific query from criteria
+    query_index INTEGER,  -- Index in queries_json array
     payload_json JSONB,
     source_file TEXT,
     property_count INTEGER DEFAULT 0,
@@ -180,6 +229,7 @@ CREATE TABLE extraction_lists (
 );
 
 CREATE INDEX idx_extraction_lists_strategy ON extraction_lists(sourcing_strategy_id);
+CREATE INDEX idx_extraction_lists_criteria ON extraction_lists(client_criteria_id);
 
 -- List Properties (Junction)
 CREATE TABLE list_properties (
@@ -609,6 +659,12 @@ CREATE TRIGGER update_agent_workflow_runs_updated_at BEFORE UPDATE ON agent_work
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER update_client_criteria_updated_at BEFORE UPDATE ON client_criteria
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- Function to update company status_changed_at when status changes
 CREATE OR REPLACE FUNCTION update_status_changed_at()
 RETURNS TRIGGER AS $$
@@ -635,7 +691,9 @@ COMMENT ON TABLE companies IS 'Owner organizations - leads in the sourcing pipel
 COMMENT ON TABLE contacts IS 'People at companies who receive outreach';
 COMMENT ON TABLE property_loans IS 'Loan data for distress-based sourcing plays';
 COMMENT ON TABLE sourcing_strategies IS 'Predefined CoStar query strategies (distress, hold period, etc.)';
-COMMENT ON TABLE extraction_lists IS 'Results of CoStar queries - batches of properties';
+COMMENT ON TABLE clients IS 'Buyers/investors we are sourcing deals for';
+COMMENT ON TABLE client_criteria IS 'Search criteria profiles - stores input criteria and generated CoStar queries';
+COMMENT ON TABLE extraction_lists IS 'Results of CoStar queries - batches of properties linked to criteria';
 COMMENT ON TABLE sequences IS 'Automated drip campaigns for outreach';
 COMMENT ON TABLE activities IS 'All touchpoints with contacts/companies';
 COMMENT ON TABLE agent_definitions IS 'Registry of Claude Code agents';

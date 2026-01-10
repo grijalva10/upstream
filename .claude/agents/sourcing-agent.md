@@ -53,7 +53,7 @@ The CoStar integration has two phases:
 
 ### Phase 1: Property Search (REST)
 ```
-POST https://product.costar.com/bff2/property/search/placards
+POST https://product.costar.com/bff2/property/search/list-properties
 ```
 - Input: Search payload with filters
 - Output: List of property "pins" with IDs

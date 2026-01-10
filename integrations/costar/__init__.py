@@ -6,7 +6,14 @@ from typing import Dict, List, Optional, Union
 from .auth import CoStarSession
 from .client import CoStarClient
 from .extract import ContactExtractor
-from .db import save_contacts
+from .db import (
+    save_contacts,
+    setup_extraction_from_payloads_file,
+    get_or_create_client,
+    create_client_criteria,
+    create_extraction_list,
+    get_criteria_by_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,4 +87,15 @@ async def extract_contacts(
 
 
 # Re-export for convenience
-__all__ = ["extract_contacts", "save_contacts", "CoStarSession", "CoStarClient", "ContactExtractor"]
+__all__ = [
+    "extract_contacts",
+    "save_contacts",
+    "setup_extraction_from_payloads_file",
+    "get_or_create_client",
+    "create_client_criteria",
+    "create_extraction_list",
+    "get_criteria_by_id",
+    "CoStarSession",
+    "CoStarClient",
+    "ContactExtractor",
+]

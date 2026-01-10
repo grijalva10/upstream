@@ -41,7 +41,7 @@ upstream/
 
 ## CoStar API Reference
 
-**Endpoint:** `POST https://product.costar.com/bff2/property/search/placards`
+**Endpoint:** `POST https://product.costar.com/bff2/property/search/list-properties`
 
 Key files:
 - `reference/costar/filter-mapping-v2.json` - Filter documentation (may have errors)
@@ -84,12 +84,14 @@ npx supabase db diff        # Generate migration from changes
 | `property_loans` | Loan/distress data (maturity, LTV, DSCR, payment status) |
 | `property_companies` | Junction: property ↔ company (owner/manager/lender) |
 
-**Sourcing:**
+**Clients & Sourcing:**
 | Table | Purpose |
 |-------|---------|
+| `clients` | Buyers/investors we source deals for |
+| `client_criteria` | Search profiles with criteria JSON + generated queries |
 | `markets` | CoStar market reference (id, name, state) |
 | `sourcing_strategies` | Predefined query strategies (hold_period, financial_distress, etc.) |
-| `extraction_lists` | Results of CoStar queries (batches of properties) |
+| `extraction_lists` | Results of CoStar queries (linked to client_criteria) |
 | `list_properties` | Junction: extraction_list ↔ property |
 
 **Outreach (CRM):**
@@ -128,6 +130,9 @@ npx supabase db diff        # Generate migration from changes
 
 ### Key Relationships
 ```
+clients → client_criteria (1:many)
+client_criteria → extraction_lists (1:many)
+extraction_lists → properties (via list_properties)
 properties ←→ companies (via property_companies)
 companies → contacts (1:many)
 properties → property_loans (1:many)
@@ -145,6 +150,42 @@ activities → contacts, companies, properties
 These MUST run on the operator's machine:
 1. **costar-extract** - Requires 2FA via mobile phone
 2. **Outlook COM** - Email sending via Microsoft Outlook
+
+## Extraction Pipeline
+
+Full pipeline from buyer criteria to DB:
+
+```
+1. sourcing-agent → generates payloads + strategy
+   Input: Buyer criteria (natural language)
+   Output: output/queries/{buyer}_payloads.json
+
+2. run_extraction.py → orchestrates extraction
+   - Creates client record (if new)
+   - Creates client_criteria (stores queries)
+   - Creates extraction_lists (one per query)
+   - Runs CoStar extraction
+   - Saves to DB with proper linking
+
+3. Properties linked via:
+   client → client_criteria → extraction_lists → list_properties → properties
+```
+
+### Running the Pipeline
+
+```bash
+# Generate queries for a buyer
+# (invoke sourcing-agent with buyer criteria)
+
+# Run extraction from generated payloads
+python scripts/run_extraction.py output/queries/TestCo_Capital_payloads.json
+
+# Options:
+#   --max-properties 100    # Limit properties per query
+#   --include-parcel        # Fetch loan data (slower)
+#   --query-index 0         # Run only first query
+#   --dry-run               # Set up DB records only
+```
 
 ## Development Approach
 
