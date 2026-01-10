@@ -23,3 +23,12 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+nul
+
+# Output directories
+output/
+reference/costar-extract-sample-output/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
