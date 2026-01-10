@@ -109,7 +109,7 @@ class ContactExtractor:
                     logger.info(f"Reached max properties limit ({max_properties})")
                     return all_contacts
 
-                property_id = pin.get("PropertyId")
+                property_id = pin.get("i")  # 'i' = property ID in pin format
                 if not property_id:
                     continue
 
@@ -129,7 +129,14 @@ class ContactExtractor:
 
             prop_detail = data.get("propertyDetail", {})
             header = prop_detail.get("propertyDetailHeader", {})
-            true_owner = prop_detail.get("propertyContactDetails_info", {}).get("trueOwner", {})
+            contact_info = prop_detail.get("propertyContactDetails_info", {})
+            true_owner = contact_info.get("trueOwner")
+
+            # trueOwner can be a list or dict
+            if isinstance(true_owner, list):
+                true_owner = true_owner[0] if true_owner else {}
+            elif not true_owner:
+                true_owner = {}
 
             if not true_owner:
                 return []

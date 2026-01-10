@@ -11,17 +11,21 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from pydoll.browser import Chrome
+from pydoll.browser.options import ChromiumOptions
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 LOGIN_URL = "https://product.costar.com/"
-HOME_URL = "https://product.costar.com/home/"
+HOME_URLS = [
+    "https://product.costar.com/home/",
+    "https://product.costar.com/suiteapps/home"
+]
 LEASECOMPS_URL = "https://product.costar.com/LeaseComps/Search/Index/US"
 
 FORM_TIMEOUT = 10
-QR_TIMEOUT = 300
+QR_TIMEOUT = 60  # 1 minute for QR scan
 COOKIE_MAX_AGE_DAYS = 7
 
 
@@ -43,7 +47,11 @@ class CoStarSession:
     async def __aenter__(self):
         self._cookie_file.parent.mkdir(exist_ok=True)
 
-        self.browser = Chrome(headless=self.headless)
+        options = ChromiumOptions()
+        if self.headless:
+            options.add_argument("--headless=new")
+
+        self.browser = Chrome(options=options)
         await self.browser.__aenter__()
         self.tab = await self.browser.start()
 
@@ -92,11 +100,11 @@ class CoStarSession:
                 return False
 
             await self.browser.set_cookies(cookies)
-            await self.tab.go_to(HOME_URL)
+            await self.tab.go_to(HOME_URLS[0])
             await asyncio.sleep(3)
 
             url = await self._get_url()
-            if HOME_URL not in url:
+            if not any(home in url for home in HOME_URLS):
                 logger.info("Cookie validation failed")
                 self._cookie_file.unlink(missing_ok=True)
                 return False
@@ -128,11 +136,11 @@ class CoStarSession:
                 raise Exception("Login button not found")
             await button.click()
 
-            logger.info("Waiting for QR code scan (up to 5 min)...")
+            logger.info("Waiting for QR code scan (up to 1 min)...")
             for elapsed in range(0, QR_TIMEOUT, 2):
                 await asyncio.sleep(2)
                 url = await self._get_url()
-                if HOME_URL in url:
+                if any(home in url for home in HOME_URLS):
                     logger.info("Login successful!")
                     await self._save_cookies()
                     await self._navigate_to_leasecomps()
@@ -152,12 +160,21 @@ class CoStarSession:
         if not field:
             raise Exception(f"Field {field_id} not found")
 
-        await field.click()
-        await asyncio.sleep(random.uniform(0.3, 0.6))
-        await self.tab.execute_script(f"document.getElementById('{field_id}').value = '';")
-        await asyncio.sleep(random.uniform(0.2, 0.4))
+        # Focus and clear field
+        await self.tab.execute_script(f"""
+            var el = document.getElementById('{field_id}');
+            el.focus();
+            el.value = '';
+        """)
+        await asyncio.sleep(random.uniform(0.3, 0.5))
+
+        # Type value with human-like speed
         await field.insert_text(value)
         await asyncio.sleep(random.uniform(0.3, 0.5))
+
+        # Blur to trigger validation
+        await self.tab.execute_script(f"document.getElementById('{field_id}').blur();")
+        await asyncio.sleep(random.uniform(0.2, 0.3))
 
     async def _navigate_to_leasecomps(self):
         logger.info("Navigating to LeaseComps...")
