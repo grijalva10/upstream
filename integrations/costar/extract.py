@@ -17,6 +17,7 @@ query ContactsDetail($propertyId: Int!) {
       buildingSize
       landSize
       yearBuilt
+      buildingClass
     }
     propertyContactDetails_info(propertyId: $propertyId) {
       trueOwner {
@@ -150,6 +151,7 @@ class ContactExtractor:
                 "building_size": header.get("buildingSize"),
                 "land_size": header.get("landSize"),
                 "year_built": header.get("yearBuilt"),
+                "building_class": header.get("buildingClass"),
                 "company_id": true_owner.get("companyId"),
                 "company_name": true_owner.get("name"),
                 "company_address": true_owner.get("address"),
@@ -209,7 +211,10 @@ class ContactExtractor:
             parcel = pr_detail.get("parcelDetail", {})
             sales = pr_detail.get("parcelSales", {}).get("sales", [])
 
-            result = {"apn": parcel.get("apn")}
+            result = {
+                "apn": parcel.get("apn"),
+                "lot_size_sf": parcel.get("lotSizeSf"),
+            }
 
             if sales:
                 sale = sales[0]

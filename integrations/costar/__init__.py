@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Union
 from .auth import CoStarSession
 from .client import CoStarClient
 from .extract import ContactExtractor
+from .db import save_contacts
 
 logger = logging.getLogger(__name__)
 
@@ -44,4 +45,4 @@ async def extract_contacts(
 
 
 # Re-export for convenience
-__all__ = ["extract_contacts", "CoStarSession", "CoStarClient", "ContactExtractor"]
+__all__ = ["extract_contacts", "save_contacts", "CoStarSession", "CoStarClient", "ContactExtractor"]
