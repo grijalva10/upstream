@@ -173,7 +173,7 @@ async def save_contacts(
                 if result.data:
                     counts["contacts"] += 1
 
-            # 5. Upsert loan data (from parcel)
+            # 5. Insert loan data (from parcel) - skip if already exists
             if prop_uuid and contact.get("lender"):
                 loan_data = {
                     "property_id": prop_uuid,
@@ -185,14 +185,15 @@ async def save_contacts(
                     "last_seen_at": datetime.utcnow().isoformat(),
                 }
 
-                # Use property_id as pseudo-unique key (one loan per property for now)
-                result = db.table("property_loans").upsert(
-                    loan_data,
-                    on_conflict="property_id"
-                ).execute()
+                # Check if loan already exists for this property
+                existing = db.table("property_loans").select("id").eq(
+                    "property_id", prop_uuid
+                ).limit(1).execute()
 
-                if result.data:
-                    counts["loans"] += 1
+                if not existing.data:
+                    result = db.table("property_loans").insert(loan_data).execute()
+                    if result.data:
+                        counts["loans"] += 1
 
         except Exception as e:
             logger.warning(f"Failed to save contact {contact.get('email')}: {e}")
@@ -221,15 +222,12 @@ def _map_property_type(type_id: Optional[int]) -> Optional[str]:
         return None
 
     type_map = {
-        1: "Multifamily",
+        1: "Hospitality",
         2: "Industrial",
-        3: "Flex",
-        4: "Retail",
+        3: "Land",
         5: "Office",
-        6: "Hospitality",
-        7: "Land",
-        8: "Health Care",
-        9: "Specialty",
+        6: "Retail",
+        11: "Multifamily",
     }
     return type_map.get(type_id, f"Type_{type_id}")
 

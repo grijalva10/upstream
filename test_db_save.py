@@ -50,7 +50,7 @@ async def main():
     contacts = await extract_contacts(
         payload,
         max_properties=20,
-        include_parcel=False,
+        include_parcel=True,
         headless=False
     )
 
