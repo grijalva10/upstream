@@ -43,14 +43,14 @@ async def main():
     # - 5s+ pause every 50 properties
     contacts = await extract_contacts(
         payloads,
-        max_properties=10000,  # Safe for up to 10k properties
+        max_properties=100,
         include_parcel=True,
         headless=False,
-        concurrency=3,  # Conservative parallelism
+        concurrency=3,
         min_delay=0.5,
         max_delay=2.0,
-        burst_size=50,  # Pause every 50 properties
-        burst_delay=5.0,  # 5s+ pause
+        burst_size=50,
+        burst_delay=5.0,
     )
 
     print(f"\n{'='*60}")
