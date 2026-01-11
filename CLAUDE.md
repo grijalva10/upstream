@@ -8,9 +8,11 @@ Upstream Sourcing Engine - AI agents that help find off-market CRE deals. See `P
 
 ## Current Focus
 
-**Stage 1: Get CoStar query building right.**
+**Full Pipeline Implementation Complete.**
 
-The filter mappings in `reference/costar/` may be inaccurate. We need to validate by testing real queries.
+The Upstream pipeline is now fully implemented with 6 agents working together. See `docs/pipeline-integration.md` for the full flow.
+
+For CoStar API reference, the filter mappings in `reference/costar/` may still need validation against real queries.
 
 ## Project Structure
 
@@ -29,15 +31,41 @@ upstream/
 └── CLAUDE.md            # This file
 ```
 
-## Subagents
+## Subagents (6 total)
 
 | Agent | Purpose |
 |-------|---------|
 | `@sourcing-agent` | Analyzes buyer criteria → strategy + CoStar payloads |
-| `@outreach-copy-gen` | Writes personalized cold emails |
-| `@drip-campaign-exec` | Sends emails via Outlook COM |
-| `@response-classifier` | Classifies email replies |
-| `@deal-packager` | Creates deal packages for distribution |
+| `@response-classifier` | Classifies email replies into 8 categories with confidence scoring |
+| `@qualify-agent` | Processes classified responses, generates follow-ups, tracks qualification |
+| `@schedule-agent` | Handles call scheduling, time slots, calendar events, call prep |
+| `@drip-campaign-exec` | Executes 3-email sequences via Outlook COM with approval queue |
+| `@deal-packager` | Creates deal packages from qualified leads, notifies matching clients |
+
+### Pipeline Flow
+```
+sourcing-agent → drip-campaign-exec → [email sent]
+                                          ↓
+                     [reply received] → response-classifier
+                                          ↓
+                     qualify-agent ← [interested/pricing_given]
+                           ↓
+                     schedule-agent ← [call request detected]
+                           ↓
+                     deal-packager ← [qualification complete]
+```
+
+### Classification Categories (response-classifier)
+| Code | Action |
+|------|--------|
+| `interested` | Continue to qualify |
+| `pricing_given` | Extract data, continue to qualify |
+| `question` | Answer, continue |
+| `referral` | Follow up with new contact |
+| `broker_redirect` | Log broker, do not pursue |
+| `soft_pass` | Add to nurture (re-engage later) |
+| `hard_pass` | Add to DNC forever |
+| `bounce` | Add email to exclusions forever |
 
 ## CoStar API Reference
 
@@ -73,7 +101,7 @@ npx supabase db reset       # Reset and re-seed
 npx supabase db diff        # Generate migration from changes
 ```
 
-### Schema Overview (28 tables)
+### Schema Overview (34 tables)
 
 **Core Entities:**
 | Table | Purpose |
@@ -120,6 +148,16 @@ npx supabase db diff        # Generate migration from changes
 |-------|---------|
 | `email_sync_state` | Outlook sync cursor (last_sync_at, last_entry_id) |
 | `synced_emails` | Raw emails synced from Outlook |
+
+**Qualification Pipeline (new):**
+| Table | Purpose |
+|-------|---------|
+| `tasks` | Call reminders, follow-ups, review tasks |
+| `qualification_data` | Tracks pricing, motivation, decision maker per deal |
+| `email_template_variants` | A/B testing for email templates |
+| `email_exclusions` | Permanent exclusion list (bounces, hard passes) |
+| `deal_packages` | Packaged qualified deals for handoff |
+| `email_drafts` | Approval queue for agent-generated emails |
 
 **Other:**
 | Table | Purpose |
