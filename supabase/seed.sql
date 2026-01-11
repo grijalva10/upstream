@@ -66,6 +66,7 @@ INSERT INTO markets (id, name, state) VALUES
 (523, 'Norfolk/VA Beach', 'VA'),
 (543, 'Omaha', 'NE'),
 (598, 'Providence', 'RI'),
+(605, 'Riverside/Inland Empire', 'CA'),
 (622, 'Reno', 'NV'),
 (639, 'Sarasota', 'FL'),
 (658, 'Savannah', 'GA'),

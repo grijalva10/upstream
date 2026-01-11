@@ -13,7 +13,21 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nInitialize Upstream Sourcing Engine with CoStar API reference data\n\n- Add project structure with agents, orchestrator, apps, packages\n- Create 6 Claude Code subagents for deal sourcing pipeline\n- Document CoStar BFF API payload structure and filters\n- Add verified lookups: property types, owner types, loan filters,\n  construction status, tenancy, building class, markets\n- Create sourcing-strategies.md with 22 executable plays\n- Include loan distress filters \\(payment status, CMBS, LTV, DSCR\\)\n- Add US markets lookup \\(521 markets with IDs\\)\n- Include industrial analytics data for value estimation\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npx supabase:*)",
+      "Bash(psql:*)",
+      "Bash(python scripts/run_extraction.py:*)",
+      "Bash(git push)",
+      "Bash(ls -la \"C:\\\\Users\\\\grija\\\\projects\\\\upstream\\\\supabase\"\" 2>/dev/null || echo \"Directory not found \")",
+      "Bash(npx create-next-app:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(python scripts/sync_emails.py:*)",
+      "Bash(npm run build:*)",
+      "Bash(start http://localhost:3000)",
+      "Bash(echo:*)",
+      "WebFetch(domain:awesomeclaude.ai)"
     ]
   }
 }
