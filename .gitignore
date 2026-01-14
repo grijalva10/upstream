@@ -33,3 +33,12 @@ reference/costar-extract-sample-output/
 supabase/.branches/
 supabase/.temp/
 .claude/mcp.json
+
+# Canvas
+canvas/node_modules/
+canvas/canvas/node_modules/
+canvas/custom/node_modules/
+canvas/.git/
+
+# Claude Code temp directories
+tmpclaude-*-cwd
