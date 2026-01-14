@@ -100,7 +100,7 @@ def email_exists(db: Client, entry_id: str) -> bool:
     return len(result.data) > 0
 
 
-def save_email(db: Client, email: Email, direction: str) -> Optional[str]:
+def save_email(db: Client, email: Email, direction: str, source_folder: str) -> Optional[str]:
     """Save email to database. Returns the new record ID or None if already exists."""
     if not email.entry_id:
         logger.warning(f"Email missing entry_id, skipping: {email.subject[:50]}")
@@ -134,6 +134,7 @@ def save_email(db: Client, email: Email, direction: str) -> Optional[str]:
         "is_read": email.is_read,
         "has_attachments": email.has_attachments,
         "synced_at": datetime.now(timezone.utc).isoformat(),
+        "source_folder": source_folder,
     }
 
     result = db.table("synced_emails").insert(data).execute()
@@ -189,9 +190,12 @@ def sync_folder(
     skipped_count = 0
     newest_email: Optional[Email] = None
 
+    # Map folder names to display names
+    folder_display = "Inbox" if folder_name == "inbox" else "Sent Items"
+
     for email in emails:
         try:
-            record_id = save_email(db, email, direction)
+            record_id = save_email(db, email, direction, folder_display)
             if record_id:
                 new_count += 1
                 # Track newest email for sync state
