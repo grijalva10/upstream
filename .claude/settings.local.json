@@ -70,7 +70,14 @@
       "WebFetch(domain:dev.to)",
       "Skill(dev-browser)",
       "Bash(npx tsx:*)",
-      "Skill(pdf)"
+      "Skill(pdf)",
+      "Bash(pg_dump:*)",
+      "Bash(tasklist /FI \"IMAGENAME eq node.exe\" /V)",
+      "Bash(wmic process where \"name=''node.exe''\" get processid,commandline)",
+      "Bash(wsl --shutdown)",
+      "Bash(tasklist:*)",
+      "Bash(sort:*)",
+      "Bash(wsl --list:*)"
     ]
   }
 }

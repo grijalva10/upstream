@@ -13,6 +13,7 @@ import {
   LogOut,
   Activity,
   Target,
+  Layers,
 } from "lucide-react";
 import {
   Tooltip,
@@ -33,6 +34,7 @@ const navItems = [
   { href: "/clients", icon: Users, label: "Clients" },
   { href: "/criteria", icon: Target, label: "Criteria" },
   { href: "/orchestrator", icon: Activity, label: "Orchestrator" },
+  { href: "/jobs", icon: Layers, label: "Jobs" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 

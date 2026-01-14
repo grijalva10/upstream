@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
     "dev:web": "npm run dev --prefix apps/web",
+    "dev:worker": "npm run dev --prefix apps/worker",
     "db:start": "npx supabase start",
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",

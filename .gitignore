@@ -1,3 +1,6 @@
+# Dependencies
+node_modules/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -42,3 +45,8 @@ canvas/.git/
 
 # Claude Code temp directories
 tmpclaude-*-cwd
+
+# Temp/backup files
+temp_*.sql
+*_backup.json
+*_backup.sql
