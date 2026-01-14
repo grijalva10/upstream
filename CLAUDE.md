@@ -259,3 +259,7 @@ If using Supabase MCP server, add to Claude settings:
 ```
 
 This enables Claude to query the database directly via MCP tools.
+
+## User Preferences
+
+- **Outbound emails**: Do NOT include signature - Outlook auto-adds it

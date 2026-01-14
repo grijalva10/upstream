@@ -1,0 +1,12 @@
+{
+  "name": "upstream",
+  "private": true,
+  "scripts": {
+    "dev": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
+    "dev:web": "npm run dev --prefix apps/web",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:studio": "start http://127.0.0.1:55323"
+  }
+}

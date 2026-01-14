@@ -1,0 +1,22 @@
+{
+  "plugins": [
+    {
+      "name": "canvas",
+      "source": "../canvas/canvas",
+      "description": "Terminal TUI components (calendars, documents, flights)",
+      "version": "0.1.0"
+    },
+    {
+      "name": "upstream-canvas",
+      "source": "../canvas/custom",
+      "description": "Custom Upstream CRE pipeline interfaces",
+      "version": "0.1.0"
+    }
+  ],
+  "marketplaces": [
+    {
+      "name": "claude-canvas",
+      "source": "../canvas/.claude-plugin/marketplace.json"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+  {
+    "buyer": {
+      "name": "VA Property Group",
+      "entity": {
+        "dealsCompleted": 25,
+        "capital": 25000000,
+        "typicalCloseDays": 30,
+        "decisionMaker": "single",
+        "id": "c10b5e8e-8c1b-44f4-b3b0-a64ee95f173a"
+      },
+      "contact": {
+        "firstName": null,
+        "lastName": null,
+        "email": null,
+        "phone": null
+      }
+    },
+    "broker": {
+      "name": "Jeff Grijalva",
+      "firstName": "Jeff",
+      "lastName": "Grijalva",
+      "phone": "(949) 939-2654",
+      "email": "jgrijalva@lee-associates.com",
+      "brokerage": "Lee & Associates",
+      "id": "22222222-2222-2222-2222-222222222222"
+    },
+    "criteria": {
+      "name": "Industrial +2 in California",
+      "notes": null,
+      "markets": ["Inland Empire - CA", "Los Angeles - CA", "Orange County - CA", "San Diego - CA"],
+      "deadline": "2026-02-25",
+      "price": { "min": 5000000, "max": 25000000 },
+      "capRate": { "min": 5.00 },
+      "strategies": ["Core", "Core Plus"],
+      "assetClasses": null,
+      "tenancy": ["single", "multi"],
+      "propertyTypes": ["Industrial", "Medical Office", "Office"],
+      "id": "b245fbfb-9819-43e2-9525-ce661527513b"
+    }
+  }
