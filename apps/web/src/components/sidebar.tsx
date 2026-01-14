@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Settings, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  CheckCircle,
+  Kanban,
+  ListTodo,
+  Inbox,
+  Users,
+  Settings,
+  LogOut,
+  Activity,
+  Target,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -14,8 +25,14 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Command Center" },
+  { href: "/approvals", icon: CheckCircle, label: "Approvals" },
+  { href: "/pipeline", icon: Kanban, label: "Pipeline" },
+  { href: "/tasks", icon: ListTodo, label: "Tasks" },
+  { href: "/inbox", icon: Inbox, label: "Inbox" },
   { href: "/clients", icon: Users, label: "Clients" },
+  { href: "/criteria", icon: Target, label: "Criteria" },
+  { href: "/orchestrator", icon: Activity, label: "Orchestrator" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -31,33 +48,38 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-16 border-r bg-background flex flex-col">
+    <aside className="h-full w-12 border-r bg-background flex flex-col flex-shrink-0">
       <div className="flex h-full flex-col items-center py-4">
         {/* Logo */}
-        <div className="mb-8 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
+        <div className="mb-6 flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
           U
         </div>
 
         {/* Navigation */}
         <nav className="flex flex-1 flex-col items-center gap-2">
           <TooltipProvider delayDuration={0}>
-            {navItems.map((item) => (
-              <Tooltip key={item.href}>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-accent",
-                      pathname === item.href && "bg-accent text-accent-foreground"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span className="sr-only">{item.label}</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{item.label}</TooltipContent>
-              </Tooltip>
-            ))}
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-accent",
+                        isActive && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span className="sr-only">{item.label}</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
+              );
+            })}
           </TooltipProvider>
         </nav>
 
@@ -68,9 +90,9 @@ export function Sidebar() {
               <TooltipTrigger asChild>
                 <button
                   onClick={handleSignOut}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-accent"
+                  className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-accent"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <LogOut className="h-4 w-4" />
                   <span className="sr-only">Sign out</span>
                 </button>
               </TooltipTrigger>
@@ -78,8 +100,8 @@ export function Sidebar() {
             </Tooltip>
           </TooltipProvider>
 
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="text-xs">SU</AvatarFallback>
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-[10px]">JG</AvatarFallback>
           </Avatar>
         </div>
       </div>
