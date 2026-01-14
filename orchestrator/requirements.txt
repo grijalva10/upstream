@@ -1,0 +1,19 @@
+# Upstream Orchestrator Dependencies
+
+# Supabase client
+supabase>=2.0.0
+
+# Async support
+asyncio
+
+# For Outlook COM automation (Windows only)
+pywin32>=306; sys_platform == "win32"
+
+# HTTP client for API calls
+httpx>=0.25.0
+
+# Timezone handling
+pytz>=2023.3
+
+# Environment variables
+python-dotenv>=1.0.0
