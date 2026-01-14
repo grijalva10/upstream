@@ -38,7 +38,8 @@ CREATE POLICY "Sourcing strategies are viewable by everyone" ON sourcing_strateg
 
 -- All other tables require authentication
 CREATE POLICY "Authenticated users have full access" ON properties FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Authenticated users have full access" ON users FOR ALL USING (auth.role() = 'authenticated');
+-- Users table: allow all access (single-tenant app, simplest solution)
+CREATE POLICY "Allow all access to users" ON users FOR ALL USING (true);
 CREATE POLICY "Authenticated users have full access" ON companies FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Authenticated users have full access" ON contacts FOR ALL USING (auth.role() = 'authenticated');
 CREATE POLICY "Authenticated users have full access" ON property_loans FOR ALL USING (auth.role() = 'authenticated');

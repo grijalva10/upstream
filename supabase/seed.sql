@@ -3,6 +3,94 @@
 -- NOTE: Sourcing strategies are now seeded in migration 00005_agent_metrics.sql
 
 -- =============================================================================
+-- SCHEMA PERMISSIONS (Required for PostgREST)
+-- =============================================================================
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
+
+-- =============================================================================
+-- AUTH USER (Super Admin)
+-- =============================================================================
+
+INSERT INTO auth.users (
+  id,
+  instance_id,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  created_at,
+  updated_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  is_super_admin,
+  role,
+  aud,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  email_change_token_current,
+  email_change_confirm_status,
+  phone_change,
+  phone_change_token,
+  recovery_token,
+  reauthentication_token
+) VALUES (
+  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+  '00000000-0000-0000-0000-000000000000',
+  'grijalva10@gmail.com',
+  crypt('Cutter123!', gen_salt('bf')),
+  NOW(),
+  NOW(),
+  NOW(),
+  '{"provider": "email", "providers": ["email"]}',
+  '{"name": "Jeff Grijalva"}',
+  false,
+  'authenticated',
+  'authenticated',
+  '',
+  '',
+  '',
+  '',
+  0,
+  '',
+  '',
+  '',
+  ''
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.identities (
+  id,
+  user_id,
+  provider_id,
+  provider,
+  identity_data,
+  last_sign_in_at,
+  created_at,
+  updated_at
+) VALUES (
+  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+  'grijalva10@gmail.com',
+  'email',
+  '{"sub": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", "email": "grijalva10@gmail.com"}',
+  NOW(),
+  NOW(),
+  NOW()
+) ON CONFLICT (provider_id, provider) DO NOTHING;
+
+-- Public users record (required for app queries)
+INSERT INTO public.users (id, email, name, role)
+VALUES (
+  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+  'grijalva10@gmail.com',
+  'Jeff Grijalva',
+  'admin'
+) ON CONFLICT (id) DO NOTHING;
+
+-- =============================================================================
 -- MARKETS (Top US CRE Markets)
 -- =============================================================================
 
