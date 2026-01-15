@@ -3,17 +3,14 @@
  *
  * This job:
  * 1. Checks if within business hours (stealth)
- * 2. Checks rate limits
- * 3. Runs CoStar query via Python subprocess
+ * 2. Checks CoStar service session status
+ * 3. Runs CoStar query via HTTP service API
  * 4. Persists results to database
  * 5. Logs execution for audit
  */
 
-import { spawn } from "child_process";
-import path from "path";
 import PgBoss from "pg-boss";
 import { config } from "../config.js";
-import { isWithinSendWindow } from "../lib/send-window.js";
 import {
   saveSellers,
   createExtractionList,
@@ -42,82 +39,66 @@ interface CoStarQueryResult {
   propertiesProcessed?: number;
 }
 
+interface CoStarSessionStatus {
+  status: "offline" | "starting" | "authenticating" | "connected" | "error";
+  session_valid: boolean;
+  expires_in_minutes: number;
+  error?: string;
+}
+
 /**
- * Execute a Python CoStar query script and return JSON result.
+ * Check if the CoStar service session is available and valid.
  */
-async function runPythonQuery(
+async function checkCoStarSession(): Promise<CoStarSessionStatus> {
+  try {
+    const res = await fetch(`${config.costarServiceUrl}/status`);
+    if (!res.ok) {
+      return {
+        status: "offline",
+        session_valid: false,
+        expires_in_minutes: 0,
+        error: "CoStar service not responding",
+      };
+    }
+    return (await res.json()) as CoStarSessionStatus;
+  } catch (err) {
+    return {
+      status: "offline",
+      session_valid: false,
+      expires_in_minutes: 0,
+      error: "CoStar service not running",
+    };
+  }
+}
+
+/**
+ * Execute a CoStar query via the HTTP service.
+ */
+async function runCoStarQuery(
   queryType: string,
   payload: Record<string, unknown>,
   options: CoStarQueryJob["options"] = {}
 ): Promise<CoStarQueryResult> {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(
-      config.python.scriptsDir,
-      "..",
-      "integrations",
-      "costar",
-      "run_query.py"
-    );
-
-    const args = [
-      scriptPath,
-      "--query-type",
-      queryType,
-      "--payload",
-      JSON.stringify(payload),
-    ];
-
-    if (options.maxProperties) {
-      args.push("--max-properties", String(options.maxProperties));
-    }
-    if (options.includeParcel) {
-      args.push("--include-parcel");
-    }
-    if (options.headless === false) {
-      args.push("--no-headless");
-    }
-
-    const proc = spawn("python", args, {
-      cwd: path.join(config.python.scriptsDir, ".."),
-      env: { ...process.env },
-    });
-
-    let stdout = "";
-    let stderr = "";
-
-    proc.stdout.on("data", (data) => {
-      stdout += data.toString();
-    });
-
-    proc.stderr.on("data", (data) => {
-      stderr += data.toString();
-      // Log stderr in real-time for debugging
-      if (config.debug) {
-        console.log(`[costar] ${data.toString().trim()}`);
-      }
-    });
-
-    proc.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`Python script exited with code ${code}: ${stderr}`));
-        return;
-      }
-
-      try {
-        // Find the JSON output (last line or marked section)
-        const lines = stdout.trim().split("\n");
-        const jsonLine = lines[lines.length - 1];
-        const result = JSON.parse(jsonLine);
-        resolve(result);
-      } catch (err) {
-        reject(new Error(`Failed to parse Python output: ${stdout}`));
-      }
-    });
-
-    proc.on("error", (err) => {
-      reject(new Error(`Failed to spawn Python: ${err.message}`));
-    });
+  const res = await fetch(`${config.costarServiceUrl}/query`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query_type: queryType,
+      payload,
+      options: {
+        max_properties: options.maxProperties,
+        include_parcel: options.includeParcel,
+      },
+    }),
   });
+
+  const data = (await res.json()) as CoStarQueryResult & { error?: string };
+
+  if (!res.ok) {
+    throw new Error(data.error || `Query failed with status ${res.status}`);
+  }
+
+  return data;
 }
 
 /**
@@ -157,7 +138,27 @@ export async function handleCoStarQuery(
     };
   }
 
-  // 2. Create extraction list if not provided
+  // 2. Check CoStar service session
+  const sessionStatus = await checkCoStarSession();
+  if (sessionStatus.status === "offline") {
+    console.log(`[costar-query] CoStar service not running`);
+    return {
+      success: false,
+      error: "CoStar service not running. Start it with: python integrations/costar/service.py",
+    };
+  }
+
+  if (!sessionStatus.session_valid) {
+    console.log(`[costar-query] CoStar session not valid (status: ${sessionStatus.status})`);
+    return {
+      success: false,
+      error: `CoStar session not valid. Go to Settings > CoStar to authenticate. Status: ${sessionStatus.status}`,
+    };
+  }
+
+  console.log(`[costar-query] Session valid, expires in ${sessionStatus.expires_in_minutes} minutes`);
+
+  // 3. Create extraction list if not provided
   if (!extractionListId) {
     try {
       extractionListId = await createExtractionList(
@@ -172,19 +173,19 @@ export async function handleCoStarQuery(
     }
   }
 
-  // 3. Update status to extracting
+  // 4. Update status to extracting
   await updateExtractionListStatus(extractionListId, "extracting");
 
   try {
-    // 4. Run the Python query
-    console.log(`[costar-query] Running Python ${queryType}...`);
-    const result = await runPythonQuery(queryType, payload, options);
+    // 5. Run the CoStar query via HTTP service
+    console.log(`[costar-query] Running ${queryType} via CoStar service...`);
+    const result = await runCoStarQuery(queryType, payload, options);
 
     if (result.error) {
       throw new Error(result.error);
     }
 
-    // 5. Persist results
+    // 6. Persist results
     if (queryType === "find_sellers" && result.contacts) {
       console.log(`[costar-query] Persisting ${result.contacts.length} contacts...`);
       const persistResult = await saveSellers(
@@ -193,10 +194,10 @@ export async function handleCoStarQuery(
         criteriaId
       );
 
-      // 6. Update status
+      // 7. Update status
       await updateExtractionListStatus(extractionListId, "completed");
 
-      // 7. Log execution
+      // 8. Log execution
       const durationMs = Date.now() - startTime;
       await logQueryExecution(
         queryType,

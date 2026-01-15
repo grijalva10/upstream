@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
+    "stop": "powershell -ExecutionPolicy Bypass -File scripts/stop.ps1",
     "dev:web": "npm run dev --prefix apps/web",
     "dev:worker": "npm run dev --prefix apps/worker",
     "db:start": "npx supabase start",

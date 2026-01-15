@@ -43,6 +43,9 @@ export interface WorkerConfig {
     projectRoot: string;
   };
 
+  // CoStar service
+  costarServiceUrl: string;
+
   // Feature flags
   dryRun: boolean;
   debug: boolean;
@@ -86,6 +89,9 @@ export const config: WorkerConfig = {
     scriptsDir: resolve(__dirname, '../../../scripts'),
     projectRoot: resolve(__dirname, '../../..'),
   },
+
+  // CoStar service
+  costarServiceUrl: process.env.COSTAR_SERVICE_URL || 'http://localhost:8765',
 
   // Feature flags (defaults, will be overridden from DB)
   dryRun: process.env.DRY_RUN === 'true',

@@ -1,12 +1,24 @@
 import Link from "next/link";
-import { Cog, ChevronRight } from "lucide-react";
+import { Cog, ChevronRight, Globe, Server } from "lucide-react";
 
 const settingsSections = [
+  {
+    href: "/settings/services",
+    icon: Server,
+    title: "Services",
+    description: "Start and stop background services",
+  },
   {
     href: "/settings/worker",
     icon: Cog,
     title: "Worker",
     description: "Background job worker, rate limits, and job intervals",
+  },
+  {
+    href: "/settings/costar",
+    icon: Globe,
+    title: "CoStar",
+    description: "Browser session management and authentication",
   },
 ];
 

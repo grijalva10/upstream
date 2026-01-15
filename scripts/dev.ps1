@@ -26,6 +26,15 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$wo
 
 Write-Host "Worker started in new terminal" -ForegroundColor Green
 Write-Host ""
+Write-Host "Starting CoStar service in background..." -ForegroundColor Cyan
+
+# Start CoStar service in a new terminal window
+$projectRoot = Join-Path $PSScriptRoot ".."
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$projectRoot'; Write-Host 'Starting CoStar session service on port 8765...' -ForegroundColor Green; python integrations/costar/service.py"
+
+Write-Host "CoStar service started in new terminal" -ForegroundColor Green
+Write-Host "  -> Go to Settings > CoStar to authenticate" -ForegroundColor Yellow
+Write-Host ""
 Write-Host "Starting web app..." -ForegroundColor Cyan
 Write-Host "Open http://localhost:3000" -ForegroundColor Yellow
 Write-Host ""
