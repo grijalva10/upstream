@@ -1,11 +1,31 @@
-"""CoStar Integration - Property Contact Extraction."""
+"""CoStar Integration - Property Data Extraction.
+
+Architecture:
+- session.py: Browser session management (Pydoll for stealth)
+- client.py: CoStar API calls
+- queries/: Query modules that return JSON (no DB interaction)
+    - find_sellers.py: Extract property owner contacts
+    - find_buyers.py: Extract active buyers (TODO)
+    - market_analytics.py: Get market data (TODO)
+- db.py: Legacy DB helpers (being migrated to worker layer)
+
+Usage:
+    from integrations.costar.queries import find_sellers
+    contacts = await find_sellers(payload, max_properties=100)
+"""
 
 import logging
 from typing import Dict, List, Optional, Union
 
-from .auth import CoStarSession
+# Core components
+from .session import CoStarSession  # Renamed from auth.py
 from .client import CoStarClient
 from .extract import ContactExtractor
+
+# Query modules (new pattern - returns JSON, no DB)
+from .queries import find_sellers, SellerQuery
+
+# Legacy DB helpers (TODO: migrate to worker layer)
 from .db import (
     save_contacts,
     setup_extraction_from_payloads_file,
@@ -96,6 +116,14 @@ async def extract_contacts(
 
 # Re-export for convenience
 __all__ = [
+    # New query pattern (preferred)
+    "find_sellers",
+    "SellerQuery",
+    # Core components
+    "CoStarSession",
+    "CoStarClient",
+    "ContactExtractor",
+    # Legacy (still works, but use queries instead)
     "extract_contacts",
     "save_contacts",
     "setup_extraction_from_payloads_file",
@@ -111,7 +139,4 @@ __all__ = [
     "get_strategy_by_name",
     "save_strategy_summary",
     "update_criteria_with_results",
-    "CoStarSession",
-    "CoStarClient",
-    "ContactExtractor",
 ]

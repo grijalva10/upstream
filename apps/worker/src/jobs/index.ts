@@ -5,8 +5,16 @@ import { handleCheckReplies } from './check-replies.job.js';
 import { handleSendEmail } from './send-email.job.js';
 import { handleClassify } from './classify.job.js';
 import { handleProcessQueue } from './process-queue.job.js';
+import { handleCoStarQuery } from './costar-query.job.js';
 
-const QUEUES = ['email-sync', 'check-replies', 'process-queue', 'send-email', 'classify-email'];
+const QUEUES = [
+  'email-sync',
+  'check-replies',
+  'process-queue',
+  'send-email',
+  'classify-email',
+  'costar-query',
+];
 
 interface JobCallbacks {
   onJobComplete: () => void;
@@ -86,6 +94,14 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
     'classify-email',
     { teamSize: 2, teamConcurrency: 2 },
     wrapHandler('classify-email', handleClassify)
+  );
+
+  // CoStar queries (triggered by criteria approval or manual)
+  // Only 1 concurrent - CoStar is rate-sensitive
+  await boss.work(
+    'costar-query',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('costar-query', handleCoStarQuery)
   );
 }
 
