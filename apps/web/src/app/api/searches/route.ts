@@ -73,14 +73,18 @@ export async function POST(request: Request) {
     const { name, source, criteria_json } = parsed.data;
     const supabase = createAdminClient();
 
+    // If no criteria provided, create in draft status
+    const hasCriteria = criteria_json && Object.keys(criteria_json).length > 0;
+    const initialStatus = hasCriteria ? "pending_queries" : "draft";
+
     // Create search record
     const { data: search, error: searchError } = await supabase
       .from("searches")
       .insert({
         name,
         source,
-        criteria_json,
-        status: "pending_queries",
+        criteria_json: criteria_json || {},
+        status: initialStatus,
       })
       .select("id")
       .single();
@@ -88,35 +92,39 @@ export async function POST(request: Request) {
     if (searchError) {
       console.error("Error creating search:", searchError);
       return NextResponse.json(
-        { error: "Failed to create search" },
+        { error: `Failed to create search: ${searchError.message}` },
         { status: 500 }
       );
     }
 
-    // Queue sourcing agent task via pg-boss
-    const { error: taskError } = await supabase.rpc("queue_pgboss_job", {
-      p_name: "generate-queries",
-      p_data: {
-        searchId: search.id,
-        name,
-        source,
-        criteriaJson: criteria_json,
-      },
-      p_options: {
-        priority: 7,
-        retryLimit: 2,
-      },
-    });
+    // Only queue job if we have criteria
+    if (hasCriteria) {
+      const { error: taskError } = await supabase.rpc("queue_pgboss_job", {
+        p_name: "generate-queries",
+        p_data: {
+          searchId: search.id,
+          name,
+          source,
+          criteriaJson: criteria_json,
+        },
+        p_options: {
+          priority: 7,
+          retryLimit: 2,
+        },
+      });
 
-    if (taskError) {
-      console.error("Error creating task:", taskError);
-      // Don't fail - search was created successfully
+      if (taskError) {
+        console.error("Error creating task:", taskError);
+        // Don't fail - search was created successfully
+      }
     }
 
     return NextResponse.json({
       id: search.id,
-      status: "submitted",
-      message: `Created search "${name}". Sourcing agent task queued.`,
+      status: initialStatus,
+      message: hasCriteria
+        ? `Created search "${name}". Sourcing agent task queued.`
+        : `Created search "${name}". Add criteria to generate queries.`,
     });
   } catch (error) {
     console.error("Create search error:", error);

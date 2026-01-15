@@ -447,8 +447,29 @@ class Database:
             .execute()
         return result.data
 
+    # =========================================================================
+    # CoStar Lookups
+    # =========================================================================
+
+    def get_costar_lookups(self) -> Dict[str, Any]:
+        """
+        Get all CoStar lookup data from the database.
+
+        Returns dict keyed by lookup_type: markets, property_types, owner_types, etc.
+        """
+        result = self.table("costar_lookups") \
+            .select("lookup_type, data") \
+            .execute()
+
+        lookups = {}
+        for row in result.data or []:
+            lookups[row["lookup_type"]] = row["data"]
+
+        return lookups
+
 
 # Global database instance
+_costar_lookups_cache: Optional[Dict[str, Any]] = None
 _db: Optional[Database] = None
 
 
@@ -458,3 +479,26 @@ def get_db() -> Database:
     if _db is None:
         _db = Database()
     return _db
+
+
+def get_costar_lookups_cached() -> Dict[str, Any]:
+    """
+    Get CoStar lookups with caching.
+
+    Loads from database once and caches in memory for the process lifetime.
+    Call clear_costar_lookups_cache() to force reload.
+    """
+    global _costar_lookups_cache
+    if _costar_lookups_cache is None:
+        logger.info("Loading CoStar lookups from database...")
+        db = get_db()
+        _costar_lookups_cache = db.get_costar_lookups()
+        logger.info(f"Loaded {len(_costar_lookups_cache)} lookup types: {list(_costar_lookups_cache.keys())}")
+    return _costar_lookups_cache
+
+
+def clear_costar_lookups_cache() -> None:
+    """Clear the cached lookups (for testing or after updates)."""
+    global _costar_lookups_cache
+    _costar_lookups_cache = None
+    logger.info("CoStar lookups cache cleared")

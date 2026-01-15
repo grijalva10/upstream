@@ -331,18 +331,22 @@ Your Payloads → search_properties() → property pins → extract_contacts() �
 
 ---
 
-## Reference Files (READ THESE FIRST)
+## Reference Data (INJECTED - DO NOT READ FILES)
 
+**IMPORTANT: CoStar lookup data is injected directly into your prompt. Use the "COSTAR API REFERENCE DATA" section above for all IDs.**
+
+Do NOT read reference files for lookups - the complete data is provided to you. This includes:
+- All 240+ US markets with exact IDs
+- Property type IDs
+- Owner type IDs by category
+- Loan filter IDs (payment status, special servicing, watchlist)
+- Construction status, building class, tenancy
+
+For payload structure examples only, you may read:
 | File | Purpose |
 |------|---------|
 | `reference/costar/payload-example.json` | Ground truth payload structure |
 | `reference/costar/sourcing-strategies.md` | All sourcing plays with filters |
-| `reference/costar/markets-us-lookup.json` | Market name → ID mapping |
-| `reference/costar/lookups/property-types.json` | Property type IDs |
-| `reference/costar/lookups/owner-types.json` | Owner type IDs by category |
-| `reference/costar/lookups/loan-filters.json` | Loan/distress filter IDs |
-| `integrations/costar/client.py` | API client code |
-| `integrations/costar/extract.py` | GraphQL queries for contacts |
 
 ---
 
@@ -465,21 +469,11 @@ Your Payloads → search_properties() → property pins → extract_contacts() �
 | 8 | Bankrupt | Severe |
 | 9 | REO (Bank-Owned) | Severe |
 
-### Key Markets (sample)
-| Market | ID |
-|--------|-----|
-| Los Angeles | 430 |
-| Orange County | 526 |
-| Phoenix | 573 |
-| Dallas/Fort Worth | 275 |
-| Atlanta | 1805 |
-| Chicago | 241 |
-| Houston | 373 |
-| Denver | 291 |
-| Seattle | 661 |
-| Austin | 159 |
+### Markets
 
-For full market list, read `reference/costar/markets-us-lookup.json`.
+**Use the complete market list from the "COSTAR API REFERENCE DATA" section above.**
+
+The injected data contains all 240+ US markets with their exact CoStar IDs. Do NOT use hardcoded IDs - always reference the injected lookup data.
 
 ---
 
@@ -520,7 +514,7 @@ Typical output: **2-5 queries** (not 1, not 20)
 
 1. Always use `ListingType: 0` (off-market only)
 2. Use `FilterType: 132` for market geography
-3. Look up ALL IDs in reference files - never guess
+3. **Use IDs from the injected "COSTAR API REFERENCE DATA" section - never guess or read files for lookups**
 4. Dates use ISO format: `"2026-01-01T00:00:00.000Z"`
 5. Building filters nest under `Property.Building`
 6. Loan filters nest under `Property.Loan`

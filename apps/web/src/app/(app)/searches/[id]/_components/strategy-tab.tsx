@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, FileJson } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { CoStarPayload } from "../../_lib/types";
@@ -56,8 +57,8 @@ function StrategySummaryCard({ summary }: { summary: string | null }) {
       <CardHeader>
         <CardTitle>Strategy Summary</CardTitle>
       </CardHeader>
-      <CardContent>
-        <pre className="whitespace-pre-wrap text-sm font-sans">{summary}</pre>
+      <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+        <ReactMarkdown>{summary}</ReactMarkdown>
       </CardContent>
     </Card>
   );

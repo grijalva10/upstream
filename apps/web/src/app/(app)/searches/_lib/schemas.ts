@@ -3,9 +3,12 @@ import { z } from "zod";
 export const searchSourceSchema = z.enum(["lee-1031-x", "manual", "inbound"]);
 
 export const searchStatusSchema = z.enum([
+  "draft",
   "pending_queries",
+  "generating_queries",
   "extracting",
   "ready",
+  "failed",
   "campaign_created",
 ]);
 
@@ -17,7 +20,7 @@ export const createSearchSchema = z.object({
   source: searchSourceSchema.default("manual"),
   criteria_json: z
     .record(z.string(), z.unknown())
-    .refine((val) => Object.keys(val).length > 0, "Criteria JSON cannot be empty"),
+    .optional(),
 });
 
 export type CreateSearchInput = z.infer<typeof createSearchSchema>;

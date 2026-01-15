@@ -1,7 +1,14 @@
 # Upstream Orchestrator Dependencies
 
+# Web server for agent HTTP service
+flask>=3.0.0
+flask-cors>=4.0.0
+
 # Supabase client
 supabase>=2.0.0
+
+# PostgreSQL driver
+psycopg2-binary>=2.9.0
 
 # Async support
 asyncio

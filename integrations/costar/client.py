@@ -31,9 +31,18 @@ class CoStarClient:
                 await asyncio.sleep(self.rate_limit - elapsed)
         self.last_request = datetime.now()
 
-    async def graphql(self, query: str, variables: Dict[str, Any]) -> Dict:
+    async def graphql(
+        self,
+        query: str,
+        variables: Dict[str, Any],
+        operation_name: Optional[str] = None
+    ) -> Dict:
         """Execute GraphQL query with retries."""
-        payload = {"query": query, "variables": variables}
+        payload = {
+            "operationName": operation_name,
+            "variables": variables,
+            "query": query,
+        }
 
         for attempt in range(MAX_RETRIES):
             try:

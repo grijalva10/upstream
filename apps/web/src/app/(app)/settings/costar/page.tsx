@@ -13,6 +13,8 @@ import {
   Clock,
   AlertCircle,
   Loader2,
+  ExternalLink,
+  Code,
 } from "lucide-react";
 
 interface SessionStatus {
@@ -300,6 +302,29 @@ export default function CoStarSettingsPage() {
           <p className="text-amber-600 dark:text-amber-400">
             <strong>Note:</strong> For stealth, queries only run during business hours (9am-6pm).
           </p>
+        </CardContent>
+      </Card>
+
+      {/* API Reference Card */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Code className="h-5 w-5" />
+            GraphQL API Reference
+          </CardTitle>
+          <CardDescription>
+            Interactive documentation for CoStar&apos;s GraphQL API with example queries and responses
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => window.open("/settings/costar/graphql-docs", "_blank")}
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Open API Documentation
+          </Button>
         </CardContent>
       </Card>
     </div>

@@ -35,6 +35,14 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$pr
 Write-Host "CoStar service started in new terminal" -ForegroundColor Green
 Write-Host "  -> Go to Settings > CoStar to authenticate" -ForegroundColor Yellow
 Write-Host ""
+Write-Host "Starting Agent service in background..." -ForegroundColor Cyan
+
+# Start Agent service in a new terminal window
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$projectRoot'; Write-Host 'Starting Claude Agent service on port 8766...' -ForegroundColor Green; python orchestrator/service.py"
+
+Write-Host "Agent service started in new terminal" -ForegroundColor Green
+Write-Host "  -> Runs Claude agents in headless mode" -ForegroundColor Yellow
+Write-Host ""
 Write-Host "Starting web app..." -ForegroundColor Cyan
 Write-Host "Open http://localhost:3000" -ForegroundColor Yellow
 Write-Host ""

@@ -84,7 +84,12 @@
       "Bash(npx rimraf .next)",
       "Bash(npx next lint:*)",
       "Bash(npm run lint)",
-      "Bash(npx next build:*)"
+      "Bash(npx next build:*)",
+      "Bash(git push:*)",
+      "Bash(npx eslint:*)",
+      "Bash(claude:*)",
+      "Bash(where.exe:*)",
+      "Bash(npm view:*)"
     ]
   }
 }

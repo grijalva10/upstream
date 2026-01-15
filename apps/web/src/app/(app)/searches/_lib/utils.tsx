@@ -11,6 +11,11 @@ export interface StatusConfig {
 }
 
 export const STATUS_CONFIG: Record<string, StatusConfig> = {
+  draft: {
+    label: "Draft",
+    variant: "outline",
+    isLoading: false,
+  },
   pending_queries: {
     label: "Pending",
     variant: "secondary",

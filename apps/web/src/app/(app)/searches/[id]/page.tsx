@@ -8,6 +8,7 @@ import { OverviewTab } from "./_components/overview-tab";
 import { StrategyTab } from "./_components/strategy-tab";
 import { ResultsTab } from "./_components/results-tab";
 import { CampaignTab } from "./_components/campaign-tab";
+import { AgentRunner } from "./_components/agent-runner";
 import { SearchErrorBoundary } from "./_components/error-boundary";
 import { DeleteButton } from "./_components/delete-button";
 import { RetryButton } from "./_components/retry-button";
@@ -51,6 +52,9 @@ export default async function SearchDetailPage({ params }: PageProps) {
   const { id } = await params;
   const search = await getSearch(id);
 
+  const isDraft = search.status === "draft";
+  const defaultTab = isDraft ? "setup" : "overview";
+
   return (
     <div className="p-4 sm:p-6 max-w-6xl">
       <nav aria-label="Breadcrumb">
@@ -67,8 +71,13 @@ export default async function SearchDetailPage({ params }: PageProps) {
       <Header search={search} />
 
       <SearchErrorBoundary>
-        <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-4 sm:space-y-6">
           <TabsList aria-label="Search details navigation" className="w-full justify-start overflow-x-auto">
+            {isDraft && (
+              <TabsTrigger value="setup" className="text-xs sm:text-sm">
+                Setup
+              </TabsTrigger>
+            )}
             <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
             <TabsTrigger value="strategy" className="text-xs sm:text-sm">Strategy</TabsTrigger>
             <TabsTrigger value="results" className="text-xs sm:text-sm">Results</TabsTrigger>
@@ -82,13 +91,22 @@ export default async function SearchDetailPage({ params }: PageProps) {
             </TabsTrigger>
           </TabsList>
 
+          {isDraft && (
+            <TabsContent value="setup">
+              <AgentRunner
+                searchId={search.id}
+                searchName={search.name}
+                initialCriteria={search.criteria_json}
+              />
+            </TabsContent>
+          )}
           <TabsContent value="overview">
             <OverviewTab search={search} />
           </TabsContent>
           <TabsContent value="strategy">
             <StrategyTab
               strategySummary={search.strategy_summary}
-              payloadsJson={search.payloads_json}
+              payloadsJson={search.payloads_json?.queries ?? search.payloads_json}
               status={search.status}
             />
           </TabsContent>

@@ -46,6 +46,9 @@ export interface WorkerConfig {
   // CoStar service
   costarServiceUrl: string;
 
+  // Claude Agent service
+  agentServiceUrl: string;
+
   // Feature flags
   dryRun: boolean;
   debug: boolean;
@@ -93,6 +96,9 @@ export const config: WorkerConfig = {
 
   // CoStar service
   costarServiceUrl: process.env.COSTAR_SERVICE_URL || 'http://localhost:8765',
+
+  // Claude Agent service
+  agentServiceUrl: process.env.AGENT_SERVICE_URL || 'http://localhost:8766',
 
   // Feature flags (defaults, will be overridden from DB)
   dryRun: process.env.DRY_RUN === 'true',

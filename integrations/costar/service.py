@@ -247,8 +247,9 @@ def execute_query():
 
     async def run_query():
         try:
+            client = CoStarClient(session.tab, rate_limit=1.0)
+
             if query_type == "find_sellers":
-                client = CoStarClient(session.tab, rate_limit=1.0)
                 extractor = ContactExtractor(
                     client=client,
                     require_email=options.get("require_email", True),
@@ -267,12 +268,35 @@ def execute_query():
                     "count": len(contacts),
                 }
 
+            elif query_type == "graphql":
+                # Execute raw GraphQL query
+                gql_query = payload.get("query", "")
+                variables = payload.get("variables", {})
+                operation_name = payload.get("operationName")
+
+                if not gql_query:
+                    result["error"] = "Missing 'query' in payload"
+                else:
+                    response = await client.graphql(gql_query, variables, operation_name)
+                    result["data"] = response
+
+            elif query_type == "property_search":
+                # Execute property search with payload
+                max_pages = options.get("max_pages", 1)
+                pins = await client.search_properties(payload, max_pages=max_pages)
+                result["data"] = {
+                    "pins": pins,
+                    "count": len(pins),
+                }
+
+            else:
+                result["error"] = f"Unknown query type: {query_type}"
+
+            if not result["error"]:
                 update_state(
                     last_activity=datetime.now().isoformat(),
                     queries_run=state.queries_run + 1,
                 )
-            else:
-                result["error"] = f"Unknown query type: {query_type}"
 
         except Exception as e:
             logger.error(f"Query error: {e}")

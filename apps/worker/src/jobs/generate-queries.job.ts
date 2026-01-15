@@ -3,14 +3,16 @@
  *
  * This job:
  * 1. Takes buyer criteria from a search
- * 2. Runs sourcing agent to generate strategy + payloads
- * 3. Updates search with results
- * 4. Queues costar-query jobs for each payload
+ * 2. Runs sourcing agent via the Agent HTTP Service
+ * 3. Reads generated files from output/queries/
+ * 4. Updates search with results
+ * 5. Optionally queues costar-query jobs for each payload
  */
 
 import PgBoss from "pg-boss";
 import { pool } from "../db.js";
 import { config } from "../config.js";
+import { getAgentClient } from "../lib/agent-client.js";
 
 export interface GenerateQueriesJob {
   searchId: string;
@@ -66,9 +68,8 @@ export async function handleGenerateQueries(
       [searchId]
     );
 
-    // TODO: Run sourcing agent via Claude Code CLI
-    // For now, create a stub implementation
-    const result = await runSourcingAgent(criteriaJson);
+    // Run sourcing agent via HTTP service
+    const result = await runSourcingAgent(criteriaJson, name);
 
     // Update search with results
     await pool.query(
@@ -128,83 +129,119 @@ export async function handleGenerateQueries(
 }
 
 /**
- * Run the sourcing agent to generate query payloads.
- *
- * TODO: Implement actual Claude Code CLI call:
- * ```
- * claude -p "@sourcing-agent <criteria>" --output-format json
- * ```
+ * Run the sourcing agent via the Agent HTTP Service.
+ * The agent writes files to output/queries/, which we then read.
  */
 async function runSourcingAgent(
-  criteriaJson: Record<string, unknown>
+  criteriaJson: Record<string, unknown>,
+  searchName: string
 ): Promise<SourcingAgentResult> {
-  // Stub implementation - generates basic payloads from criteria
-  const criteria = criteriaJson as {
-    target_markets?: string[];
-    property_types?: string[];
-    size_range?: { min?: number; max?: number };
-    price_range?: { min?: number; max?: number };
-  };
+  const fs = await import("fs/promises");
+  const path = await import("path");
 
-  const markets = criteria.target_markets || ["Phoenix"];
-  const propertyTypes = criteria.property_types || ["Industrial"];
+  const client = getAgentClient();
 
-  // Generate a basic strategy summary
-  const strategySummary = `
-## Sourcing Strategy for ${markets.join(", ")}
+  // Check if agent service is running
+  const isAvailable = await client.isAvailable();
+  if (!isAvailable) {
+    throw new Error(
+      `Agent service not available at ${config.agentServiceUrl}. ` +
+      `Start it with: python orchestrator/service.py`
+    );
+  }
 
-### Target Profile
-- Property Types: ${propertyTypes.join(", ")}
-- Size Range: ${criteria.size_range?.min || "Any"} - ${criteria.size_range?.max || "Any"} SF
-- Price Range: $${(criteria.price_range?.min || 0).toLocaleString()} - $${(criteria.price_range?.max || 10000000).toLocaleString()}
+  // Sanitize name for filename
+  const safeName = searchName.replace(/[^a-zA-Z0-9]/g, "_");
+  const outputDir = path.join(config.python.projectRoot, "output", "queries");
+  const payloadsFile = path.join(outputDir, `${safeName}_payloads.json`);
+  const strategyFile = path.join(outputDir, `${safeName}_strategy.md`);
 
-### Query Approach
-Generated ${markets.length} market-based queries to identify potential sellers.
+  // Ensure output directory exists
+  await fs.mkdir(outputDir, { recursive: true });
 
-### Notes
-- Stub implementation - real sourcing agent will provide more detailed analysis
-- Auto-execution is ${config.autoExecuteQueries ? "enabled" : "disabled"}
-  `.trim();
+  // Delete old output files if they exist
+  try {
+    await fs.unlink(payloadsFile);
+  } catch {
+    /* ignore */
+  }
+  try {
+    await fs.unlink(strategyFile);
+  } catch {
+    /* ignore */
+  }
 
-  // Generate basic payloads (one per market)
-  const payloads = markets.map((market) => ({
-    name: `${market} ${propertyTypes[0] || "Properties"}`,
-    payload: {
-      PropertyCriteria: {
-        Property: {
-          Building: {
-            PropertyType: propertyTypes.map((t) => getPropertyTypeId(t)),
-          },
-        },
-        GeographyCriteria: {
-          Markets: [getMarketId(market)],
-        },
-      },
-    },
-  }));
+  // Write criteria to temp file for the agent
+  const tempCriteriaFile = path.join(outputDir, `${safeName}_input.json`);
+  await fs.writeFile(tempCriteriaFile, JSON.stringify(criteriaJson, null, 2));
+
+  console.log(`[generate-queries] Invoking sourcing agent for: ${searchName}`);
+  console.log(`[generate-queries] Criteria file: ${tempCriteriaFile}`);
+  console.log(`[generate-queries] Agent service: ${config.agentServiceUrl}`);
+
+  // Build the prompt for the sourcing agent
+  const prompt = `Read the buyer criteria from: ${tempCriteriaFile} and generate CoStar query payloads.
+
+Save payloads to: ${payloadsFile}
+Save strategy to: ${strategyFile}
+
+Use reference/costar/ for market ID lookups. DO NOT run extraction - just generate the files.`;
+
+  // Run via HTTP service
+  const result = await client.run({
+    agent: "sourcing-agent",
+    prompt,
+    context: { criteria_type: criteriaJson.type },
+    timeout: 300000, // 5 minutes
+  });
+
+  if (!result.success) {
+    throw new Error(`Sourcing agent failed: ${result.error || "Unknown error"}`);
+  }
+
+  console.log(`[generate-queries] Agent completed, reading output files...`);
+
+  // Read the output files
+  let payloadsContent: string;
+  try {
+    payloadsContent = await fs.readFile(payloadsFile, "utf-8");
+  } catch (err) {
+    throw new Error(
+      `Sourcing agent completed but payloads file not found: ${payloadsFile}. ` +
+      `Agent output: ${result.output?.slice(0, 500)}`
+    );
+  }
+
+  let payloadsData: { queries?: Array<{ name: string; payload: Record<string, unknown> }> };
+  try {
+    payloadsData = JSON.parse(payloadsContent);
+  } catch (err) {
+    throw new Error(`Failed to parse payloads JSON: ${err}`);
+  }
+
+  const queries = payloadsData.queries || [];
+  if (queries.length === 0) {
+    throw new Error(
+      `Sourcing agent generated empty payloads. ` +
+      `Agent output: ${result.output?.slice(0, 500)}`
+    );
+  }
+
+  // Read strategy file
+  let strategySummary = "";
+  try {
+    strategySummary = await fs.readFile(strategyFile, "utf-8");
+  } catch {
+    strategySummary = "Strategy file not generated";
+  }
+
+  console.log(`[generate-queries] Found ${queries.length} payloads`);
 
   return {
     strategy_summary: strategySummary,
-    payloads,
+    payloads: queries.map((q) => ({
+      name: q.name,
+      payload: q.payload,
+    })),
   };
-}
-
-// Stub ID lookups - real implementation uses reference/costar/
-function getPropertyTypeId(type: string): number {
-  const map: Record<string, number> = {
-    Industrial: 1,
-    Office: 2,
-    Retail: 3,
-    Multifamily: 4,
-  };
-  return map[type] || 1;
-}
-
-function getMarketId(market: string): number {
-  const map: Record<string, number> = {
-    Phoenix: 47,
-    "Los Angeles": 31,
-    Dallas: 15,
-  };
-  return map[market] || 47;
 }

@@ -14,6 +14,16 @@ if ($costarProc) {
     Write-Host "  CoStar service not running" -ForegroundColor Gray
 }
 
+# Stop Agent service (Python process on port 8766)
+Write-Host "Stopping Agent service..." -ForegroundColor Yellow
+$agentProc = Get-NetTCPConnection -LocalPort 8766 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -First 1
+if ($agentProc) {
+    Stop-Process -Id $agentProc -Force -ErrorAction SilentlyContinue
+    Write-Host "  Agent service stopped" -ForegroundColor Green
+} else {
+    Write-Host "  Agent service not running" -ForegroundColor Gray
+}
+
 # Stop worker (Node.js process from apps/worker)
 Write-Host "Stopping worker..." -ForegroundColor Yellow
 $workerProcs = Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object {

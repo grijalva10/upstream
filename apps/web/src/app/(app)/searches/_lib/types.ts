@@ -8,9 +8,12 @@ export type ContactRow = Database["public"]["Tables"]["contacts"]["Row"];
 
 // Derived types
 export type SearchStatus =
+  | "draft"
   | "pending_queries"
+  | "generating_queries"
   | "extracting"
   | "ready"
+  | "failed"
   | "campaign_created";
 
 export type SearchSource =
