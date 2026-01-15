@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,94 +25,113 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { JobActions } from "./job-actions";
 import { formatDistanceToNow } from "date-fns";
 import {
   RefreshCw,
   Search,
   Copy,
   Check,
+  AlertCircle,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
 
-export interface Job {
+export interface SystemJob {
   id: string;
-  job_type: string;
-  source: string;
-  status: string;
+  name: string;
   priority: number;
-  to_email: string;
-  subject: string;
-  attempts: number;
-  max_attempts: number;
-  last_error: string | null;
-  created_at: string;
-  scheduled_for: string;
-  sent_at: string | null;
-  sequence_id: string | null;
+  data: Record<string, unknown> | null;
+  state: string;
+  retry_limit: number;
+  retry_count: number;
+  retry_delay: number;
+  retry_backoff: boolean;
+  start_after: string | null;
+  started_on: string | null;
+  expire_in: string | null;
+  created_on: string;
+  completed_on: string | null;
+  keep_until: string | null;
+  output: Record<string, unknown> | null;
+  dead_letter: string | null;
 }
 
-interface JobsDataTableProps {
-  data: Job[];
+interface SystemJobsTableProps {
+  initialJobs?: SystemJob[];
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-const statusVariants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "secondary",
-  scheduled: "secondary",
-  processing: "default",
-  sent: "outline",
-  failed: "destructive",
-  cancelled: "outline",
-};
-
-const statusColors: Record<string, string> = {
-  pending: "bg-gray-100 text-gray-800",
-  scheduled: "bg-blue-100 text-blue-800",
-  processing: "bg-blue-500 text-white",
-  sent: "bg-green-100 text-green-800 border-green-300",
-  failed: "bg-red-100 text-red-800",
+const stateColors: Record<string, string> = {
+  created: "bg-gray-100 text-gray-800",
+  retry: "bg-amber-100 text-amber-800",
+  active: "bg-blue-500 text-white",
+  completed: "bg-green-100 text-green-800 border-green-300",
+  expired: "bg-orange-100 text-orange-800",
   cancelled: "bg-gray-100 text-gray-500",
+  failed: "bg-red-100 text-red-800",
 };
 
-const sourceVariants: Record<string, string> = {
-  script: "bg-slate-100 text-slate-700",
-  claude: "bg-purple-100 text-purple-700",
-  user: "bg-amber-100 text-amber-700",
-  api: "bg-cyan-100 text-cyan-700",
+const queueColors: Record<string, string> = {
+  "email-sync": "bg-blue-100 text-blue-700",
+  "check-replies": "bg-purple-100 text-purple-700",
+  "process-queue": "bg-cyan-100 text-cyan-700",
+  "send-email": "bg-green-100 text-green-700",
+  "classify-email": "bg-amber-100 text-amber-700",
+  "costar-query": "bg-rose-100 text-rose-700",
 };
 
-export function JobsDataTable({ data }: JobsDataTableProps) {
+export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
+  const [jobs, setJobs] = useState<SystemJob[]>(initialJobs);
+  const [loading, setLoading] = useState(initialJobs.length === 0);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [stateFilter, setStateFilter] = useState<string>("all");
+  const [nameFilter, setNameFilter] = useState<string>("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/jobs/system");
+      const data = await res.json();
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setJobs(data.jobs || []);
+        setError(null);
+      }
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (initialJobs.length === 0) {
+      fetchJobs();
+    }
+  }, [initialJobs.length]);
+
   // Filter data
   const filteredData = useMemo(() => {
-    return data.filter((job) => {
+    return jobs.filter((job) => {
       const matchesSearch =
         searchTerm === "" ||
-        job.to_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.job_type?.toLowerCase().includes(searchTerm.toLowerCase());
+        job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.id.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus =
-        statusFilter === "all" || job.status === statusFilter;
+      const matchesState = stateFilter === "all" || job.state === stateFilter;
+      const matchesName = nameFilter === "all" || job.name === nameFilter;
 
-      const matchesSource =
-        sourceFilter === "all" || job.source === sourceFilter;
-
-      return matchesSearch && matchesStatus && matchesSource;
+      return matchesSearch && matchesState && matchesName;
     });
-  }, [data, searchTerm, statusFilter, sourceFilter]);
+  }, [jobs, searchTerm, stateFilter, nameFilter]);
 
   // Pagination
   const totalPages = Math.ceil(filteredData.length / pageSize);
@@ -125,26 +143,7 @@ export function JobsDataTable({ data }: JobsDataTableProps) {
   // Reset to page 1 when filters change
   useMemo(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, sourceFilter, pageSize]);
-
-  // Selection handlers
-  const toggleAll = () => {
-    if (selectedIds.size === paginatedData.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(paginatedData.map((j) => j.id)));
-    }
-  };
-
-  const toggleOne = (id: string) => {
-    const newSet = new Set(selectedIds);
-    if (newSet.has(id)) {
-      newSet.delete(id);
-    } else {
-      newSet.add(id);
-    }
-    setSelectedIds(newSet);
-  };
+  }, [searchTerm, stateFilter, nameFilter, pageSize]);
 
   const copyId = async (id: string) => {
     await navigator.clipboard.writeText(id);
@@ -152,18 +151,21 @@ export function JobsDataTable({ data }: JobsDataTableProps) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleRetrySelected = async () => {
-    // TODO: Implement bulk retry
-    console.log("Retry selected:", Array.from(selectedIds));
-  };
+  // Get unique states and names from data
+  const states = [...new Set(jobs.map((j) => j.state))];
+  const names = [...new Set(jobs.map((j) => j.name))];
 
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
-  // Get unique statuses and sources from data
-  const statuses = [...new Set(data.map((j) => j.status))];
-  const sources = [...new Set(data.map((j) => j.source))];
+  if (error && jobs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+        <AlertCircle className="h-8 w-8 mb-2" />
+        <p className="text-sm">{error}</p>
+        <p className="text-xs mt-1">
+          Run the worker to create pg-boss jobs
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -173,54 +175,48 @@ export function JobsDataTable({ data }: JobsDataTableProps) {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by email, subject, or type..."
+              placeholder="Search by name or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={stateFilter} onValueChange={setStateFilter}>
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="State" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              {statuses.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+              <SelectItem value="all">All States</SelectItem>
+              {states.map((state) => (
+                <SelectItem key={state} value={state}>
+                  {state.charAt(0).toUpperCase() + state.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={sourceFilter} onValueChange={setSourceFilter}>
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Source" />
+          <Select value={nameFilter} onValueChange={setNameFilter}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Queue" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Sources</SelectItem>
-              {sources.map((source) => (
-                <SelectItem key={source} value={source}>
-                  {source.charAt(0).toUpperCase() + source.slice(1)}
+              <SelectItem value="all">All Queues</SelectItem>
+              {names.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="flex gap-2">
-          {selectedIds.size > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRetrySelected}
-            >
-              Retry Selected ({selectedIds.size})
-            </Button>
-          )}
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Refresh
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchJobs}
+          disabled={loading}
+        >
+          <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Table */}
@@ -228,44 +224,34 @@ export function JobsDataTable({ data }: JobsDataTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={
-                    paginatedData.length > 0 &&
-                    selectedIds.size === paginatedData.length
-                  }
-                  onCheckedChange={toggleAll}
-                />
-              </TableHead>
               <TableHead className="w-[100px]">ID</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-center">Source</TableHead>
+              <TableHead>Queue</TableHead>
+              <TableHead className="text-center">State</TableHead>
+              <TableHead className="text-right">Priority</TableHead>
               <TableHead className="text-right">Retries</TableHead>
-              <TableHead>To</TableHead>
               <TableHead className="text-right">Created</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="text-right">Completed</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  <RefreshCw className="h-4 w-4 animate-spin mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={9}
+                  colSpan={7}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  No jobs found
+                  No system jobs found
                 </TableCell>
               </TableRow>
             ) : (
               paginatedData.map((job) => (
                 <TableRow key={job.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedIds.has(job.id)}
-                      onCheckedChange={() => toggleOne(job.id)}
-                    />
-                  </TableCell>
                   <TableCell className="font-mono text-xs">
                     <TooltipProvider>
                       <Tooltip>
@@ -292,59 +278,46 @@ export function JobsDataTable({ data }: JobsDataTableProps) {
                     </TooltipProvider>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium">
-                      {job.job_type.replace(/_/g, " ")}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant={statusVariants[job.status] || "secondary"}
-                      className={statusColors[job.status]}
-                    >
-                      {job.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
                     <Badge
                       variant="outline"
-                      className={sourceVariants[job.source]}
+                      className={queueColors[job.name] || "bg-slate-100 text-slate-700"}
                     >
-                      {job.source}
+                      {job.name}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge
+                      variant="secondary"
+                      className={stateColors[job.state] || "bg-gray-100"}
+                    >
+                      {job.state}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-sm">
+                    {job.priority}
                   </TableCell>
                   <TableCell className="text-right">
                     <span
                       className={
-                        job.attempts > 0 ? "text-red-600 font-medium" : ""
+                        job.retry_count > 0 ? "text-red-600 font-medium" : ""
                       }
                     >
-                      {job.attempts}/{job.max_attempts}
+                      {job.retry_count}/{job.retry_limit}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="truncate max-w-[200px] block">
-                            {job.to_email}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="font-medium">{job.to_email}</p>
-                          <p className="text-xs text-muted-foreground max-w-[300px] truncate">
-                            {job.subject}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                  <TableCell className="text-right text-muted-foreground text-sm">
+                    {job.created_on
+                      ? formatDistanceToNow(new Date(job.created_on), {
+                          addSuffix: true,
+                        })
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground text-sm">
-                    {formatDistanceToNow(new Date(job.created_at), {
-                      addSuffix: true,
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    <JobActions job={job} />
+                    {job.completed_on
+                      ? formatDistanceToNow(new Date(job.completed_on), {
+                          addSuffix: true,
+                        })
+                      : "-"}
                   </TableCell>
                 </TableRow>
               ))

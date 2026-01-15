@@ -163,7 +163,7 @@ INSERT INTO settings (key, value) VALUES
     ('worker.interval_email_sync', '15'),
     ('worker.interval_check_replies', '5'),
     ('worker.interval_queue_process', '30'),
-    ('worker.dry_run', 'false'),
+    ('worker.dry_run', 'true'),
     ('worker.debug', 'false'),
     ('worker.paused', 'false')
 ON CONFLICT (key) DO NOTHING;

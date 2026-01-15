@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { JobsDataTable } from "./_components/jobs-data-table";
+import { JobsTabs } from "./_components/jobs-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface QueueStats {
@@ -205,15 +205,8 @@ export default async function JobsPage() {
         />
       </div>
 
-      {/* Jobs table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Email Queue</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <JobsDataTable data={jobs} />
-        </CardContent>
-      </Card>
+      {/* Jobs tabs */}
+      <JobsTabs emailJobs={jobs} />
     </div>
   );
 }
