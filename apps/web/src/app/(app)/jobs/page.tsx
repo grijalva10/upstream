@@ -157,7 +157,7 @@ export default async function JobsPage() {
       : "default";
 
   return (
-    <div className="p-6">
+    <div className="p-6 pb-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Jobs</h1>
         <p className="text-sm text-muted-foreground">

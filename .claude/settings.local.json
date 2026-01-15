@@ -77,7 +77,14 @@
       "Bash(wsl --shutdown)",
       "Bash(tasklist:*)",
       "Bash(sort:*)",
-      "Bash(wsl --list:*)"
+      "Bash(wsl --list:*)",
+      "Bash(find:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(grep:*)",
+      "Bash(npx rimraf .next)",
+      "Bash(npx next lint:*)",
+      "Bash(npm run lint)",
+      "Bash(npx next build:*)"
     ]
   }
 }

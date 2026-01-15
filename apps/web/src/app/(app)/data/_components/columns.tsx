@@ -1,0 +1,395 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Column, Filter } from "./data-table";
+import type { Contact, Company, Property } from "./types";
+
+// Re-export types for convenience
+export type { Contact, Company, Property };
+
+// ============================================================================
+// SHARED HELPERS
+// ============================================================================
+
+/** Displays value or dash placeholder */
+function displayValue(v: unknown): string {
+  return v ? String(v) : "-";
+}
+
+/** Badge with color mapping */
+function coloredBadge(value: string, colors: Record<string, string>): React.ReactNode {
+  return <Badge className={colors[value]}>{value}</Badge>;
+}
+
+/** Buyer/Seller type badges - shared by contacts and companies */
+function buyerSellerBadges(isBuyer: boolean | null, isSeller: boolean | null): React.ReactNode {
+  if (!isBuyer && !isSeller) {
+    return <span className="text-muted-foreground">-</span>;
+  }
+  return (
+    <div className="flex gap-1 justify-center">
+      {isBuyer && <Badge variant="outline" className="text-xs">Buyer</Badge>}
+      {isSeller && <Badge variant="outline" className="text-xs">Seller</Badge>}
+    </div>
+  );
+}
+
+// ============================================================================
+// CONTACTS
+// ============================================================================
+
+const contactStatusColors: Record<string, string> = {
+  active: "bg-green-100 text-green-800",
+  dnc: "bg-red-100 text-red-800",
+  bounced: "bg-orange-100 text-orange-800",
+  bad_contact: "bg-gray-100 text-gray-500",
+};
+
+export const contactColumns: Column<Contact>[] = [
+  {
+    id: "name",
+    header: "Name",
+    accessorFn: (row) => [row.first_name, row.last_name].filter(Boolean).join(" ") || "-",
+    enableSorting: true,
+  },
+  {
+    id: "company",
+    header: "Company",
+    accessorFn: (row) => row.company?.name || "-",
+    className: "text-muted-foreground",
+  },
+  {
+    id: "title",
+    header: "Title",
+    accessorKey: "title",
+    defaultHidden: true,
+    cell: displayValue,
+  },
+  {
+    id: "email",
+    header: "Email",
+    accessorKey: "email",
+    cell: displayValue,
+  },
+  {
+    id: "phone",
+    header: "Phone",
+    accessorKey: "phone",
+    cell: displayValue,
+  },
+  {
+    id: "status",
+    header: "Status",
+    accessorKey: "status",
+    align: "center",
+    cell: (v) => coloredBadge(v as string, contactStatusColors),
+  },
+  {
+    id: "type",
+    header: "Type",
+    align: "center",
+    accessorFn: (row) => [row.is_buyer && "Buyer", row.is_seller && "Seller"].filter(Boolean).join(", "),
+    cell: (_, row) => buyerSellerBadges(row.is_buyer, row.is_seller),
+  },
+  {
+    id: "decision_maker",
+    header: "DM",
+    accessorKey: "is_decision_maker",
+    align: "center",
+    defaultHidden: true,
+    cell: (v) => v ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : "-",
+  },
+  {
+    id: "created_at",
+    header: "Created",
+    accessorKey: "created_at",
+    align: "right",
+    defaultHidden: true,
+    cell: (v) => new Date(v as string).toLocaleDateString(),
+  },
+];
+
+export const contactFilters: Filter[] = [
+  {
+    id: "status",
+    label: "Status",
+    options: [
+      { value: "all", label: "All" },
+      { value: "active", label: "Active" },
+      { value: "dnc", label: "DNC" },
+      { value: "bounced", label: "Bounced" },
+      { value: "bad_contact", label: "Bad Contact" },
+    ],
+  },
+  {
+    id: "type",
+    label: "Type",
+    options: [
+      { value: "all", label: "All" },
+      { value: "buyer", label: "Buyer" },
+      { value: "seller", label: "Seller" },
+    ],
+  },
+];
+
+// ============================================================================
+// COMPANIES
+// ============================================================================
+
+const companyStatusColors: Record<string, string> = {
+  new: "bg-gray-100 text-gray-800",
+  contacted: "bg-blue-100 text-blue-800",
+  engaged: "bg-yellow-100 text-yellow-800",
+  qualified: "bg-green-100 text-green-800",
+  dnc: "bg-red-100 text-red-800",
+};
+
+function websiteLink(url: string | null): React.ReactNode {
+  if (!url) return "-";
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+      {url.replace(/^https?:\/\//, "")}
+    </a>
+  );
+}
+
+export const companyColumns: Column<Company>[] = [
+  {
+    id: "name",
+    header: "Name",
+    accessorKey: "name",
+    enableSorting: true,
+    className: "font-medium",
+  },
+  {
+    id: "location",
+    header: "Location",
+    accessorFn: (row) => [row.city, row.state].filter(Boolean).join(", ") || "-",
+    className: "text-muted-foreground",
+  },
+  {
+    id: "phone",
+    header: "Phone",
+    accessorKey: "phone",
+    defaultHidden: true,
+    cell: displayValue,
+  },
+  {
+    id: "website",
+    header: "Website",
+    accessorKey: "website",
+    defaultHidden: true,
+    cell: (v) => websiteLink(v as string | null),
+  },
+  {
+    id: "status",
+    header: "Status",
+    accessorKey: "status",
+    align: "center",
+    cell: (v) => coloredBadge(v as string, companyStatusColors),
+  },
+  {
+    id: "type",
+    header: "Type",
+    align: "center",
+    accessorFn: (row) => [row.is_buyer && "Buyer", row.is_seller && "Seller"].filter(Boolean).join(", "),
+    cell: (_, row) => buyerSellerBadges(row.is_buyer, row.is_seller),
+  },
+  {
+    id: "properties",
+    header: "Properties",
+    accessorKey: "property_count",
+    align: "right",
+  },
+  {
+    id: "contacts",
+    header: "Contacts",
+    accessorKey: "contact_count",
+    align: "right",
+  },
+  {
+    id: "created_at",
+    header: "Created",
+    accessorKey: "created_at",
+    align: "right",
+    defaultHidden: true,
+    cell: (v) => new Date(v as string).toLocaleDateString(),
+  },
+];
+
+export const companyFilters: Filter[] = [
+  {
+    id: "status",
+    label: "Status",
+    options: [
+      { value: "all", label: "All" },
+      { value: "new", label: "New" },
+      { value: "contacted", label: "Contacted" },
+      { value: "engaged", label: "Engaged" },
+      { value: "qualified", label: "Qualified" },
+      { value: "dnc", label: "DNC" },
+    ],
+  },
+  {
+    id: "type",
+    label: "Type",
+    options: [
+      { value: "all", label: "All" },
+      { value: "buyer", label: "Buyer" },
+      { value: "seller", label: "Seller" },
+    ],
+  },
+];
+
+// ============================================================================
+// PROPERTIES
+// ============================================================================
+
+const propertyTypeColors: Record<string, string> = {
+  Industrial: "bg-slate-100 text-slate-800",
+  Office: "bg-blue-100 text-blue-800",
+  Retail: "bg-purple-100 text-purple-800",
+  Multifamily: "bg-green-100 text-green-800",
+  Land: "bg-amber-100 text-amber-800",
+  Hospitality: "bg-pink-100 text-pink-800",
+  Healthcare: "bg-cyan-100 text-cyan-800",
+  "Self Storage": "bg-orange-100 text-orange-800",
+};
+
+const buildingClassColors: Record<string, string> = {
+  A: "bg-green-100 text-green-800",
+  B: "bg-blue-100 text-blue-800",
+  C: "bg-gray-100 text-gray-600",
+};
+
+function formatNumber(n: number | null): string {
+  return n?.toLocaleString() ?? "-";
+}
+
+function formatAcres(n: number | null): string {
+  return n?.toFixed(2) ?? "-";
+}
+
+export const propertyColumns: Column<Property>[] = [
+  {
+    id: "address",
+    header: "Address",
+    accessorKey: "address",
+    enableSorting: true,
+    className: "font-medium",
+    cell: displayValue,
+  },
+  {
+    id: "location",
+    header: "Location",
+    accessorFn: (row) => [row.city, row.state].filter(Boolean).join(", ") || "-",
+    className: "text-muted-foreground",
+  },
+  {
+    id: "zip",
+    header: "ZIP",
+    accessorKey: "zip",
+    defaultHidden: true,
+    cell: displayValue,
+  },
+  {
+    id: "property_type",
+    header: "Type",
+    accessorKey: "property_type",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, propertyTypeColors) : "-",
+  },
+  {
+    id: "building_class",
+    header: "Class",
+    accessorKey: "building_class",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, buildingClassColors) : "-",
+  },
+  {
+    id: "sqft",
+    header: "SqFt",
+    accessorKey: "building_size_sqft",
+    align: "right",
+    cell: (v) => formatNumber(v as number | null),
+  },
+  {
+    id: "lot_size",
+    header: "Lot (ac)",
+    accessorKey: "lot_size_acres",
+    align: "right",
+    defaultHidden: true,
+    cell: (v) => formatAcres(v as number | null),
+  },
+  {
+    id: "year_built",
+    header: "Year",
+    accessorKey: "year_built",
+    align: "right",
+    enableSorting: true,
+    cell: displayValue,
+  },
+  {
+    id: "units",
+    header: "Units",
+    accessorKey: "units",
+    align: "right",
+    defaultHidden: true,
+    cell: displayValue,
+  },
+  {
+    id: "floors",
+    header: "Floors",
+    accessorKey: "floors",
+    align: "right",
+    defaultHidden: true,
+    cell: displayValue,
+  },
+  {
+    id: "costar_id",
+    header: "CoStar ID",
+    accessorKey: "costar_property_id",
+    defaultHidden: true,
+    className: "font-mono text-xs text-muted-foreground",
+    cell: displayValue,
+  },
+];
+
+export const propertyFilters: Filter[] = [
+  {
+    id: "property_type",
+    label: "Type",
+    options: [
+      { value: "all", label: "All" },
+      { value: "Industrial", label: "Industrial" },
+      { value: "Office", label: "Office" },
+      { value: "Retail", label: "Retail" },
+      { value: "Multifamily", label: "Multifamily" },
+      { value: "Land", label: "Land" },
+      { value: "Hospitality", label: "Hospitality" },
+      { value: "Healthcare", label: "Healthcare" },
+      { value: "Self Storage", label: "Self Storage" },
+    ],
+  },
+  {
+    id: "building_class",
+    label: "Class",
+    options: [
+      { value: "all", label: "All" },
+      { value: "A", label: "Class A" },
+      { value: "B", label: "Class B" },
+      { value: "C", label: "Class C" },
+    ],
+  },
+  {
+    id: "size",
+    label: "Size",
+    options: [
+      { value: "all", label: "All" },
+      { value: "small", label: "< 10K sqft" },
+      { value: "medium", label: "10K - 50K" },
+      { value: "large", label: "50K - 100K" },
+      { value: "xlarge", label: "> 100K sqft" },
+    ],
+  },
+];

@@ -42,7 +42,7 @@ export default async function ClientsPage() {
     .limit(50);
 
   return (
-    <div className="p-6">
+    <div className="p-6 pb-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Clients</h1>

@@ -6,7 +6,7 @@ import { StalledDealsCard } from "./_components/stalled-deals-card";
 import { PipelineSnapshot } from "./_components/pipeline-snapshot";
 import { DealsReadyCard } from "./_components/deals-ready-card";
 import { AgentActivityTimeline } from "./_components/agent-activity";
-import { ClassificationType } from "@/components/classification-badge";
+import { Classification } from "@/components/classification-badge";
 
 async function getDashboardData() {
   const supabase = await createClient();
@@ -38,26 +38,28 @@ async function getDashboardData() {
       .lt("classification_confidence", 0.7)
       .eq("needs_human_review", true),
 
-    // Calls scheduled for today
+    // Calls scheduled for today (from new calls table)
     supabase
-      .from("tasks")
+      .from("calls")
       .select(
         `
         id,
-        due_date,
-        contacts (
-          name
+        scheduled_at,
+        contact:contacts (
+          first_name,
+          last_name
         ),
-        properties (
-          address
+        deal:deals (
+          property:properties (
+            address
+          )
         )
       `
       )
-      .eq("type", "call_reminder")
-      .eq("status", "pending")
-      .gte("due_date", today)
-      .lt("due_date", new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())
-      .order("due_date"),
+      .eq("status", "scheduled")
+      .gte("scheduled_at", today)
+      .lt("scheduled_at", new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString())
+      .order("scheduled_at"),
 
     // New replies grouped by classification
     supabase
@@ -121,16 +123,18 @@ async function getDashboardData() {
       .gte("created_at", yesterday),
   ]);
 
-  // Process calls
+  // Process calls from new calls table
   const calls =
-    callsResult.data?.map((task: any) => ({
-      id: task.id,
-      time: new Date(task.due_date).toLocaleTimeString("en-US", {
+    callsResult.data?.map((call: any) => ({
+      id: call.id,
+      time: new Date(call.scheduled_at).toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
       }),
-      contactName: task.contacts?.name || "Unknown",
-      propertyAddress: task.properties?.address || "No property",
+      contactName: call.contact
+        ? `${call.contact.first_name} ${call.contact.last_name}`
+        : "Unknown",
+      propertyAddress: call.deal?.property?.address || "No property",
     })) || [];
 
   // Process replies by classification type
@@ -140,7 +144,7 @@ async function getDashboardData() {
     replyCounts[type] = (replyCounts[type] || 0) + 1;
   });
   const replies = Object.entries(replyCounts).map(([type, count]) => ({
-    type: type as ClassificationType,
+    type: type as Classification,
     count,
   }));
 
@@ -266,7 +270,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="p-6">
+    <div className="p-6 pb-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
         <p className="text-sm text-muted-foreground">{today}</p>

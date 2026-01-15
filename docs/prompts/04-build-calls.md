@@ -1,0 +1,265 @@
+# Build Calls Page
+
+## Context
+
+You're building the Upstream CRE deal sourcing system. Read the full spec at `docs/upstream-v2-spec.md`.
+
+**Build order:** Data (masters) → Searches → Campaigns → Pipeline → **Calls** → Dashboard
+
+We're building **Calls** - scheduled calls with AI-generated prep docs.
+
+## What Calls Does
+
+1. Calls are scheduled when a prospect says "let's talk" or user manually schedules
+2. AI generates a call prep document with property info, conversation history, talking points
+3. User can view today's calls, upcoming calls, and past calls
+4. After call, user logs outcome and action items
+
+## Database
+
+The migration `supabase/migrations/00017_upstream_v2_schema.sql` creates:
+
+```sql
+-- calls (scheduled calls with prep)
+calls:
+  id UUID PRIMARY KEY,
+  deal_id UUID REFERENCES deals(id),
+  contact_id UUID REFERENCES contacts(id),
+
+  -- Scheduling
+  scheduled_at TIMESTAMPTZ NOT NULL,
+  duration_minutes INT DEFAULT 30,
+
+  -- Status: scheduled → completed → no_show → rescheduled → cancelled
+  status TEXT DEFAULT 'scheduled',
+
+  -- Content
+  call_prep_md TEXT, -- AI-generated prep doc
+  notes_md TEXT, -- post-call notes
+  outcome TEXT, -- qualified, needs_followup, not_interested, reschedule
+  action_items JSONB, -- array of action items
+
+  created_at, updated_at
+```
+
+## Tasks
+
+### 1. Create Calls List Page
+
+Create `apps/web/src/app/(app)/calls/page.tsx`:
+
+**Today's Calls Section:**
+- Large cards for each call scheduled today
+- Shows: Time, Contact name, Company, Property, Deal ID
+- "View Prep" button
+- "Start Call" button (opens call detail)
+- Color-coded by status (upcoming = blue, in progress = green, completed = gray)
+
+**Upcoming Section:**
+- Table view of future calls
+- Columns: Date/Time, Contact, Company, Property, Deal, Status, Actions
+- Grouped by date
+
+**Past Calls Section:**
+- Table view of completed calls
+- Columns: Date, Contact, Company, Outcome, Duration, Actions
+- Filter by outcome
+- "Add Notes" if notes_md is empty
+
+**Top Actions:**
+- "Schedule Call" button
+- Filter by status
+- Date range picker
+
+### 2. Create Call Detail / Prep Page
+
+Create `apps/web/src/app/(app)/calls/[id]/page.tsx`:
+
+**Header:**
+- Contact name, Company
+- Property address
+- Scheduled time + duration
+- Status badge
+- "Start Call" / "Complete Call" button
+
+**Two-column layout:**
+
+Left column (60%):
+
+**Call Prep Card:**
+```markdown
+## Property Overview
+- 123 Industrial Way, Phoenix AZ
+- 50,000 SF Industrial, Class B
+- Built 2005
+- Owner: ABC Holdings LLC
+
+## Conversation History
+- Jan 5: Email 1 sent
+- Jan 8: Email 2 sent
+- Jan 10: Reply received - "interested, give me a call"
+- Jan 11: Call scheduled
+
+## What We Know
+- Asking: $5M (mentioned in email)
+- Motivation: Unknown
+- Timeline: Unknown
+
+## Talking Points
+1. Confirm they are the decision maker
+2. Understand motivation for selling
+3. Get timeline expectations
+4. Discuss asking price / NOI
+5. Offer to send NDA if they want formal process
+
+## Questions to Ask
+- What's driving the decision to sell?
+- What timeline are you looking at?
+- Have you had any other offers?
+- Is there a loan on the property?
+```
+
+Prep doc is AI-generated in markdown, displayed with formatting.
+
+**Post-Call Notes:**
+- Textarea for notes (markdown supported)
+- Save as you type
+
+Right column (40%):
+
+**Deal Quick View:**
+- Link to deal in pipeline
+- Current qualification status
+- Qualification checklist (read-only)
+
+**Action Items:**
+- Checklist of action items
+- Add new action item
+- Mark complete
+- Each has text + optional due date
+
+**Outcome Selector:** (after call)
+- Dropdown: qualified, needs_followup, not_interested, reschedule
+- If reschedule: date/time picker for new call
+
+### 3. Schedule Call Dialog
+
+Create `apps/web/src/app/(app)/calls/_components/schedule-call-dialog.tsx`:
+
+Can be opened from:
+- Calls page "Schedule Call" button
+- Deal detail page
+- Inbox message actions
+
+Fields:
+- Contact (autocomplete from contacts table, or pre-filled)
+- Deal (optional, autocomplete)
+- Date picker
+- Time picker
+- Duration (15, 30, 45, 60 min dropdown)
+- Notes (optional)
+
+On create:
+- Creates call record
+- Triggers call prep generation (queue job)
+- If deal exists, adds activity to deal timeline
+
+### 4. Create API Routes
+
+`apps/web/src/app/api/calls/route.ts`:
+- GET: List calls with filters (date range, status)
+- POST: Create new call
+
+`apps/web/src/app/api/calls/[id]/route.ts`:
+- GET: Call details with contact, company, deal info
+- PATCH: Update notes, status, outcome
+
+`apps/web/src/app/api/calls/[id]/prep/route.ts`:
+- GET: Get call prep (or generate if not exists)
+- POST: Regenerate call prep
+
+`apps/web/src/app/api/calls/[id]/action-items/route.ts`:
+- GET: List action items
+- POST: Add action item
+- PATCH: Update action item
+
+`apps/web/src/app/api/calls/today/route.ts`:
+- GET: Calls scheduled for today
+
+### 5. Call Prep Generation
+
+The call prep is generated by an AI agent (schedule-agent). For now, create placeholder that returns:
+
+```typescript
+async function generateCallPrep(callId: string) {
+  const call = await getCallWithDetails(callId);
+
+  // For now, generate simple template
+  // Later: queue job for AI agent to enhance
+  const prep = `
+## Property Overview
+- ${call.property.address}, ${call.property.city} ${call.property.state}
+- ${call.property.sqft?.toLocaleString()} SF ${call.property.property_type}
+- Owner: ${call.company.name}
+
+## Contact
+- ${call.contact.first_name} ${call.contact.last_name}
+- ${call.contact.title || 'Title unknown'}
+- ${call.contact.phone}
+- ${call.contact.email}
+
+## Conversation History
+${await getConversationHistory(call.contact_id)}
+
+## Talking Points
+1. Confirm they are the decision maker
+2. Understand motivation for selling
+3. Get timeline expectations
+4. Discuss asking price / NOI
+5. Ask about existing loans
+
+## Key Questions
+- What's driving the decision to sell?
+- What timeline are you looking at?
+- Is there a loan on the property?
+  `;
+
+  return prep;
+}
+```
+
+## Existing Patterns
+
+Look at:
+- `apps/web/src/app/(app)/jobs/page.tsx` - Table with data
+- `apps/web/src/app/(app)/pipeline/[id]/page.tsx` - Detail page layout (once built)
+
+## UI Components
+
+- `@/components/ui/card`
+- `@/components/ui/badge`
+- `@/components/ui/button`
+- `@/components/ui/textarea`
+- `@/components/ui/select`
+- `@/components/ui/checkbox`
+- `@/components/ui/calendar` (for date picker)
+- `@/components/ui/dialog`
+- Markdown renderer (consider `react-markdown`)
+
+## Don't
+
+- Don't integrate with actual calendar (Google Calendar, Outlook) yet
+- Don't implement call reminders/notifications yet
+- Don't implement AI call prep generation (just template for now)
+
+## Verify
+
+After building:
+1. Can navigate to /calls from sidebar
+2. See today's calls prominently displayed
+3. Can schedule new call
+4. Can view call prep document
+5. Can complete call and log outcome
+6. Can add action items
+7. Past calls show with notes/outcome
+8. Can reschedule a call

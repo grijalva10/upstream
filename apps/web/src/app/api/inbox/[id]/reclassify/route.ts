@@ -18,15 +18,14 @@ export async function POST(
 
     const supabase = await createClient();
 
-    // Update the email classification
+    // Update the inbox message classification
     const { error } = await supabase
-      .from("synced_emails")
+      .from("inbox_messages")
       .update({
         classification,
         classification_confidence: 1.0, // Human override = full confidence
-        needs_human_review: false,
-        classified_at: new Date().toISOString(),
-        classified_by: "human",
+        classification_reasoning: "Manually reclassified by user",
+        status: "reviewed",
       })
       .eq("id", id);
 

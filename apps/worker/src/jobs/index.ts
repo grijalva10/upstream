@@ -6,6 +6,7 @@ import { handleSendEmail } from './send-email.job.js';
 import { handleClassify } from './classify.job.js';
 import { handleProcessQueue } from './process-queue.job.js';
 import { handleCoStarQuery } from './costar-query.job.js';
+import { handleGenerateQueries } from './generate-queries.job.js';
 
 const QUEUES = [
   'email-sync',
@@ -14,6 +15,7 @@ const QUEUES = [
   'send-email',
   'classify-email',
   'costar-query',
+  'generate-queries',
 ];
 
 interface JobCallbacks {
@@ -102,6 +104,13 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
     'costar-query',
     { teamSize: 1, teamConcurrency: 1 },
     wrapHandler('costar-query', handleCoStarQuery)
+  );
+
+  // Generate queries from buyer criteria (triggered by new search)
+  await boss.work(
+    'generate-queries',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('generate-queries', (job) => handleGenerateQueries(job, boss))
   );
 }
 

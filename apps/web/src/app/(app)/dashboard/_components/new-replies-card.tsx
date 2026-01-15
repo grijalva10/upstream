@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { ClassificationBadge, ClassificationType } from "@/components/classification-badge";
+import { ClassificationBadge, Classification } from "@/components/classification-badge";
 
 interface RepliesByType {
-  type: ClassificationType;
+  type: Classification;
   count: number;
 }
 
@@ -32,7 +32,10 @@ export function NewRepliesCard({ replies, total }: NewRepliesCardProps) {
         ) : (
           <div className="flex flex-wrap gap-2">
             {replies.map(({ type, count }) => (
-              <ClassificationBadge key={type} type={type} count={count} />
+              <div key={type} className="flex items-center gap-1">
+                <ClassificationBadge type={type} size="sm" />
+                <span className="text-sm font-medium">{count}</span>
+              </div>
             ))}
           </div>
         )}

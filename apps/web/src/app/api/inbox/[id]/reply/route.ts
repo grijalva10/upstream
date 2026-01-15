@@ -18,28 +18,39 @@ export async function POST(
 
     const supabase = await createClient();
 
-    // Get the original email to extract context
-    const { data: email, error: emailError } = await supabase
-      .from("synced_emails")
-      .select("from_email, from_name, matched_company_id, matched_contact_id")
+    // Get the original message to extract context
+    const { data: message, error: messageError } = await supabase
+      .from("inbox_messages")
+      .select("from_email, from_name, contact_id, property_id, enrollment_id")
       .eq("id", id)
       .single();
 
-    if (emailError || !email) {
+    if (messageError || !message) {
       return NextResponse.json(
-        { error: "Email not found" },
+        { error: "Message not found" },
         { status: 404 }
       );
     }
 
+    // Get company_id from contact if available
+    let companyId: string | null = null;
+    if (message.contact_id) {
+      const { data: contact } = await supabase
+        .from("contacts")
+        .select("company_id")
+        .eq("id", message.contact_id)
+        .single();
+      companyId = contact?.company_id || null;
+    }
+
     // Create email draft for approval
     const { error: draftError } = await supabase.from("email_drafts").insert({
-      to_email: email.from_email,
-      to_name: email.from_name,
+      to_email: message.from_email,
+      to_name: message.from_name,
       subject: subject || "Re:",
       body: body.trim(),
-      company_id: email.matched_company_id,
-      contact_id: email.matched_contact_id,
+      company_id: companyId,
+      contact_id: message.contact_id,
       in_reply_to_email_id: id,
       draft_type: "qualification",
       status: "pending",

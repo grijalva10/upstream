@@ -4,16 +4,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
-  CheckCircle,
-  Kanban,
-  ListTodo,
+  Search,
+  Send,
   Inbox,
-  Users,
+  Kanban,
+  Phone,
+  Database,
+  Layers,
   Settings,
   LogOut,
-  Activity,
-  Target,
-  Layers,
 } from "lucide-react";
 import {
   Tooltip,
@@ -26,14 +25,13 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Command Center" },
-  { href: "/approvals", icon: CheckCircle, label: "Approvals" },
-  { href: "/pipeline", icon: Kanban, label: "Pipeline" },
-  { href: "/tasks", icon: ListTodo, label: "Tasks" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/searches", icon: Search, label: "Searches" },
+  { href: "/campaigns", icon: Send, label: "Campaigns" },
   { href: "/inbox", icon: Inbox, label: "Inbox" },
-  { href: "/clients", icon: Users, label: "Clients" },
-  { href: "/criteria", icon: Target, label: "Criteria" },
-  { href: "/orchestrator", icon: Activity, label: "Orchestrator" },
+  { href: "/pipeline", icon: Kanban, label: "Pipeline" },
+  { href: "/calls", icon: Phone, label: "Calls" },
+  { href: "/data", icon: Database, label: "Data" },
   { href: "/jobs", icon: Layers, label: "Jobs" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
