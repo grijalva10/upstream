@@ -310,11 +310,26 @@ Use 2-3 per email, rotate across sequence:
 
 ## Urgency Without Being Pushy
 
+**Use soft timeframes, not hard dates:**
+```
+✅ "end of Q1"
+✅ "early February"
+✅ "before spring"
+✅ "over the next few weeks"
+✅ "wrapping up their Q1 acquisitions"
+
+❌ "February 25th"      (too specific, goes stale)
+❌ "March 3rd"          (feels arbitrary)
+❌ "by the 15th"        (expires quickly)
+```
+
+Why: Hard dates go stale if the campaign runs for weeks. Soft timeframes stay evergreen while still creating urgency.
+
 **Good urgency** (real, explains why):
 - "Buyer has capital to deploy before Q2"
-- "1031 exchange with a June deadline"
+- "1031 exchange with a mid-year deadline"
 - "They're evaluating three properties this week"
-- "Market timing - rates expected to shift"
+- "Looking to close something by end of February"
 
 **Bad urgency** (fake, pressuring):
 - "Act now or lose out!"

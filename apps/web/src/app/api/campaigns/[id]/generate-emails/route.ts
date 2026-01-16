@@ -113,7 +113,7 @@ Buyer Profile:
 - Capital: $${Number(buyerContext.capital).toLocaleString()}
 - Close timeline: ${buyerContext.closeTimeline}
 - Decision maker: ${buyerContext.decisionMaker}
-${buyerContext.deadline ? `- 1031 deadline: ${buyerContext.deadline}` : ""}
+${buyerContext.deadline ? `- 1031 exchange: yes (use soft timeframe like "end of Q1" or "early spring" - NOT the exact date)` : ""}
 
 Search Criteria:
 - Markets: ${Array.isArray(searchContext.markets) ? searchContext.markets.join(", ") : "Not specified"}
