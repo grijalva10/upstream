@@ -294,17 +294,33 @@ Every email must include multiple specificity signals:
 
 ## Credibility Signals That Work
 
-Use 2-3 per email, rotate across sequence:
+Use 2-3 per email, rotate across sequence.
+
+**The goal:** Prove they're funded, deadline-driven, and won't waste time.
+
+**Use soft credibility, not hard numbers:**
+```
+✅ "well-capitalized"
+✅ "experienced buyer"
+✅ "serious, no games"
+✅ "can move quickly"
+✅ "not going to retrade you"
+
+❌ "closed 25 deals"     (too specific, sounds scripted)
+❌ "$25M in capital"     (exact numbers feel rehearsed)
+❌ "15 transactions"     (nobody talks like this)
+```
 
 | Signal | Example Phrasing |
 |--------|------------------|
-| Capital amount | "$25M to deploy" / "$25 million in capital" |
-| Track record | "closed 15 deals in the IE" / "active in your market" |
-| Speed | "can close in 30 days" / "proven 30-day close capability" |
-| Certainty | "all-cash, no financing contingency" |
+| Funded | "well-capitalized" / "capital ready to deploy" |
+| Experienced | "experienced buyer" / "knows how to get deals done" |
+| No BS | "serious buyer, no games" / "not going to waste your time" |
+| Speed | "can close quickly" / "typically around 30 days" |
+| Certainty | "all-cash, no financing contingency" / "won't retrade" |
 | Discretion | "confidential, off-market process" |
-| Broker affiliation | "I'm with Lee & Associates" (implies legitimacy) |
-| Exchange context | "1031 buyer with June deadline" (explains urgency) |
+| Broker credibility | "I'm with Lee & Associates" |
+| Deadline | "1031 buyer looking to close by end of Q1" |
 
 ---
 

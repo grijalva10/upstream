@@ -109,11 +109,11 @@ Lee & Associates | Newport Beach, CA
 Generate a 3-email sequence for:
 
 Buyer Profile:
-- Deals completed: ${buyerContext.dealsCompleted}
-- Capital: $${Number(buyerContext.capital).toLocaleString()}
-- Close timeline: ${buyerContext.closeTimeline}
-- Decision maker: ${buyerContext.decisionMaker}
-${buyerContext.deadline ? `- 1031 exchange: yes (use soft timeframe like "end of Q1" or "early spring" - NOT the exact date)` : ""}
+- Well-capitalized, experienced buyer
+- Can close quickly (around 30 days)
+- Single decision maker, no committees
+- Serious, won't retrade or waste time
+${buyerContext.deadline ? `- 1031 exchange buyer (use soft timeframe like "end of Q1" - NOT exact dates)` : ""}
 
 Search Criteria:
 - Markets: ${Array.isArray(searchContext.markets) ? searchContext.markets.join(", ") : "Not specified"}
