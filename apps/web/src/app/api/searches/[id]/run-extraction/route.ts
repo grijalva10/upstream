@@ -196,6 +196,12 @@ export async function POST(
     // Handle both response formats: {contacts: [...]} or {data: {contacts: [...]}}
     const contacts: ExtractedContact[] = result.contacts || result.data?.contacts || [];
 
+    // DEBUG: Log received contacts
+    console.log(`[extraction] Received ${contacts.length} contacts from CoStar`);
+    if (contacts.length > 0) {
+      console.log(`[extraction] First contact:`, JSON.stringify(contacts[0], null, 2));
+    }
+
     // Upsert extracted data
     const stats = await upsertExtractedData(supabase, id, contacts);
 
@@ -241,6 +247,7 @@ async function upsertExtractedData(
   const uniqueCompanies = new Map<number, ExtractedContact>();
 
   for (const contact of contacts) {
+    console.log(`[extraction] Contact property_id=${contact.property_id} (type: ${typeof contact.property_id}), company_id=${contact.company_id}`);
     if (contact.property_id && !uniqueProperties.has(contact.property_id)) {
       uniqueProperties.set(contact.property_id, contact);
     }
@@ -248,6 +255,8 @@ async function upsertExtractedData(
       uniqueCompanies.set(contact.company_id, contact);
     }
   }
+
+  console.log(`[extraction] uniqueProperties: ${uniqueProperties.size}, uniqueCompanies: ${uniqueCompanies.size}`);
 
   // 1. Upsert properties with all available fields
   for (const [costarId, contact] of uniqueProperties) {
@@ -261,7 +270,7 @@ async function upsertExtractedData(
 
       // Size/age
       building_size_sqft: parseSqft(contact.building_size),
-      lot_size_acres: parseFloat(String(contact.land_size)) || null,
+      lot_size_acres: parsePrice(contact.land_size), // handles commas in "1,234.56"
       year_built: parseYear(contact.year_built),
 
       // Location fields
@@ -297,13 +306,13 @@ async function upsertExtractedData(
 
       // Sale info
       last_sale_date: parseDate(contact.last_sale_date) || null,
-      last_sale_price: contact.last_sale_price || null,
+      last_sale_price: parsePrice(contact.last_sale_price),
 
       // Management
       property_manager: contact.property_manager || null,
 
       // Leasing
-      available_sf: contact.available_sf || null,
+      available_sf: parseSqft(contact.available_sf),
 
       last_seen_at: new Date().toISOString(),
     };
@@ -447,12 +456,21 @@ async function upsertExtractedData(
   };
 }
 
-function parseSqft(size: string | number | null): number | null {
+function parseSqft(size: string | number | null | undefined): number | null {
   if (!size) return null;
   if (typeof size === "number") return size;
   // Remove commas and parse "103,440" -> 103440
   const cleaned = size.replace(/[^0-9.]/g, "");
   const parsed = parseInt(cleaned, 10);
+  return isNaN(parsed) ? null : parsed;
+}
+
+function parsePrice(price: string | number | null | undefined): number | null {
+  if (!price) return null;
+  if (typeof price === "number") return price;
+  // Remove $, commas, and other non-numeric chars: "$9,500,000" -> 9500000
+  const cleaned = price.replace(/[^0-9.]/g, "");
+  const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? null : parsed;
 }
 

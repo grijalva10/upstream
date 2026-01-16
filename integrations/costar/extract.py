@@ -242,8 +242,8 @@ class ContactExtractor:
 
             # Build base property data with all available fields
             base = {
-                # Core identifiers
-                "property_id": header.get("propertyId"),
+                # Core identifiers - use function arg as fallback since GraphQL may not return it
+                "property_id": header.get("propertyId") or property_id,
                 "property_address": header.get("addressHeader"),
 
                 # From search result - comprehensive property data

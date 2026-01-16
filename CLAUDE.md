@@ -271,3 +271,20 @@ This enables Claude to query the database directly via MCP tools.
 ## User Preferences
 
 - **Outbound emails**: Do NOT include signature - Outlook auto-adds it
+
+## Critical Rules
+
+### Database Protection
+**NEVER reset the database without:**
+1. Creating a backup first that can be used to restore
+2. Explicitly asking the user for permission before resetting
+
+To backup the database:
+```bash
+pg_dump postgresql://postgres:postgres@127.0.0.1:55322/postgres > backup_$(date +%Y%m%d_%H%M%S).sql
+```
+
+To restore from backup:
+```bash
+psql postgresql://postgres:postgres@127.0.0.1:55322/postgres < backup_YYYYMMDD_HHMMSS.sql
+```
