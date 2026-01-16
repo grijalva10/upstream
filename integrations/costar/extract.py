@@ -85,11 +85,11 @@ class ContactExtractor:
         require_phone: bool = False,
         include_parcel: bool = False,
         include_market: bool = False,
-        concurrency: int = 3,  # Max parallel requests (conservative for safety)
-        min_delay: float = 0.5,  # Min delay between requests (evasion)
-        max_delay: float = 2.0,  # Max delay between requests (evasion)
-        burst_size: int = 50,  # Properties before taking a break
-        burst_delay: float = 5.0,  # Seconds to pause between bursts
+        concurrency: int = 8,  # Max parallel requests (aggressively safe)
+        min_delay: float = 0.15,  # Min delay between requests
+        max_delay: float = 0.4,  # Max delay between requests
+        burst_size: int = 150,  # Properties before taking a break
+        burst_delay: float = 3.0,  # Seconds to pause between bursts
     ):
         self.client = client
         self.require_email = require_email
@@ -133,6 +133,14 @@ class ContactExtractor:
             pins = await self.client.search_properties(payload)
             total_pins += len(pins)
 
+            # DEBUG: Log first pin structure to verify field names
+            if pins and i == 0:
+                first_pin = pins[0]
+                logger.info(f"DEBUG: First pin keys: {list(first_pin.keys())}")
+                logger.info(f"DEBUG: First pin City={first_pin.get('City')}, StateCode={first_pin.get('StateCode')}")
+                logger.info(f"DEBUG: First pin TrueOwner={first_pin.get('TrueOwner')}")
+                logger.info(f"DEBUG: include_parcel={self.include_parcel}")
+
             # Apply max_properties limit across all payloads
             if max_properties:
                 remaining = max_properties - properties_processed
@@ -147,10 +155,12 @@ class ContactExtractor:
 
                 # Create tasks for parallel execution
                 tasks = []
-                for pin in batch:
-                    property_id = pin.get("i")
+                for prop in batch:
+                    # Handle both formats: PropertyId from properties array, or i from Pins
+                    property_id = prop.get("PropertyId") or prop.get("i")
                     if property_id:
-                        tasks.append(self._extract_property_contacts_with_evasion(property_id, market_ids))
+                        # Pass full property data for rich extraction
+                        tasks.append(self._extract_property_contacts_with_evasion(property_id, market_ids, prop))
 
                 # Execute batch in parallel with semaphore limiting
                 results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -182,7 +192,8 @@ class ContactExtractor:
     async def _extract_property_contacts_with_evasion(
         self,
         property_id: int,
-        market_ids: Optional[List[int]] = None
+        market_ids: Optional[List[int]] = None,
+        search_result: Optional[Dict] = None
     ) -> List[Dict]:
         """Wrapper that adds rate limiting and variable delays for evasion."""
         async with self._semaphore:
@@ -190,10 +201,18 @@ class ContactExtractor:
             delay = random.uniform(self.min_delay, self.max_delay)
             await asyncio.sleep(delay)
 
-            return await self._extract_property_contacts(property_id, market_ids)
+            return await self._extract_property_contacts(property_id, market_ids, search_result)
 
-    async def _extract_property_contacts(self, property_id: int, market_ids: Optional[List[int]] = None) -> List[Dict]:
+    async def _extract_property_contacts(
+        self,
+        property_id: int,
+        market_ids: Optional[List[int]] = None,
+        search_result: Optional[Dict] = None
+    ) -> List[Dict]:
         try:
+            # DEBUG: Log what search_result we received
+            logger.debug(f"Property {property_id}: search_result has {len(search_result) if search_result else 0} keys")
+
             data = await self.client.graphql(CONTACTS_QUERY, {"propertyId": property_id})
 
             prop_detail = data.get("propertyDetail", {})
@@ -210,17 +229,81 @@ class ContactExtractor:
             if not true_owner:
                 return []
 
-            # Build base property data (without parcel yet)
+            # Extract rich data from search result (list-properties response)
+            sr = search_result or {}
+
+            # TrueOwner is an array in the properties response
+            true_owner_list = sr.get("TrueOwner") or []
+            sr_true_owner = true_owner_list[0] if isinstance(true_owner_list, list) and true_owner_list else (true_owner_list if isinstance(true_owner_list, dict) else {})
+
+            # DEBUG: Log extracted values
+            if sr:
+                logger.debug(f"Property {property_id}: SR City={sr.get('City')}, State={sr.get('StateCode')}, TrueOwner={sr_true_owner}")
+
+            # Build base property data with all available fields
             base = {
+                # Core identifiers
                 "property_id": header.get("propertyId"),
                 "property_address": header.get("addressHeader"),
-                "property_type": header.get("propertyType"),
-                "building_size": header.get("buildingSize"),
-                "land_size": header.get("landSize"),
-                "year_built": header.get("yearBuilt"),
+
+                # From search result - comprehensive property data
+                "property_type": sr.get("PropertyType") or header.get("propertyType"),
+                "property_type_id": sr.get("PropertyTypeId"),
+                "secondary_type": sr.get("SecondaryType"),
+                "building_size": sr.get("BuildingAreaTotal") or sr.get("BuildingSF") or header.get("buildingSize"),
+                "land_size": sr.get("LandArea") or header.get("landSize"),
+                "year_built": sr.get("YearBuilt") or header.get("yearBuilt"),
+
+                # Location fields
+                "city": sr.get("City"),
+                "state_code": sr.get("StateCode"),
+                "postal_code": sr.get("PostalCode"),
+                "county": sr.get("County"),
+                "submarket": sr.get("Submarket"),
+                "submarket_cluster": sr.get("SubmarketCluster"),
+
+                # Building characteristics
+                "building_class": sr.get("BuildingClass"),
+                "building_status": sr.get("BuildingStatus"),
+                "star_rating": sr.get("StarRating"),
+                "tenancy": sr.get("Tenancy"),
+                "number_of_stories": sr.get("NumberOfStories"),
+                "ceiling_height": sr.get("CeilingHeight"),
+                "zoning": sr.get("Zoning"),
+
+                # Parking
+                "parking_ratio": sr.get("ParkingRatio"),
+                "parking_spaces": sr.get("ParkingSpaces"),
+
+                # Industrial-specific
+                "docks": sr.get("Docks"),
+                "drive_ins": sr.get("DriveIns"),
+                "power": sr.get("Power"),
+                "rail": sr.get("Rail"),
+                "crane": sr.get("Crane"),
+
+                # Multifamily-specific
+                "num_of_beds": sr.get("NumOfBeds"),
+
+                # Sale info
+                "last_sale_date": sr.get("LastSaleDate"),
+                "last_sale_price": sr.get("LastSalePrice"),
+
+                # Management
+                "property_manager": sr.get("PropertyManager"),
+
+                # Leasing info
+                "percent_leased": sr.get("PercentLeased"),
+                "available_sf": sr.get("AvailableSF"),
+
+                # Market
                 "market_id": market_ids[0] if market_ids else None,
-                "company_id": true_owner.get("companyId"),
-                "company_name": true_owner.get("name"),
+
+                # Company/Owner data from search result TrueOwner (fields are lowercase)
+                "company_id": sr_true_owner.get("id") or true_owner.get("companyId"),
+                "company_name": sr_true_owner.get("name") or true_owner.get("name"),
+                "company_costar_key": sr_true_owner.get("key"),
+                "company_type": sr_true_owner.get("type"),
                 "company_address": true_owner.get("address"),
                 "company_phone": self._format_phones(true_owner.get("phoneNumbers")),
             }
@@ -240,10 +323,14 @@ class ContactExtractor:
 
             # Only fetch parcel data if we have valid contacts and parcel is requested
             if self.include_parcel:
+                logger.info(f"Property {property_id}: Fetching parcel data...")
                 parcel_data = await self._get_parcel_data(property_id)
+                logger.info(f"Property {property_id}: Parcel data = {parcel_data}")
                 # Merge parcel data into each contact
                 for _, contact in valid_contacts:
                     contact.update(parcel_data)
+            else:
+                logger.debug(f"Property {property_id}: include_parcel={self.include_parcel}, skipping parcel fetch")
 
             return [contact for _, contact in valid_contacts]
 
@@ -281,8 +368,8 @@ class ContactExtractor:
 
     async def _get_parcel_data(self, property_id: int) -> Dict:
         try:
-            # Small delay between parcel requests (evasion)
-            await asyncio.sleep(random.uniform(0.1, 0.3))
+            # Minimal delay between parcel requests
+            await asyncio.sleep(random.uniform(0.05, 0.15))
 
             pins_data = await self.client.graphql(PARCEL_PINS_QUERY, {"propertyId": property_id})
             parcel_pins = pins_data.get("parcelPinsFromProperty", {}).get("parcelPins", [])
@@ -292,8 +379,8 @@ class ContactExtractor:
 
             parcel_id = str(parcel_pins[0]["id"])
 
-            # Another small delay before details request
-            await asyncio.sleep(random.uniform(0.1, 0.3))
+            # Minimal delay before details request
+            await asyncio.sleep(random.uniform(0.05, 0.15))
 
             parcel_data = await self.client.graphql(PARCEL_DETAILS_QUERY, {"parcelId": parcel_id})
 

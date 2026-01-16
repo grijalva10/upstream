@@ -101,7 +101,7 @@ npx supabase db reset       # Reset and re-seed
 npx supabase db diff        # Generate migration from changes
 ```
 
-### Schema Overview (34 tables)
+### Schema Overview (~30 tables)
 
 **Core Entities:**
 | Table | Purpose |
@@ -112,15 +112,14 @@ npx supabase db diff        # Generate migration from changes
 | `property_loans` | Loan/distress data (maturity, LTV, DSCR, payment status) |
 | `property_companies` | Junction: property ↔ company (owner/manager/lender) |
 
-**Clients & Sourcing:**
+**Searches & Sourcing:**
 | Table | Purpose |
 |-------|---------|
-| `clients` | Buyers/investors we source deals for |
-| `client_criteria` | Search profiles with criteria JSON + generated queries |
+| `searches` | Search profiles with criteria JSON + generated payloads (main entity) |
+| `search_properties` | Junction: search ↔ property |
 | `markets` | CoStar market reference (id, name, state) |
 | `sourcing_strategies` | Predefined query strategies (hold_period, financial_distress, etc.) |
-| `extraction_lists` | Results of CoStar queries (linked to client_criteria) |
-| `list_properties` | Junction: extraction_list ↔ property |
+| `campaigns` | Email campaigns linked to searches |
 
 **Outreach (CRM):**
 | Table | Purpose |
@@ -168,14 +167,13 @@ npx supabase db diff        # Generate migration from changes
 
 ### Key Relationships
 ```
-clients → client_criteria (1:many)
-client_criteria → extraction_lists (1:many)
-extraction_lists → properties (via list_properties)
+searches → search_properties → properties (via search_properties junction)
 properties ←→ companies (via property_companies)
 companies → contacts (1:many)
 properties → property_loans (1:many)
 contacts → sequence_subscriptions → sequences
 activities → contacts, companies, properties
+searches → campaigns (1:many)
 ```
 
 ### Key Status Flows
@@ -191,38 +189,48 @@ These MUST run on the operator's machine:
 
 ## Extraction Pipeline
 
-Full pipeline from buyer criteria to DB:
+Full pipeline from buyer criteria to DB (uses web UI):
 
 ```
-1. sourcing-agent → generates payloads + strategy
-   Input: Buyer criteria (natural language)
-   Output: output/queries/{buyer}_payloads.json
+1. Create Search via web UI or API
+   - POST /api/searches with criteria JSON
+   - Creates search record with status 'new'
 
-2. run_extraction.py → orchestrates extraction
-   - Creates client record (if new)
-   - Creates client_criteria (stores queries)
-   - Creates extraction_lists (one per query)
-   - Runs CoStar extraction
-   - Saves to DB with proper linking
+2. Run Sourcing Agent
+   - POST /api/searches/[id]/run-agent
+   - Generates payloads_json and strategy_summary
+   - Updates search status to 'ready'
 
-3. Properties linked via:
-   client → client_criteria → extraction_lists → list_properties → properties
+3. Run Extraction (requires local CoStar service)
+   - POST /api/searches/[id]/run-extraction
+   - Calls CoStar service (requires 2FA)
+   - Saves properties, companies, contacts
+   - Links via search_properties junction
+
+4. Properties linked via:
+   searches → search_properties → properties → companies → contacts
 ```
 
-### Running the Pipeline
+### Running via Web UI
+
+1. Go to `/searches` page
+2. Click "New Search" and enter buyer criteria
+3. Click "Run Agent" to generate CoStar payloads
+4. Click "Run Extraction" (requires CoStar service running locally)
+5. View results in the search detail page
+
+### API Endpoints
 
 ```bash
-# Generate queries for a buyer
-# (invoke sourcing-agent with buyer criteria)
+# Create a new search
+POST /api/searches
+{ "name": "Test Search", "criteria_json": {...} }
 
-# Run extraction from generated payloads
-python scripts/run_extraction.py output/queries/TestCo_Capital_payloads.json
+# Generate payloads (run sourcing agent)
+POST /api/searches/[id]/run-agent
 
-# Options:
-#   --max-properties 100    # Limit properties per query
-#   --include-parcel        # Fetch loan data (slower)
-#   --query-index 0         # Run only first query
-#   --dry-run               # Set up DB records only
+# Run extraction (requires CoStar service)
+POST /api/searches/[id]/run-extraction
 ```
 
 ## Development Approach

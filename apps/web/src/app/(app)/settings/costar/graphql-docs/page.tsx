@@ -709,7 +709,7 @@ function QueryDetail({ name, data }: { name: string; data: QueryData }) {
                       {executionTime === null && "Execute query to see response"}
                     </CardDescription>
                   </div>
-                  {testResult && (
+                  {testResult !== null && (
                     <CopyButton text={JSON.stringify(testResult, null, 2)} />
                   )}
                 </div>
@@ -734,7 +734,7 @@ function QueryDetail({ name, data }: { name: string; data: QueryData }) {
                         </div>
                       </div>
                     )}
-                    {testResult && !isRunning && (
+                    {testResult !== null && !isRunning && (
                       <HighlightedJSON data={testResult} />
                     )}
                     {!testResult && !testError && !isRunning && (

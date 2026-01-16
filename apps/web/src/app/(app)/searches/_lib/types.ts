@@ -38,10 +38,15 @@ export interface SearchContact {
   email: string;
 }
 
+// Payloads JSON structure (from agent output)
+export interface PayloadsJson {
+  queries: CoStarPayload[];
+}
+
 // Search with related data (as returned by API/queries)
 export interface SearchWithRelations extends Omit<SearchRow, "criteria_json" | "payloads_json"> {
   criteria_json: CriteriaJson;
-  payloads_json: CoStarPayload[] | null;
+  payloads_json: PayloadsJson | null;
   campaigns: SearchCampaign[];
   source_contact?: SearchContact | null;
 }

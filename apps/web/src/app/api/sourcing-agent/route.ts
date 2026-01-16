@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+/**
+ * Legacy Sourcing Agent API
+ *
+ * DEPRECATED: Use the searches workflow instead:
+ * 1. POST /api/searches - Create a new search
+ * 2. POST /api/searches/[id]/run-agent - Generate payloads
+ * 3. POST /api/searches/[id]/run-extraction - Extract data
+ *
+ * This endpoint is kept for backward compatibility but creates
+ * a search record in the new schema.
+ */
 export async function POST(request: Request) {
   try {
     const { criteria } = await request.json();
@@ -15,70 +26,30 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient();
 
-    // Extract buyer info
-    const buyerName =
-      criteria.buyer?.entityName ||
-      criteria.buyer?.name ||
-      "Unknown Buyer";
-    const buyerEmail = criteria.buyer?.contact?.email || null;
-    const buyerPhone = criteria.buyer?.contact?.phone || null;
-
-    // Check if client already exists by name
-    let clientId: string;
-    const { data: existingClient } = await supabase
-      .from("clients")
-      .select("id")
-      .eq("name", buyerName)
-      .single();
-
-    if (existingClient) {
-      clientId = existingClient.id;
-    } else {
-      // Create new client
-      const { data: newClient, error: clientError } = await supabase
-        .from("clients")
-        .insert({
-          name: buyerName,
-          company_name: criteria.buyer?.entityName || criteria.buyer?.name,
-          email: buyerEmail,
-          phone: buyerPhone,
-          status: "active",
-          notes: `Capital: ${criteria.buyer?.entity?.capital || criteria.buyer?.capitalAvailable || "N/A"}`,
-        })
-        .select("id")
-        .single();
-
-      if (clientError) {
-        console.error("Error creating client:", clientError);
-        return NextResponse.json(
-          { error: "Failed to create client: " + clientError.message },
-          { status: 500 }
-        );
-      }
-      clientId = newClient.id;
-    }
-
-    // Create client_criteria record with status 'pending_queries'
-    const criteriaName =
+    // Extract search name
+    const searchName =
       criteria.criteria?.criteriaName ||
       criteria.criteria?.name ||
+      criteria.buyer?.entityName ||
+      criteria.buyer?.name ||
       `Search ${new Date().toLocaleDateString()}`;
 
-    const { data: newCriteria, error: criteriaError } = await supabase
-      .from("client_criteria")
+    // Create a search record (new schema)
+    const { data: search, error: searchError } = await supabase
+      .from("searches")
       .insert({
-        client_id: clientId,
-        name: criteriaName,
+        name: searchName,
+        source: "api",
         criteria_json: criteria,
-        status: "pending_queries", // Waiting for sourcing agent to generate queries
+        status: "pending_queries",
       })
       .select("id")
       .single();
 
-    if (criteriaError) {
-      console.error("Error creating criteria:", criteriaError);
+    if (searchError) {
+      console.error("Error creating search:", searchError);
       return NextResponse.json(
-        { error: "Failed to create criteria: " + criteriaError.message },
+        { error: "Failed to create search: " + searchError.message },
         { status: 500 }
       );
     }
@@ -88,14 +59,11 @@ export async function POST(request: Request) {
       .from("agent_tasks")
       .insert({
         task_type: "generate_queries",
-        priority: 7, // High priority
+        priority: 7,
         status: "pending",
-        criteria_id: newCriteria.id,
         input_data: {
-          criteria_id: newCriteria.id,
-          client_id: clientId,
-          buyer_name: buyerName,
-          criteria_name: criteriaName,
+          search_id: search.id,
+          search_name: searchName,
           criteria_json: criteria,
         },
       });
@@ -107,9 +75,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       status: "submitted",
-      message: `Created client "${buyerName}" and criteria "${criteriaName}". Sourcing agent task queued.`,
-      clientId,
-      criteriaId: newCriteria.id,
+      message: `Created search "${searchName}". Sourcing agent task queued.`,
+      searchId: search.id,
+      // Backward compatibility
+      criteriaId: search.id,
     });
   } catch (error) {
     console.error("Sourcing agent error:", error);

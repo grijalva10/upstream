@@ -1,12 +1,16 @@
 """
-Outreach Loop - From criteria to campaign execution.
+Outreach Loop - From searches to campaign execution.
 
 Flow:
-1. Criteria -> Sourcing Agent -> Payloads + Strategy
+1. Search -> Sourcing Agent -> Payloads + Strategy
 2. [CHECKPOINT 1: Extraction] - Requires 2FA
 3. Campaign Scheduling (rules-based V1)
 4. [CHECKPOINT 2: Campaign Approval]
 5. Email Execution (pre-scheduled sends)
+
+NOTE: This module uses the NEW searches-based schema:
+- searches (replaces client_criteria)
+- search_properties (replaces list_properties)
 """
 import logging
 import random
@@ -22,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class OutreachLoop:
     """
-    Handles the outreach pipeline from criteria input to email sends.
+    Handles the outreach pipeline from search input to email sends.
     """
 
     def __init__(
@@ -35,80 +39,77 @@ class OutreachLoop:
         self.db = db or get_db()
         self.runner = runner or get_runner()
 
-    async def process_pending_criteria(self) -> int:
+    async def process_pending_searches(self) -> int:
         """
-        Process criteria awaiting query generation.
+        Process searches awaiting query generation.
 
-        Returns number of criteria processed.
+        Returns number of searches processed.
         """
-        criteria_list = self.db.get_pending_criteria()
+        searches = self.db.get_pending_searches()
         processed = 0
 
-        for criteria in criteria_list:
+        for search in searches:
             try:
-                await self._process_single_criteria(criteria)
+                await self._process_single_search(search)
                 processed += 1
             except Exception as e:
-                logger.exception(f"Error processing criteria {criteria['id']}: {e}")
+                logger.exception(f"Error processing search {search['id']}: {e}")
 
         return processed
 
-    async def _process_single_criteria(self, criteria: dict):
-        """Process a single criteria through sourcing agent."""
-        criteria_id = criteria["id"]
-        client = criteria.get("clients", {})
+    async def _process_single_search(self, search: dict):
+        """Process a single search through sourcing agent."""
+        search_id = search["id"]
 
-        logger.info(f"Processing criteria {criteria_id} for client {client.get('name')}")
+        logger.info(f"Processing search {search_id}: {search.get('name')}")
 
         # Run sourcing agent
         result = self.runner.run_sourcing(
-            criteria=criteria.get("criteria_json", {}),
+            criteria=search.get("criteria_json", {}),
             context={
-                "criteria_id": criteria_id,
-                "client_id": criteria.get("client_id"),
-                "criteria_type": criteria.get("criteria_json", {}).get("type")
+                "search_id": search_id,
+                "search_name": search.get("name"),
             }
         )
 
         if not result.success:
-            logger.error(f"Sourcing failed for criteria {criteria_id}: {result.error}")
+            logger.error(f"Sourcing failed for search {search_id}: {result.error}")
             return
 
-        # Sourcing runs automatically (no approval checkpoint)
         # Mark as ready for extraction (which requires 2FA)
-        self.db.update_criteria_status(criteria_id, "awaiting_extraction")
+        self.db.update_search_status(search_id, "awaiting_extraction")
 
         # Store the generated payloads
-        self.db.table("client_criteria").update({
-            "generated_queries": result.output,
-            "queries_generated_at": datetime.utcnow().isoformat()
-        }).eq("id", criteria_id).execute()
+        self.db.table("searches").update({
+            "payloads_json": result.output,
+            "updated_at": datetime.utcnow().isoformat()
+        }).eq("id", search_id).execute()
 
-        logger.info(f"Criteria {criteria_id} ready for extraction")
+        logger.info(f"Search {search_id} ready for extraction")
 
-    async def process_extraction_results(self, extraction_id: str) -> Optional[dict]:
+    async def process_extraction_results(self, search_id: str) -> Optional[dict]:
         """
         Process extraction results and create campaign schedule.
 
         Called after 2FA extraction completes.
         Returns campaign schedule if successful.
         """
-        # Get extraction with related data
-        result = self.db.table("extraction_lists") \
-            .select("*, client_criteria(*, clients(*))") \
-            .eq("id", extraction_id) \
+        # Get search with related data
+        result = self.db.table("searches") \
+            .select("*") \
+            .eq("id", search_id) \
             .single() \
             .execute()
 
         if not result.data:
-            logger.error(f"Extraction {extraction_id} not found")
+            logger.error(f"Search {search_id} not found")
             return None
 
-        extraction = result.data
-        schedule = await self._create_campaign_schedule(extraction)
+        search = result.data
+        schedule = await self._create_campaign_schedule(search)
 
         if not schedule:
-            logger.warning(f"No campaign schedule created for extraction {extraction_id}")
+            logger.warning(f"No campaign schedule created for search {search_id}")
             return None
 
         # Check checkpoint mode
@@ -116,30 +117,30 @@ class OutreachLoop:
 
         if mode == "auto":
             # Auto-accept: activate campaign immediately
-            await self._activate_campaign(extraction_id, schedule)
-            logger.info(f"Campaign auto-activated for extraction {extraction_id}")
+            await self._activate_campaign(search_id, schedule)
+            logger.info(f"Campaign auto-activated for search {search_id}")
         else:
             # Queue for approval
             self.db.queue_for_approval(
                 checkpoint="campaign",
                 data={
-                    "extraction_id": extraction_id,
+                    "search_id": search_id,
                     "schedule": schedule
                 },
                 context={
-                    "client_name": extraction.get("client_criteria", {}).get("clients", {}).get("name"),
+                    "search_name": search.get("name"),
                     "contact_count": schedule.get("contact_count", 0),
                     "excluded_count": schedule.get("excluded_count", 0)
                 }
             )
-            self.db.update_extraction_status(extraction_id, "campaign_pending_approval")
-            logger.info(f"Campaign queued for approval: {extraction_id}")
+            self.db.update_search_status(search_id, "campaign_pending_approval")
+            logger.info(f"Campaign queued for approval: {search_id}")
 
         return schedule
 
-    async def _create_campaign_schedule(self, extraction: dict) -> Optional[dict]:
+    async def _create_campaign_schedule(self, search: dict) -> Optional[dict]:
         """
-        Create a campaign schedule for an extraction.
+        Create a campaign schedule for a search.
 
         Rules-based V1:
         - 3-email sequence
@@ -147,13 +148,13 @@ class OutreachLoop:
         - Exclude contacts in active campaigns
         - Stagger sends across business hours
         """
-        list_id = extraction["id"]
+        search_id = search["id"]
 
-        # Get contacts from extraction via list_properties -> properties -> companies -> contacts
-        contacts = await self._get_extraction_contacts(list_id)
+        # Get contacts from search via search_properties -> properties -> companies -> contacts
+        contacts = await self._get_search_contacts(search_id)
 
         if not contacts:
-            logger.warning(f"No contacts with emails in extraction {list_id}")
+            logger.warning(f"No contacts with emails in search {search_id}")
             return None
 
         # Get contacts already in active campaigns
@@ -173,7 +174,7 @@ class OutreachLoop:
         scheduled_contacts = self._schedule_sends(new_contacts)
 
         return {
-            "extraction_id": list_id,
+            "search_id": search_id,
             "contact_count": len(new_contacts),
             "excluded_count": excluded_count,
             "total_emails": len(new_contacts) * 3,  # 3-email sequence
@@ -192,9 +193,9 @@ class OutreachLoop:
             "created_at": datetime.utcnow().isoformat()
         }
 
-    async def _get_extraction_contacts(self, list_id: str) -> list[dict]:
-        """Get all contacts with emails from an extraction list."""
-        result = self.db.table("list_properties") \
+    async def _get_search_contacts(self, search_id: str) -> list[dict]:
+        """Get all contacts with emails from a search via search_properties."""
+        result = self.db.table("search_properties") \
             .select("""
                 properties(
                     id,
@@ -208,14 +209,14 @@ class OutreachLoop:
                     )
                 )
             """) \
-            .eq("extraction_list_id", list_id) \
+            .eq("search_id", search_id) \
             .execute()
 
         contacts = []
         seen_emails: set[str] = set()
 
-        for lp in result.data or []:
-            prop = lp.get("properties", {})
+        for sp in result.data or []:
+            prop = sp.get("properties", {})
             for pc in prop.get("property_companies", []):
                 company = pc.get("companies", {})
                 for contact in company.get("contacts", []):
@@ -301,17 +302,17 @@ class OutreachLoop:
             dt += timedelta(days=1)
         return dt
 
-    async def _activate_campaign(self, extraction_id: str, schedule: dict):
+    async def _activate_campaign(self, search_id: str, schedule: dict):
         """
         Activate a campaign by creating sequence subscriptions.
 
         Each contact gets enrolled in the sequence with scheduled send times.
         """
         # Get or create the sequence
-        sequence = await self._get_or_create_sequence(extraction_id, schedule)
+        sequence = await self._get_or_create_sequence(search_id, schedule)
 
         if not sequence:
-            logger.error(f"Could not create sequence for extraction {extraction_id}")
+            logger.error(f"Could not create sequence for search {search_id}")
             return
 
         # Create subscriptions for each contact
@@ -331,21 +332,21 @@ class OutreachLoop:
                 "context": {
                     "company_name": contact.get("company_name"),
                     "property_address": contact.get("property_address"),
-                    "extraction_id": extraction_id
+                    "search_id": search_id
                 }
             }).execute()
 
-        # Update extraction status
-        self.db.update_extraction_status(extraction_id, "campaign_active")
+        # Update search status
+        self.db.update_search_status(search_id, "campaign_active")
 
         logger.info(f"Campaign activated: {len(schedule.get('contacts', []))} contacts enrolled")
 
-    async def _get_or_create_sequence(self, extraction_id: str, schedule: dict) -> Optional[dict]:
+    async def _get_or_create_sequence(self, search_id: str, schedule: dict) -> Optional[dict]:
         """Get or create a sequence for this campaign."""
-        # Check if sequence already exists for this extraction
+        # Check if sequence already exists for this search
         result = self.db.table("sequences") \
             .select("*") \
-            .eq("extraction_list_id", extraction_id) \
+            .eq("search_id", search_id) \
             .maybe_single() \
             .execute()
 
@@ -356,8 +357,8 @@ class OutreachLoop:
         seq_data = schedule.get("sequence", {})
 
         result = self.db.table("sequences").insert({
-            "name": f"Campaign for extraction {extraction_id[:8]}",
-            "extraction_list_id": extraction_id,
+            "name": f"Campaign for search {search_id[:8]}",
+            "search_id": search_id,
             "step_count": seq_data.get("length", 3),
             "status": "active",
             "timezone": schedule.get("send_window", {}).get("timezone", "America/Los_Angeles"),

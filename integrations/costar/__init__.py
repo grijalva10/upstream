@@ -7,7 +7,11 @@ Architecture:
     - find_sellers.py: Extract property owner contacts
     - find_buyers.py: Extract active buyers (TODO)
     - market_analytics.py: Get market data (TODO)
-- db.py: Legacy DB helpers (being migrated to worker layer)
+- db.py: DB utilities (parsing helpers, agent logging, strategy queries)
+
+Data Flow:
+    Web UI: searches -> CoStar service -> upsertExtractedData() -> search_properties
+    CLI: Use queries module directly, persist with your own logic
 
 Usage:
     from integrations.costar.queries import find_sellers
@@ -18,29 +22,23 @@ import logging
 from typing import Dict, List, Optional, Union
 
 # Core components
-from .session import CoStarSession  # Renamed from auth.py
+from .session import CoStarSession
 from .client import CoStarClient
 from .extract import ContactExtractor
 
-# Query modules (new pattern - returns JSON, no DB)
+# Query modules (returns JSON, no DB)
 from .queries import find_sellers, SellerQuery
 
-# Legacy DB helpers (TODO: migrate to worker layer)
+# DB utilities (kept functions only)
 from .db import (
-    save_contacts,
-    setup_extraction_from_payloads_file,
-    get_or_create_client,
-    create_client_criteria,
-    create_extraction_list,
-    upsert_extraction_list,
-    get_criteria_by_id,
-    get_or_create_criteria,
+    get_supabase_client,
+    parse_building_size,
+    parse_land_size,
+    parse_year_built,
     log_agent_execution,
     update_agent_execution,
     get_sourcing_strategies,
     get_strategy_by_name,
-    save_strategy_summary,
-    update_criteria_with_results,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,22 +49,22 @@ async def extract_contacts(
     max_properties: Optional[int] = None,
     require_email: bool = True,
     require_phone: bool = False,
-    rate_limit: float = 1.0,
+    rate_limit: float = 0.2,
     include_parcel: bool = False,
     include_market: bool = False,
     headless: bool = True,
-    concurrency: int = 3,  # Max parallel property requests (conservative)
-    min_delay: float = 0.5,  # Min delay between requests (evasion)
-    max_delay: float = 2.0,  # Max delay between requests (evasion)
-    burst_size: int = 50,  # Properties before taking a break
-    burst_delay: float = 5.0,  # Seconds to pause between bursts
+    concurrency: int = 8,
+    min_delay: float = 0.15,
+    max_delay: float = 0.4,
+    burst_size: int = 150,
+    burst_delay: float = 3.0,
 ) -> List[Dict]:
     """Extract property owner contacts from CoStar search payloads.
 
-    Safe for large extractions (10k+):
-    - Conservative concurrency (3 parallel requests by default)
-    - Burst pauses every 50 properties (5s+ break)
-    - Variable delays (0.5-2.0s) between requests for evasion
+    Aggressively safe settings for faster extractions:
+    - 8 parallel requests
+    - Burst pauses every 150 properties (3s break)
+    - Variable delays (0.15-0.4s) between requests
     - Skips parcel fetch if no valid contacts found
     - Progress logging every 100 properties
 
@@ -116,27 +114,22 @@ async def extract_contacts(
 
 # Re-export for convenience
 __all__ = [
-    # New query pattern (preferred)
+    # Query pattern (preferred)
     "find_sellers",
     "SellerQuery",
     # Core components
     "CoStarSession",
     "CoStarClient",
     "ContactExtractor",
-    # Legacy (still works, but use queries instead)
+    # Convenience wrapper
     "extract_contacts",
-    "save_contacts",
-    "setup_extraction_from_payloads_file",
-    "get_or_create_client",
-    "create_client_criteria",
-    "create_extraction_list",
-    "upsert_extraction_list",
-    "get_criteria_by_id",
-    "get_or_create_criteria",
+    # DB utilities
+    "get_supabase_client",
+    "parse_building_size",
+    "parse_land_size",
+    "parse_year_built",
     "log_agent_execution",
     "update_agent_execution",
     "get_sourcing_strategies",
     "get_strategy_by_name",
-    "save_strategy_summary",
-    "update_criteria_with_results",
 ]

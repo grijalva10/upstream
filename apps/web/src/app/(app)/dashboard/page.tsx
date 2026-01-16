@@ -199,7 +199,7 @@ async function getDashboardData() {
         : "TBD",
       motivation: deal.motivation || "Not stated",
       timeline: deal.timeline || "Not stated",
-      matchingClients: [], // TODO: Match against client_criteria
+      matchingClients: [], // TODO: Match against searches criteria_json
     })) || [];
 
   // Process agent activity

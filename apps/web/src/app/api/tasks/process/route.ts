@@ -18,7 +18,6 @@ interface AgentTask {
   task_type: string;
   priority: number;
   status: string;
-  criteria_id: string | null;
   input_data: Record<string, unknown>;
   created_at: string;
 }
@@ -142,105 +141,100 @@ export async function POST(request: Request) {
  * In a real setup, this would:
  * 1. Call the Claude API with the sourcing-agent prompt
  * 2. Parse the generated queries and strategy
- * 3. Update the client_criteria record
- *
- * For now, this is a placeholder that:
- * - Updates criteria status to pending_approval
- * - Leaves queries_json and strategy_summary empty (to be filled by actual agent)
+ * 3. Update the search record
  */
 async function processGenerateQueries(
   supabase: ReturnType<typeof createAdminClient>,
   task: AgentTask
 ): Promise<{ success: boolean; message?: string; error?: string }> {
-  const criteriaId = task.criteria_id || (task.input_data?.criteria_id as string);
+  const searchId = task.input_data?.search_id as string;
 
-  if (!criteriaId) {
-    return { success: false, error: "No criteria_id in task" };
+  if (!searchId) {
+    return { success: false, error: "No search_id in task" };
   }
 
   // In production, this is where you would:
   // 1. Invoke the sourcing agent via Claude API
-  // 2. Parse the response for queries_json and strategy_summary
-  // 3. Update the criteria record
+  // 2. Parse the response for payloads_json and strategy_summary
+  // 3. Update the search record
 
   // For now, we'll just update the status to show the flow works
   // The actual agent invocation would be done by n8n or an orchestrator
 
   const { error: updateError } = await supabase
-    .from("client_criteria")
+    .from("searches")
     .update({
       status: "pending_approval",
       // In production, these would come from the agent:
-      // queries_json: agentResponse.queries,
+      // payloads_json: agentResponse.queries,
       // strategy_summary: agentResponse.strategy,
     })
-    .eq("id", criteriaId);
+    .eq("id", searchId);
 
   if (updateError) {
     return {
       success: false,
-      error: `Failed to update criteria: ${updateError.message}`,
+      error: `Failed to update search: ${updateError.message}`,
     };
   }
 
   return {
     success: true,
-    message: `Criteria ${criteriaId} marked as pending_approval. Run sourcing agent to generate queries.`,
+    message: `Search ${searchId} marked as pending_approval. Run sourcing agent to generate queries.`,
   };
 }
 
 /**
  * Process run_extraction task
  *
- * This task runs the CoStar extraction for approved criteria.
- * In production, this would invoke the extraction script.
+ * This task runs the CoStar extraction for approved searches.
+ * In production, this would invoke the extraction via the CoStar service.
  */
 async function processRunExtraction(
   supabase: ReturnType<typeof createAdminClient>,
   task: AgentTask
 ): Promise<{ success: boolean; message?: string; error?: string }> {
-  const criteriaId = task.criteria_id || (task.input_data?.criteria_id as string);
+  const searchId = task.input_data?.search_id as string;
 
-  if (!criteriaId) {
-    return { success: false, error: "No criteria_id in task" };
+  if (!searchId) {
+    return { success: false, error: "No search_id in task" };
   }
 
-  // Get the criteria with queries
-  const { data: criteria, error: fetchError } = await supabase
-    .from("client_criteria")
-    .select("id, name, queries_json, status")
-    .eq("id", criteriaId)
+  // Get the search with payloads
+  const { data: search, error: fetchError } = await supabase
+    .from("searches")
+    .select("id, name, payloads_json, status")
+    .eq("id", searchId)
     .single();
 
-  if (fetchError || !criteria) {
-    return { success: false, error: "Criteria not found" };
+  if (fetchError || !search) {
+    return { success: false, error: "Search not found" };
   }
 
-  if (!criteria.queries_json) {
-    return { success: false, error: "No queries_json in criteria - run sourcing agent first" };
+  if (!search.payloads_json) {
+    return { success: false, error: "No payloads_json in search - run sourcing agent first" };
   }
 
-  // Update status to active (extraction would start)
+  // Update status to extracting
   const { error: updateError } = await supabase
-    .from("client_criteria")
-    .update({ status: "active" })
-    .eq("id", criteriaId);
+    .from("searches")
+    .update({ status: "extracting" })
+    .eq("id", searchId);
 
   if (updateError) {
     return {
       success: false,
-      error: `Failed to update criteria status: ${updateError.message}`,
+      error: `Failed to update search status: ${updateError.message}`,
     };
   }
 
-  // In production, this would:
-  // 1. Write queries to a file
-  // 2. Call the extraction script
-  // 3. Wait for completion and update stats
+  // In production, this would call:
+  // POST /api/searches/[id]/run-extraction
+  // which talks to the CoStar service
 
   return {
     success: true,
-    message: `Extraction started for criteria ${criteriaId}. Run extraction script manually: python scripts/run_extraction.py`,
+    message: `Extraction started for search ${searchId}. Call POST /api/searches/${searchId}/run-extraction to run.`,
   };
 }
 
@@ -258,7 +252,7 @@ export async function GET() {
         task_type,
         priority,
         status,
-        criteria_id,
+        input_data,
         created_at,
         started_at,
         completed_at

@@ -122,37 +122,37 @@ class Database:
         return True, f"OK (hourly: {hourly}, daily: {daily})"
 
     # =========================================================================
-    # Pending Work Queries
+    # Pending Work Queries (uses searches table)
     # =========================================================================
 
-    def get_pending_criteria(self) -> list[dict]:
-        """Get client criteria pending query generation."""
-        result = self.table("client_criteria") \
-            .select("*, clients(*)") \
+    def get_pending_searches(self) -> list[dict]:
+        """Get searches pending query generation."""
+        result = self.table("searches") \
+            .select("*") \
             .eq("status", "pending_queries") \
             .execute()
         return result.data or []
 
-    def get_approved_queries(self) -> list[dict]:
-        """Get criteria with approved queries ready for extraction."""
-        result = self.table("client_criteria") \
-            .select("*, clients(*)") \
+    def get_approved_searches(self) -> list[dict]:
+        """Get searches with approved queries ready for extraction."""
+        result = self.table("searches") \
+            .select("*") \
             .eq("status", "approved") \
             .execute()
         return result.data or []
 
-    def get_pending_campaigns(self) -> list[dict]:
-        """Get extraction lists ready for campaign scheduling."""
-        result = self.table("extraction_lists") \
-            .select("*, client_criteria(*, clients(*))") \
+    def get_searches_ready_for_campaign(self) -> list[dict]:
+        """Get searches ready for campaign scheduling (extraction complete)."""
+        result = self.table("searches") \
+            .select("*") \
             .eq("status", "extraction_complete") \
             .execute()
         return result.data or []
 
     def get_approved_campaigns(self) -> list[dict]:
-        """Get campaigns approved and ready to start."""
-        result = self.table("extraction_lists") \
-            .select("*, client_criteria(*, clients(*))") \
+        """Get searches with approved campaigns ready to start."""
+        result = self.table("searches") \
+            .select("*") \
             .eq("status", "campaign_approved") \
             .execute()
         return result.data or []
@@ -207,13 +207,9 @@ class Database:
             data.update(extra)
         self.table(table).update(data).eq("id", record_id).execute()
 
-    def update_criteria_status(self, criteria_id: str, status: str) -> None:
-        """Update client_criteria status."""
-        self._update_status("client_criteria", criteria_id, status)
-
-    def update_extraction_status(self, extraction_id: str, status: str) -> None:
-        """Update extraction_list status."""
-        self._update_status("extraction_lists", extraction_id, status)
+    def update_search_status(self, search_id: str, status: str) -> None:
+        """Update search status."""
+        self._update_status("searches", search_id, status)
 
     def update_subscription_status(
         self,

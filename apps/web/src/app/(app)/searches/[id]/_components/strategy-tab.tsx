@@ -1,20 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight, FileJson } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronRight, FileJson, Play, AlertCircle, CheckCircle2, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { CoStarPayload } from "../../_lib/types";
 import { isProcessing } from "../../_lib/utils";
 
 interface StrategyTabProps {
+  searchId: string;
   strategySummary: string | null;
   payloadsJson: CoStarPayload[] | null;
   status: string;
 }
 
-export function StrategyTab({ strategySummary, payloadsJson, status }: StrategyTabProps) {
+export function StrategyTab({ searchId, strategySummary, payloadsJson, status }: StrategyTabProps) {
   if (isProcessing(status)) {
     return <ProcessingState />;
   }
@@ -22,7 +27,7 @@ export function StrategyTab({ strategySummary, payloadsJson, status }: StrategyT
   return (
     <div className="space-y-6">
       <StrategySummaryCard summary={strategySummary} />
-      <PayloadsCard payloads={payloadsJson} />
+      <PayloadsCard searchId={searchId} payloads={payloadsJson} status={status} />
     </div>
   );
 }
@@ -64,8 +69,39 @@ function StrategySummaryCard({ summary }: { summary: string | null }) {
   );
 }
 
-function PayloadsCard({ payloads }: { payloads: CoStarPayload[] | null }) {
+interface CoStarStatus {
+  available: boolean;
+  status: string;
+  session_valid?: boolean;
+  expires_in_minutes?: number;
+  error?: string;
+}
+
+function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloads: CoStarPayload[] | null; status: string }) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [costarStatus, setCostarStatus] = useState<CoStarStatus | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+  const [extractSuccess, setExtractSuccess] = useState<string | null>(null);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [maxProperties, setMaxProperties] = useState(20);
+
+  // Check CoStar service status on mount
+  useEffect(() => {
+    async function checkStatus() {
+      try {
+        const res = await fetch(`/api/searches/${searchId}/run-extraction`);
+        const data = await res.json();
+        setCostarStatus(data);
+      } catch {
+        setCostarStatus({ available: false, status: "offline", error: "Failed to check status" });
+      }
+    }
+    if (payloads?.length) {
+      checkStatus();
+    }
+  }, [searchId, payloads]);
 
   const toggle = (index: number) => {
     setExpanded((prev) => {
@@ -79,6 +115,48 @@ function PayloadsCard({ payloads }: { payloads: CoStarPayload[] | null }) {
     });
   };
 
+  const runExtraction = async () => {
+    const controller = new AbortController();
+    setAbortController(controller);
+    setIsExtracting(true);
+    setExtractError(null);
+    setExtractSuccess(null);
+
+    try {
+      const res = await fetch(`/api/searches/${searchId}/run-extraction`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ max_properties: maxProperties }),
+        signal: controller.signal,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setExtractError(data.error || "Extraction failed");
+        return;
+      }
+
+      setExtractSuccess(`Extracted ${data.properties} properties, ${data.companies} companies, ${data.contacts} contacts, ${data.loans || 0} loans`);
+      router.refresh();
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        setExtractError("Extraction cancelled");
+      } else {
+        setExtractError(String(err));
+      }
+    } finally {
+      setIsExtracting(false);
+      setAbortController(null);
+    }
+  };
+
+  const stopExtraction = () => {
+    if (abortController) {
+      abortController.abort();
+    }
+  };
+
   if (!payloads?.length) {
     return (
       <Card>
@@ -89,21 +167,90 @@ function PayloadsCard({ payloads }: { payloads: CoStarPayload[] | null }) {
     );
   }
 
+  const canExtract = costarStatus?.available && costarStatus?.status === "connected" && costarStatus?.session_valid;
+  const isAlreadyExtracted = status === "extraction_complete" || status === "campaign_ready";
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>CoStar Query Payloads ({payloads.length})</CardTitle>
+        <div className="flex items-center gap-2">
+          {costarStatus && (
+            <span className={`text-xs px-2 py-1 rounded ${
+              costarStatus.status === "connected" && costarStatus.session_valid
+                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+            }`}>
+              CoStar: {costarStatus.status}
+              {costarStatus.expires_in_minutes ? ` (${costarStatus.expires_in_minutes}m)` : ""}
+            </span>
+          )}
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="max-properties" className="text-xs whitespace-nowrap">Max:</Label>
+            <Input
+              id="max-properties"
+              type="number"
+              min={1}
+              max={1000}
+              value={maxProperties}
+              onChange={(e) => setMaxProperties(Number(e.target.value) || 20)}
+              className="w-16 h-8 text-xs"
+              disabled={isExtracting}
+            />
+          </div>
+          {isExtracting ? (
+            <Button size="sm" variant="destructive" onClick={stopExtraction}>
+              <Square className="h-4 w-4 mr-2" />
+              Stop
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={runExtraction}
+              disabled={!canExtract}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              {isAlreadyExtracted ? "Re-run" : "Run Extraction"}
+            </Button>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {payloads.map((payload, i) => (
-          <PayloadItem
-            key={i}
-            index={i}
-            payload={payload}
-            isExpanded={expanded.has(i)}
-            onToggle={() => toggle(i)}
-          />
-        ))}
+      <CardContent className="space-y-3">
+        {extractError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{extractError}</AlertDescription>
+          </Alert>
+        )}
+        {extractSuccess && (
+          <Alert>
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>{extractSuccess}</AlertDescription>
+          </Alert>
+        )}
+        {!canExtract && costarStatus && !isAlreadyExtracted && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {costarStatus.status === "offline"
+                ? "CoStar service not running. Start it with: python integrations/costar/service.py"
+                : costarStatus.status !== "connected"
+                ? `CoStar session not connected (${costarStatus.status}). Click Start in Settings > CoStar.`
+                : "CoStar session expired. Please re-authenticate in Settings > CoStar."}
+            </AlertDescription>
+          </Alert>
+        )}
+        <div className="space-y-2">
+          {payloads.map((payload, i) => (
+            <PayloadItem
+              key={i}
+              index={i}
+              payload={payload}
+              isExpanded={expanded.has(i)}
+              onToggle={() => toggle(i)}
+            />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

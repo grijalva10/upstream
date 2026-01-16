@@ -242,6 +242,8 @@ def execute_query():
     payload = data.get("payload", {})
     options = data.get("options", {})
 
+    logger.info(f"Query request: type={query_type}, options={options}")
+
     result = {"error": None, "data": None}
     done_event = threading.Event()
 
@@ -250,10 +252,18 @@ def execute_query():
             client = CoStarClient(session.tab, rate_limit=1.0)
 
             if query_type == "find_sellers":
+                include_parcel = options.get("include_parcel", False)
+                require_email = options.get("require_email", True)
+                max_props = options.get("max_properties")
+                logger.info(f"=== FIND_SELLERS OPTIONS ===")
+                logger.info(f"  include_parcel: {include_parcel}")
+                logger.info(f"  require_email: {require_email}")
+                logger.info(f"  max_properties: {max_props}")
+                logger.info(f"  raw options: {options}")
                 extractor = ContactExtractor(
                     client=client,
-                    require_email=options.get("require_email", True),
-                    include_parcel=options.get("include_parcel", False),
+                    require_email=require_email,
+                    include_parcel=include_parcel,
                     concurrency=options.get("concurrency", 3),
                 )
 

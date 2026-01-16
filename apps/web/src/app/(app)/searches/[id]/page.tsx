@@ -105,8 +105,9 @@ export default async function SearchDetailPage({ params }: PageProps) {
           </TabsContent>
           <TabsContent value="strategy">
             <StrategyTab
+              searchId={search.id}
               strategySummary={search.strategy_summary}
-              payloadsJson={search.payloads_json?.queries ?? search.payloads_json}
+              payloadsJson={search.payloads_json?.queries ?? null}
               status={search.status}
             />
           </TabsContent>

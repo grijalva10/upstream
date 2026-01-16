@@ -18,7 +18,7 @@ REQUEST_TIMEOUT = 30
 class CoStarClient:
     """API client for CoStar GraphQL and REST endpoints."""
 
-    def __init__(self, tab, rate_limit: float = 1.0):
+    def __init__(self, tab, rate_limit: float = 0.2):
         self.tab = tab
         self.rate_limit = rate_limit
         self.last_request: Optional[datetime] = None
@@ -80,7 +80,7 @@ class CoStarClient:
         self,
         payload: Dict,
         max_pages: int = 10,
-        page_delay: float = 1.5
+        page_delay: float = 0.5
     ) -> List[Dict]:
         """Search properties with automatic pagination."""
         all_pins = []
@@ -106,24 +106,37 @@ class CoStarClient:
 
                 data = response.json()
 
-                # Handle different response structures
-                pins = []
-                if "searchResult" in data:
-                    sr = data.get("searchResult", {})
-                    pins = sr.get("Pins", []) or sr.get("pins", [])
-                elif "Pins" in data:
-                    pins = data.get("Pins", [])
-                elif "pins" in data:
-                    pins = data.get("pins", [])
-                elif isinstance(data, list):
-                    pins = data
-                if not pins:
+                # The API returns rich property data in the "properties" array
+                # and minimal pin data in "searchResult.Pins". Use "properties" for full data.
+                properties = data.get("properties", [])
+
+                # Fallback to pins if properties not present
+                if not properties:
+                    if "searchResult" in data:
+                        sr = data.get("searchResult", {})
+                        properties = sr.get("Pins", []) or sr.get("pins", [])
+                    elif "Pins" in data:
+                        properties = data.get("Pins", [])
+                    elif "pins" in data:
+                        properties = data.get("pins", [])
+                    elif isinstance(data, list):
+                        properties = data
+
+                if not properties:
                     break
 
-                all_pins.extend(pins)
-                logger.info(f"Page {page}: {len(pins)} properties")
+                # DEBUG: Log first property structure on first page
+                if page == 1 and properties:
+                    first_prop = properties[0]
+                    logger.info(f"DEBUG: First property has {len(first_prop)} keys: {list(first_prop.keys())[:20]}...")
+                    logger.info(f"DEBUG: First property - PropertyId={first_prop.get('PropertyId')}, City={first_prop.get('City')}, StateCode={first_prop.get('StateCode')}")
+                    logger.info(f"DEBUG: First property - TrueOwner={first_prop.get('TrueOwner')}")
+                    logger.info(f"DEBUG: First property - BuildingClass={first_prop.get('BuildingClass')}, YearBuilt={first_prop.get('YearBuilt')}")
 
-                if len(pins) < 2000:
+                all_pins.extend(properties)
+                logger.info(f"Page {page}: {len(properties)} properties")
+
+                if len(properties) < 2000:
                     break
 
                 await asyncio.sleep(page_delay)
