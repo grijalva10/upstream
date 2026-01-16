@@ -15,6 +15,7 @@ import {
   Phone,
   Reply,
   Search,
+  Sparkles,
   UserPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ import {
   ACTIONS,
   getAvailableActions,
 } from "@/lib/inbox/schemas";
+import { useAISheet } from "@/components/ai-sheet";
 import { takeAction } from "../actions";
 
 // =============================================================================
@@ -90,11 +92,29 @@ export function MessageActions({
   onOptimisticUpdate,
 }: MessageActionsProps) {
   const router = useRouter();
+  const { open: openAISheet } = useAISheet();
   const [loadingAction, setLoadingAction] = useState<Action | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const classification = message.classification as Classification | null;
+
+  function handleAskAI() {
+    openAISheet({
+      type: "email",
+      id: message.id,
+      data: {
+        from_name: message.from_name,
+        from_email: message.from_email,
+        subject: message.subject,
+        body: message.body_text || message.body_html,
+        received_at: message.received_at,
+        classification: message.classification,
+        matched_contact_id: message.matched_contact_id,
+        matched_property_id: message.matched_property_id,
+      },
+    });
+  }
 
   // Get available actions based on classification and linked entities
   const availableActions = getAvailableActions(
@@ -184,6 +204,24 @@ export function MessageActions({
 
       {/* Action buttons */}
       <div className="flex flex-wrap items-center gap-2">
+        {/* AI Assistant button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleAskAI}
+              className="h-8"
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+              Ask AI
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Open AI assistant with this email context
+          </TooltipContent>
+        </Tooltip>
+
         {/* Reply button - always first if available */}
         {hasReply && (
           <Button
