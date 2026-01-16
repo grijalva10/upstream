@@ -1,9 +1,9 @@
 -- Test Contact Reset
 -- Run this to reset the test company/contact back to initial state for re-testing
 
--- Reset company status back to 'new'
+-- Reset company status back to 'contacted' (simulates we've sent outreach)
 UPDATE companies
-SET status = 'new', updated_at = NOW()
+SET status = 'contacted', updated_at = NOW()
 WHERE name = 'Test Company (Jeff)';
 
 -- Reset contact status back to 'active'
