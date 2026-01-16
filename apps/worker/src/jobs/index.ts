@@ -1,7 +1,7 @@
 import PgBoss from 'pg-boss';
 import { config } from '../config.js';
 import { handleEmailSync } from './email-sync.job.js';
-import { handleCheckReplies } from './check-replies.job.js';
+import { createCheckRepliesHandler } from './check-replies.job.js';
 import { handleSendEmail } from './send-email.job.js';
 import { handleClassify } from './classify.job.js';
 import { createProcessQueueHandler } from './process-queue.job.js';
@@ -84,6 +84,28 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
     { teamSize: 1, teamConcurrency: 1 },
     wrapHandler('generate-queries', handleGenerateQueries)
   );
+
+  // Email sync from Outlook (scheduled)
+  await boss.work(
+    'email-sync',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('email-sync', handleEmailSync)
+  );
+
+  // Check for unclassified replies (scheduled)
+  const checkRepliesHandler = createCheckRepliesHandler(boss);
+  await boss.work(
+    'check-replies',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('check-replies', checkRepliesHandler)
+  );
+
+  // Classify individual emails (triggered by check-replies)
+  await boss.work(
+    'classify-email',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('classify-email', handleClassify)
+  );
 }
 
 export async function scheduleRecurringJobs(boss: PgBoss) {
@@ -92,4 +114,16 @@ export async function scheduleRecurringJobs(boss: PgBoss) {
     tz: config.defaultTimezone,
   });
   console.log(`  - process-queue: every minute`);
+
+  // Email sync from Outlook - every 5 minutes
+  await boss.schedule('email-sync', '*/5 * * * *', undefined, {
+    tz: config.defaultTimezone,
+  });
+  console.log(`  - email-sync: every 5 minutes`);
+
+  // Check for unclassified replies - every 2 minutes
+  await boss.schedule('check-replies', '*/2 * * * *', undefined, {
+    tz: config.defaultTimezone,
+  });
+  console.log(`  - check-replies: every 2 minutes`);
 }

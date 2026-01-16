@@ -1,6 +1,5 @@
 import PgBoss from 'pg-boss';
 import { supabase } from '../db.js';
-import { config } from '../config.js';
 
 export interface CheckRepliesResult {
   success: boolean;
@@ -8,43 +7,46 @@ export interface CheckRepliesResult {
   queuedForClassification: number;
 }
 
-export async function handleCheckReplies(
-  job: PgBoss.Job
-): Promise<CheckRepliesResult> {
-  console.log('[check-replies] Checking for unclassified emails...');
+/**
+ * Create a check-replies handler with access to the boss instance
+ */
+export function createCheckRepliesHandler(boss: PgBoss) {
+  return async function handleCheckReplies(
+    job: PgBoss.Job | PgBoss.Job[]
+  ): Promise<CheckRepliesResult> {
+    // pg-boss 10.x passes jobs as array even for single items
+    const actualJob = Array.isArray(job) ? job[0] : job;
+    void actualJob; // We don't need job data for this handler
 
-  // Find unclassified inbound emails
-  const { data: unclassified, error } = await supabase
-    .from('synced_emails')
-    .select('id, from_email, subject, body_text')
-    .eq('direction', 'inbound')
-    .is('classification', null)
-    .order('received_at', { ascending: true })
-    .limit(50);
+    console.log('[check-replies] Checking for unclassified emails...');
 
-  if (error) {
-    console.error('[check-replies] Query failed:', error.message);
-    throw new Error(error.message);
-  }
+    // Find unclassified inbound emails
+    const { data: unclassified, error } = await supabase
+      .from('synced_emails')
+      .select('id, from_email, subject, body_text')
+      .eq('direction', 'inbound')
+      .is('classification', null)
+      .order('received_at', { ascending: true })
+      .limit(50);
 
-  const unclassifiedCount = unclassified?.length || 0;
-  console.log(`[check-replies] Found ${unclassifiedCount} unclassified emails`);
+    if (error) {
+      console.error('[check-replies] Query failed:', error.message);
+      throw new Error(error.message);
+    }
 
-  if (!unclassified || unclassified.length === 0) {
-    return {
-      success: true,
-      unclassifiedCount: 0,
-      queuedForClassification: 0,
-    };
-  }
+    const unclassifiedCount = unclassified?.length || 0;
+    console.log(`[check-replies] Found ${unclassifiedCount} unclassified emails`);
 
-  // Get pg-boss instance from the job
-  // We need to queue classify jobs
-  const boss = (job as unknown as { boss?: PgBoss }).boss;
+    if (!unclassified || unclassified.length === 0) {
+      return {
+        success: true,
+        unclassifiedCount: 0,
+        queuedForClassification: 0,
+      };
+    }
 
-  let queued = 0;
+    let queued = 0;
 
-  if (boss) {
     // Queue classification jobs
     for (const email of unclassified) {
       try {
@@ -59,23 +61,13 @@ export async function handleCheckReplies(
         console.error(`[check-replies] Failed to queue ${email.id}:`, err);
       }
     }
-  } else {
-    // Fallback: just mark them for classification later
-    console.log('[check-replies] No boss instance, emails will be classified on next run');
 
-    // Mark as needs_human_review so they show up in the UI
-    const ids = unclassified.map((e) => e.id);
-    await supabase
-      .from('synced_emails')
-      .update({ needs_human_review: true })
-      .in('id', ids);
-  }
+    console.log(`[check-replies] Queued ${queued} emails for classification`);
 
-  console.log(`[check-replies] Queued ${queued} emails for classification`);
-
-  return {
-    success: true,
-    unclassifiedCount,
-    queuedForClassification: queued,
+    return {
+      success: true,
+      unclassifiedCount,
+      queuedForClassification: queued,
+    };
   };
 }

@@ -19,9 +19,11 @@ export interface ClassifyResult {
 }
 
 export async function handleClassify(
-  job: PgBoss.Job<ClassifyEmailPayload>
+  job: PgBoss.Job<ClassifyEmailPayload> | PgBoss.Job<ClassifyEmailPayload>[]
 ): Promise<ClassifyResult> {
-  const { emailId } = job.data;
+  // pg-boss 10.x passes jobs as array even for single items
+  const actualJob = Array.isArray(job) ? job[0] : job;
+  const { emailId } = actualJob.data;
   console.log(`[classify] Classifying email ${emailId}`);
 
   // Fetch full email content
