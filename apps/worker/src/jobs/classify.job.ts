@@ -114,6 +114,19 @@ Return JSON only:
 
     console.log(`[classify] Classified as ${parsed.category} (${parsed.confidence})`);
 
+    // Update company status to 'engaged' if they replied (any classification except bounce)
+    if (parsed.category !== 'bounce' && email.matched_company_id) {
+      const { error: companyError } = await supabase
+        .from('companies')
+        .update({ status: 'engaged' })
+        .eq('id', email.matched_company_id)
+        .eq('status', 'contacted');
+
+      if (!companyError) {
+        console.log(`[classify] Updated company ${email.matched_company_id} status to 'engaged'`);
+      }
+    }
+
     return {
       success: true,
       emailId,
