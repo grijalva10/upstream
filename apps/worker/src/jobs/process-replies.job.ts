@@ -361,7 +361,10 @@ async function processEmail(email: EmailRecord, boss: PgBoss): Promise<void> {
   }
 
   if (senderType === 'internal_team') {
-    console.log(`[process-replies] Auto-skipping internal email from ${email.from_email}`);
+    // Internal team emails (e.g., @lee-associates.com) are classified as 'internal'
+    // but NOT skipped - they show in inbox under "Team" filter and remain available
+    // for later AI parsing (Brian's emails contain deal notes, buyer criteria, etc.)
+    console.log(`[process-replies] Classifying internal email from ${email.from_email} (not skipping)`);
     await supabase
       .from('synced_emails')
       .update({
@@ -370,8 +373,11 @@ async function processEmail(email: EmailRecord, boss: PgBoss): Promise<void> {
         classified_at: new Date().toISOString(),
         classified_by: 'process-replies-autofilter',
         needs_human_review: false,
+        status: 'new', // Keep as 'new' so it shows in inbox
       })
       .eq('id', email.id);
+    // Don't return - email is classified but still visible in inbox
+    // No further action needed for internal emails
     return;
   }
 
@@ -1766,6 +1772,34 @@ function extractBounceRecipient(subject: string, body: string): string | null {
 }
 
 /**
+ * Infer contact_type from classification
+ */
+function inferContactType(classification: string): 'buyer' | 'seller' | 'other' {
+  // Buyer inquiries indicate they want to buy, not sell
+  if (classification === 'buyer_inquiry' || classification === 'buyer_criteria_update') {
+    return 'buyer';
+  }
+  // Most inbound contacts in CRE sourcing are property owners (sellers)
+  // These classifications indicate they're responding to outreach about selling
+  if (
+    [
+      'hot_interested',
+      'hot_schedule',
+      'hot_confirm',
+      'hot_pricing',
+      'question',
+      'info_request',
+      'referral',
+      'doc_promised',
+      'doc_received',
+    ].includes(classification)
+  ) {
+    return 'seller';
+  }
+  return 'other';
+}
+
+/**
  * Create a new contact and optionally company for an unknown sender
  */
 async function createContactForSender(
@@ -1775,6 +1809,10 @@ async function createContactForSender(
   const emailLower = email.from_email.toLowerCase();
   const domain = emailLower.split('@')[1] || 'unknown';
   const senderName = email.from_name || emailLower.split('@')[0];
+
+  // Infer contact type from classification
+  const contactType = inferContactType(classification);
+  const isBuyer = contactType === 'buyer';
 
   // First, check if a company exists for this domain
   let company: CompanyRecord | null = null;
@@ -1804,7 +1842,7 @@ async function createContactForSender(
     company = newCompany as CompanyRecord;
   }
 
-  // Create the contact
+  // Create the contact with inferred contact_type
   const { data: newContact } = await supabase
     .from('contacts')
     .insert({
@@ -1813,6 +1851,8 @@ async function createContactForSender(
       email: emailLower,
       source: 'inbound_email',
       status: 'active',
+      contact_type: contactType,
+      is_buyer: isBuyer,
     })
     .select()
     .single();
@@ -1821,7 +1861,9 @@ async function createContactForSender(
     throw new Error(`Failed to create contact for ${emailLower}`);
   }
 
-  console.log(`[process-replies] Created new contact ${newContact.id} for ${emailLower}`);
+  console.log(
+    `[process-replies] Created new contact ${newContact.id} for ${emailLower} (type: ${contactType})`
+  );
 
   return {
     contact: newContact as ContactRecord,

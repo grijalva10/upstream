@@ -24,7 +24,20 @@ import {
   AlertCircle,
   Mail,
   MailX,
+  RotateCcw,
+  Loader2,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface WorkerSettings {
   "worker.rate_limit_hourly": number;
@@ -112,6 +125,16 @@ export default function WorkerSettingsPage() {
   const [rateStatus, setRateStatus] = useState<RateStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
+  const [reprocessResult, setReprocessResult] = useState<{
+    success: boolean;
+    message: string;
+    emailsReset?: number;
+  } | null>(null);
+  const [emailCounts, setEmailCounts] = useState<{
+    total: number;
+    unclassified: number;
+  } | null>(null);
 
   const fetchData = async () => {
     try {
@@ -135,6 +158,7 @@ export default function WorkerSettingsPage() {
 
   useEffect(() => {
     fetchData();
+    fetchEmailCounts();
 
     // Refresh every 30 seconds
     const interval = setInterval(fetchData, 30000);
@@ -190,6 +214,59 @@ export default function WorkerSettingsPage() {
       setDirty(false);
     } catch (err) {
       setError("Failed to toggle pause");
+    }
+  };
+
+  const fetchEmailCounts = async () => {
+    try {
+      const res = await fetch("/api/worker/reprocess-all");
+      const data = await res.json();
+      if (data.counts) {
+        setEmailCounts({
+          total: data.counts.total || 0,
+          unclassified: data.counts.unclassified || 0,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch email counts:", err);
+    }
+  };
+
+  const handleReprocessAll = async () => {
+    setReprocessing(true);
+    setReprocessResult(null);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/worker/reprocess-all", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: true }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setReprocessResult({
+          success: true,
+          message: data.message,
+          emailsReset: data.stats?.emailsReset,
+        });
+        // Refresh email counts
+        fetchEmailCounts();
+      } else {
+        setReprocessResult({
+          success: false,
+          message: data.error || "Unknown error",
+        });
+      }
+    } catch (err) {
+      setReprocessResult({
+        success: false,
+        message: "Failed to reprocess emails",
+      });
+    } finally {
+      setReprocessing(false);
     }
   };
 
@@ -593,6 +670,95 @@ export default function WorkerSettingsPage() {
                 Enable verbose logging for troubleshooting
               </p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Reprocess All Emails Card */}
+      <Card className="border-orange-200 bg-orange-50/30">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <RotateCcw className="h-5 w-5 text-orange-600" />
+            Reprocess All Emails
+          </CardTitle>
+          <CardDescription>
+            Reset and reclassify all inbound emails with updated logic
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {emailCounts && (
+            <div className="text-sm text-muted-foreground">
+              <p>{emailCounts.total} total inbound emails, {emailCounts.unclassified} unclassified</p>
+            </div>
+          )}
+
+          {reprocessResult && (
+            <div
+              className={`p-3 rounded-lg text-sm ${
+                reprocessResult.success
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {reprocessResult.message}
+            </div>
+          )}
+
+          <div className="flex items-center gap-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="border-orange-300 hover:bg-orange-100"
+                  disabled={reprocessing}
+                >
+                  {reprocessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Reprocessing...
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Reprocess All Emails
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reprocess All Emails?</AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-2">
+                    <p>
+                      This will reset classification on all {emailCounts?.total || "inbound"} inbound
+                      emails and rerun the classification job with updated logic.
+                    </p>
+                    <p className="font-medium text-orange-600">
+                      This action cannot be undone. All existing classifications will be cleared.
+                    </p>
+                    <p>Use this after fixing classification bugs or updating filter rules.</p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleReprocessAll}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    Yes, Reprocess All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={fetchEmailCounts}
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Refresh Count
+            </Button>
           </div>
         </CardContent>
       </Card>
