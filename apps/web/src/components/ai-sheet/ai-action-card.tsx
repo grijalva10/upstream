@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, X, Loader2, UserPlus, Search, Briefcase, Mail, ListTodo, UserX } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { SuggestedAction } from "./types";
 
@@ -12,137 +11,97 @@ interface AIActionCardProps {
   isExecuting?: boolean;
 }
 
-const actionIcons: Record<SuggestedAction['type'], React.ElementType> = {
-  create_contact: UserPlus,
-  create_search: Search,
-  create_deal: Briefcase,
-  send_email: Mail,
-  create_task: ListTodo,
-  update_contact: UserPlus,
-  mark_dnc: UserX,
+const actionConfig: Record<SuggestedAction["type"], { icon: React.ElementType; label: string }> = {
+  create_contact: { icon: UserPlus, label: "Create Contact" },
+  create_search: { icon: Search, label: "Create Search" },
+  create_deal: { icon: Briefcase, label: "Create Deal" },
+  send_email: { icon: Mail, label: "Send Email" },
+  create_task: { icon: ListTodo, label: "Create Task" },
+  update_contact: { icon: UserPlus, label: "Update Contact" },
+  mark_dnc: { icon: UserX, label: "Mark as DNC" },
 };
 
-const actionLabels: Record<SuggestedAction['type'], string> = {
-  create_contact: "Create Contact",
-  create_search: "Create Search",
-  create_deal: "Create Deal",
-  send_email: "Send Email",
-  create_task: "Create Task",
-  update_contact: "Update Contact",
-  mark_dnc: "Mark as DNC",
+// Field display names for each action type
+const actionFields: Record<string, string[]> = {
+  create_contact: ["first_name", "last_name", "email", "phone", "company_name", "role", "type"],
+  create_search: ["name", "property_type", "market", "budget"],
+  create_deal: ["property_name", "status"],
+  send_email: ["to", "subject"],
+  create_task: ["title", "due_date"],
+  update_contact: ["contact_name", "reason"],
+  mark_dnc: ["contact_name", "reason"],
 };
 
-function formatActionData(action: SuggestedAction): string[] {
-  const data = action.data;
-  const lines: string[] = [];
+function formatFieldName(field: string): string {
+  return field.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+}
 
-  switch (action.type) {
-    case 'create_contact':
-      if (data.name) lines.push(`Name: ${data.name}`);
-      if (data.first_name && data.last_name) lines.push(`Name: ${data.first_name} ${data.last_name}`);
-      if (data.email) lines.push(`Email: ${data.email}`);
-      if (data.phone) lines.push(`Phone: ${data.phone}`);
-      if (data.company_name) lines.push(`Company: ${data.company_name}`);
-      if (data.role) lines.push(`Role: ${data.role}`);
-      if (data.type) lines.push(`Type: ${data.type}`);
-      break;
-    case 'create_search':
-      if (data.name) lines.push(`Name: ${data.name}`);
-      if (data.property_type) lines.push(`Property Type: ${data.property_type}`);
-      if (data.market) lines.push(`Market: ${data.market}`);
-      if (data.budget) lines.push(`Budget: ${data.budget}`);
-      break;
-    case 'create_deal':
-      if (data.property_name) lines.push(`Property: ${data.property_name}`);
-      if (data.status) lines.push(`Status: ${data.status}`);
-      break;
-    case 'send_email':
-      if (data.to) lines.push(`To: ${data.to}`);
-      if (data.subject) lines.push(`Subject: ${data.subject}`);
-      break;
-    case 'create_task':
-      if (data.title) lines.push(`Title: ${data.title}`);
-      if (data.due_date) lines.push(`Due: ${data.due_date}`);
-      break;
-    case 'update_contact':
-    case 'mark_dnc':
-      if (data.contact_name) lines.push(`Contact: ${data.contact_name}`);
-      if (data.reason) lines.push(`Reason: ${data.reason}`);
-      break;
-  }
-
-  return lines;
+function getDataLines(action: SuggestedAction): string[] {
+  const fields = actionFields[action.type] || [];
+  return fields
+    .filter((field) => action.data[field])
+    .map((field) => `${formatFieldName(field)}: ${action.data[field]}`);
 }
 
 export function AIActionCard({ action, onConfirm, onReject, isExecuting }: AIActionCardProps) {
-  const Icon = actionIcons[action.type];
-  const label = action.label || actionLabels[action.type];
-  const dataLines = formatActionData(action);
+  const config = actionConfig[action.type];
+  const Icon = config.icon;
+  const label = action.label || config.label;
+  const dataLines = getDataLines(action);
 
   if (action.confirmed) {
     return (
-      <Card className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-            <Check className="h-4 w-4" />
-            <span className="text-sm font-medium">{label} - Confirmed</span>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+        <span className="text-sm font-medium text-green-700 dark:text-green-300">
+          {label} - Done
+        </span>
+      </div>
     );
   }
 
   return (
-    <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950">
-      <CardContent className="p-3">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-              <Icon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-              {label}
-            </span>
-          </div>
-
-          {dataLines.length > 0 && (
-            <div className="pl-8 space-y-0.5">
-              {dataLines.map((line, i) => (
-                <p key={i} className="text-xs text-blue-600 dark:text-blue-400">
-                  {line}
-                </p>
-              ))}
-            </div>
-          )}
-
-          <div className="flex gap-2 pl-8">
-            <Button
-              size="sm"
-              variant="default"
-              className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
-              onClick={() => onConfirm(action)}
-              disabled={isExecuting}
-            >
-              {isExecuting ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <Check className="h-3 w-3 mr-1" />
-              )}
-              Confirm
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 text-xs text-blue-600 hover:text-blue-700"
-              onClick={() => onReject(action)}
-              disabled={isExecuting}
-            >
-              <X className="h-3 w-3 mr-1" />
-              Cancel
-            </Button>
-          </div>
+    <div className="rounded-lg bg-primary/5 border border-primary/20 overflow-hidden">
+      <div className="px-3 py-2.5 flex items-center gap-2 border-b border-primary/10">
+        <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+          <Icon className="w-3.5 h-3.5 text-primary" />
         </div>
-      </CardContent>
-    </Card>
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+
+      {dataLines.length > 0 && (
+        <div className="px-3 py-2 space-y-0.5 bg-background/50">
+          {dataLines.map((line, i) => (
+            <p key={i} className="text-xs text-muted-foreground">{line}</p>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2 px-3 py-2 bg-muted/30">
+        <Button
+          size="sm"
+          onClick={() => onConfirm(action)}
+          disabled={isExecuting}
+          className="h-7 text-xs"
+        >
+          {isExecuting ? (
+            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+          ) : (
+            <Check className="h-3 w-3 mr-1" />
+          )}
+          Confirm
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => onReject(action)}
+          disabled={isExecuting}
+          className="h-7 text-xs"
+        >
+          <X className="h-3 w-3 mr-1" />
+          Cancel
+        </Button>
+      </div>
+    </div>
   );
 }
