@@ -159,9 +159,7 @@ export async function POST(
       .eq("id", id);
 
     // Extract payloads (just the payload objects)
-    console.log("Raw payloads:", JSON.stringify(payloads[0], null, 2));
     const payloadObjects = payloads.map((p: { payload?: unknown }) => p.payload ?? p);
-    console.log("Sending payloads:", payloadObjects.length);
 
     // Run extraction
     const extractRes = await fetch(`${COSTAR_SERVICE_URL}/query`, {
@@ -197,7 +195,6 @@ export async function POST(
 
     // Handle both response formats: {contacts: [...]} or {data: {contacts: [...]}}
     const contacts: ExtractedContact[] = result.contacts || result.data?.contacts || [];
-    console.log(`Found ${contacts.length} contacts to upsert`);
 
     // Upsert extracted data
     const stats = await upsertExtractedData(supabase, id, contacts);
@@ -237,7 +234,7 @@ async function upsertExtractedData(
 ) {
   const propertyMap = new Map<number, string>(); // costar_id -> uuid
   const companyMap = new Map<number, string>(); // costar_id -> uuid
-  const contactCount = { inserted: 0, updated: 0 };
+  let contactsUpserted = 0;
 
   // Group contacts by property and company for deduplication
   const uniqueProperties = new Map<number, ExtractedContact>();
@@ -253,7 +250,6 @@ async function upsertExtractedData(
   }
 
   // 1. Upsert properties with all available fields
-  console.log(`Upserting ${uniqueProperties.size} unique properties...`);
   for (const [costarId, contact] of uniqueProperties) {
     const propertyData = {
       costar_property_id: String(costarId),
@@ -312,8 +308,6 @@ async function upsertExtractedData(
       last_seen_at: new Date().toISOString(),
     };
 
-    console.log(`Upserting property ${costarId}:`, propertyData.address, propertyData.city, propertyData.state_code);
-
     const { data: property, error } = await supabase
       .from("properties")
       .upsert(propertyData, {
@@ -324,30 +318,23 @@ async function upsertExtractedData(
       .single();
 
     if (error) {
-      console.error(`Failed to upsert property ${costarId}:`, error.message, error.details, error.hint);
+      console.error(`Failed to upsert property ${costarId}:`, error.message);
     } else if (property) {
-      console.log(`Property ${costarId} saved with id ${property.id}`);
       propertyMap.set(costarId, property.id);
-    } else {
-      console.log(`Property ${costarId} - no data returned, no error`);
     }
   }
 
   // 2. Upsert companies with TrueOwner data
   for (const [costarId, contact] of uniqueCompanies) {
-    const companyData = {
-      costar_company_id: String(costarId),
-      costar_key: contact.company_costar_key || null,
-      company_type: contact.company_type || null,
-      name: contact.company_name || "Unknown",
-      is_seller: true,
-    };
-
-    console.log(`Upserting company ${costarId}:`, companyData.name, companyData.costar_key);
-
     const { data: company, error } = await supabase
       .from("companies")
-      .upsert(companyData, {
+      .upsert({
+        costar_company_id: String(costarId),
+        costar_key: contact.company_costar_key || null,
+        company_type: contact.company_type || null,
+        name: contact.company_name || "Unknown",
+        is_seller: true,
+      }, {
         onConflict: "costar_company_id",
         ignoreDuplicates: false,
       })
@@ -355,7 +342,7 @@ async function upsertExtractedData(
       .single();
 
     if (error) {
-      console.error(`Failed to upsert company ${costarId}:`, error.message, companyData);
+      console.error(`Failed to upsert company ${costarId}:`, error.message);
     } else if (company) {
       companyMap.set(costarId, company.id);
     }
@@ -383,7 +370,7 @@ async function upsertExtractedData(
       });
 
     if (!error) {
-      contactCount.inserted++;
+      contactsUpserted++;
     }
   }
 
@@ -455,7 +442,7 @@ async function upsertExtractedData(
   return {
     properties: propertyMap.size,
     companies: companyMap.size,
-    contacts: contactCount.inserted,
+    contacts: contactsUpserted,
     loans: loansCreated,
   };
 }
@@ -476,7 +463,7 @@ function parseYear(year: string | number | null): number | null {
   return isNaN(parsed) ? null : parsed;
 }
 
-function parseDate(dateStr: string | null): string | null {
+function parseDate(dateStr: string | null | undefined): string | null {
   if (!dateStr) return null;
   // Try to parse various date formats
   const date = new Date(dateStr);

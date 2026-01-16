@@ -77,6 +77,16 @@ interface CoStarStatus {
   error?: string;
 }
 
+function getCoStarErrorMessage(status: CoStarStatus): string {
+  if (status.status === "offline") {
+    return "CoStar service not running. Start it with: python integrations/costar/service.py";
+  }
+  if (status.status !== "connected") {
+    return `CoStar session not connected (${status.status}). Click Start in Settings > CoStar.`;
+  }
+  return "CoStar session expired. Please re-authenticate in Settings > CoStar.";
+}
+
 function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloads: CoStarPayload[] | null; status: string }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -231,13 +241,7 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
         {!canExtract && costarStatus && !isAlreadyExtracted && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {costarStatus.status === "offline"
-                ? "CoStar service not running. Start it with: python integrations/costar/service.py"
-                : costarStatus.status !== "connected"
-                ? `CoStar session not connected (${costarStatus.status}). Click Start in Settings > CoStar.`
-                : "CoStar session expired. Please re-authenticate in Settings > CoStar."}
-            </AlertDescription>
+            <AlertDescription>{getCoStarErrorMessage(costarStatus)}</AlertDescription>
           </Alert>
         )}
         <div className="space-y-2">
