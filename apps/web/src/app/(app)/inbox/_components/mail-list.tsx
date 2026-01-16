@@ -1,18 +1,50 @@
 "use client";
 
-import { Search, MapPin, Loader2, ChevronLeft, ChevronRight, FileEdit, AlertCircle } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  FileEdit,
+  AlertCircle,
+  Bot,
+  Inbox,
+  Filter,
+  Flame,
+  HelpCircle,
+  ShoppingCart,
+  UserPlus,
+  XCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ClassificationBadge } from "@/components/classification-badge";
-import { type InboxMessage, type Classification } from "@/lib/inbox/schemas";
+import {
+  type InboxMessage,
+  type Classification,
+  type ViewMode,
+  type ClassificationGroup,
+  CLASSIFICATION_GROUPS,
+} from "@/lib/inbox/schemas";
 import { useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // =============================================================================
 // Types
 // =============================================================================
+
+type ClassificationFilter = Classification | ClassificationGroup | "all";
 
 interface MailListProps {
   messages: InboxMessage[];
@@ -24,7 +56,33 @@ interface MailListProps {
   page?: number;
   limit?: number;
   isPending?: boolean;
+  // Filter props
+  viewMode?: ViewMode;
+  classificationFilter?: ClassificationFilter;
+  viewModeCounts?: Record<ViewMode, number>;
+  classificationCounts?: Record<string, number>;
+  onViewModeChange?: (viewMode: ViewMode) => void;
+  onClassificationChange?: (filter: ClassificationFilter) => void;
 }
+
+// =============================================================================
+// Filter Configuration
+// =============================================================================
+
+interface FilterGroup {
+  id: ClassificationGroup;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+}
+
+const filterGroups: FilterGroup[] = [
+  { id: "hot", label: "Hot Leads", icon: Flame, color: "text-green-500" },
+  { id: "qualify", label: "Questions", icon: HelpCircle, color: "text-yellow-500" },
+  { id: "buyer", label: "Buyers", icon: ShoppingCart, color: "text-cyan-500" },
+  { id: "redirect", label: "Redirects", icon: UserPlus, color: "text-orange-500" },
+  { id: "closed", label: "Closed", icon: XCircle, color: "text-muted-foreground" },
+];
 
 // =============================================================================
 // Component
@@ -40,6 +98,13 @@ export function MailList({
   page = 1,
   limit = 20,
   isPending = false,
+  // Filter props with defaults
+  viewMode = "needs_review",
+  classificationFilter = "all",
+  viewModeCounts = { needs_review: 0, auto_handled: 0, all: 0 },
+  classificationCounts = {},
+  onViewModeChange,
+  onClassificationChange,
 }: MailListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,54 +141,203 @@ export function MailList({
     [router, searchParams]
   );
 
+  // Calculate group counts for classification filter
+  const getGroupCount = (groupId: ClassificationGroup) => {
+    const classifications = CLASSIFICATION_GROUPS[groupId];
+    return classifications.reduce(
+      (sum, c) => sum + (classificationCounts[c] || 0),
+      0
+    );
+  };
+
+  // Get current filter label for dropdown
+  const getFilterLabel = () => {
+    if (classificationFilter === "all") return "All Types";
+    const group = filterGroups.find((g) => g.id === classificationFilter);
+    return group?.label || "All Types";
+  };
+
+  // Get current filter icon for dropdown
+  const getFilterIcon = () => {
+    if (classificationFilter === "all") return CheckCircle2;
+    const group = filterGroups.find((g) => g.id === classificationFilter);
+    return group?.icon || Filter;
+  };
+
+  const FilterIcon = getFilterIcon();
+  const filterColor = classificationFilter !== "all"
+    ? filterGroups.find((g) => g.id === classificationFilter)?.color
+    : undefined;
+
   return (
     <div className="flex h-full flex-col bg-background overflow-hidden">
-      {/* Search Header */}
-      <div className="flex-shrink-0 p-3 border-b bg-muted/30">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search messages..."
-            value={localSearch}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-8 h-9 bg-background"
-            aria-label="Search messages"
-          />
-          {isPending && (
-            <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
-          )}
-        </div>
-        <div className="flex items-center justify-between mt-2 px-1">
-          <p className="text-xs text-muted-foreground">
-            {total} {total === 1 ? "message" : "messages"}
-          </p>
-          {totalPages > 1 && (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => goToPage(page - 1)}
-                disabled={!hasPrev || isPending}
-                aria-label="Previous page"
+      {/* Filter Header */}
+      <div className="flex-shrink-0 border-b bg-muted/30">
+        {/* View Mode Tabs */}
+        {onViewModeChange && (
+          <div className="p-2 pb-0">
+            <div className="flex bg-muted rounded-lg p-0.5">
+              <button
+                onClick={() => onViewModeChange("needs_review")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-medium transition-all",
+                  viewMode === "needs_review"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {page}/{totalPages}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => goToPage(page + 1)}
-                disabled={!hasNext || isPending}
-                aria-label="Next page"
+                <AlertCircle className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Review</span>
+                {viewModeCounts.needs_review > 0 && (
+                  <span className="tabular-nums text-[10px] bg-primary/10 text-primary px-1 rounded">
+                    {viewModeCounts.needs_review}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => onViewModeChange("auto_handled")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-medium transition-all",
+                  viewMode === "auto_handled"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+                <Bot className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Auto</span>
+                {viewModeCounts.auto_handled > 0 && (
+                  <span className="tabular-nums text-[10px] opacity-70">
+                    {viewModeCounts.auto_handled}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => onViewModeChange("all")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-medium transition-all",
+                  viewMode === "all"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Inbox className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">All</span>
+                {viewModeCounts.all > 0 && (
+                  <span className="tabular-nums text-[10px] opacity-70">
+                    {viewModeCounts.all}
+                  </span>
+                )}
+              </button>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Search and Classification Filter Row */}
+        <div className="p-2 space-y-2">
+          <div className="flex gap-2">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                value={localSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-8 h-8 text-sm bg-background"
+                aria-label="Search messages"
+              />
+              {isPending && (
+                <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground animate-spin" />
+              )}
+            </div>
+
+            {/* Classification Filter Dropdown */}
+            {onClassificationChange && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={classificationFilter !== "all" ? "secondary" : "outline"}
+                    size="sm"
+                    className={cn(
+                      "h-8 px-2.5 gap-1.5 flex-shrink-0",
+                      classificationFilter !== "all" && "bg-accent"
+                    )}
+                  >
+                    <FilterIcon className={cn("h-3.5 w-3.5", filterColor)} />
+                    <span className="text-xs max-w-[60px] truncate hidden sm:inline">
+                      {getFilterLabel()}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => onClassificationChange("all")}
+                    className={cn(
+                      classificationFilter === "all" && "bg-accent"
+                    )}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    All Types
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {filterGroups.map((group) => {
+                    const count = getGroupCount(group.id);
+                    const isActive = classificationFilter === group.id;
+                    const Icon = group.icon;
+
+                    return (
+                      <DropdownMenuItem
+                        key={group.id}
+                        onClick={() => onClassificationChange(group.id)}
+                        className={cn(isActive && "bg-accent")}
+                      >
+                        <Icon className={cn("h-4 w-4 mr-2", group.color)} />
+                        <span className="flex-1">{group.label}</span>
+                        {count > 0 && (
+                          <span className="text-xs text-muted-foreground tabular-nums">
+                            {count}
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+
+          {/* Count and Pagination */}
+          <div className="flex items-center justify-between px-0.5">
+            <p className="text-[11px] text-muted-foreground">
+              {total} {total === 1 ? "message" : "messages"}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5"
+                  onClick={() => goToPage(page - 1)}
+                  disabled={!hasPrev || isPending}
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Button>
+                <span className="text-[11px] text-muted-foreground tabular-nums px-1">
+                  {page}/{totalPages}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5"
+                  onClick={() => goToPage(page + 1)}
+                  disabled={!hasNext || isPending}
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

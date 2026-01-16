@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { MailSidebar } from "./mail-sidebar";
 import { MailList } from "./mail-list";
 import { MailDisplay } from "./mail-display";
 import { useInbox } from "./use-inbox";
@@ -66,19 +65,7 @@ export function InboxShell({ messages, total, filters, counts }: InboxShellProps
 
   return (
     <div className="h-full flex">
-      {/* Sidebar - fixed width */}
-      <div className="hidden md:block w-52 border-r flex-shrink-0 overflow-hidden">
-        <MailSidebar
-          viewMode={filters.viewMode}
-          classificationFilter={filters.classification}
-          viewModeCounts={inbox.counts.byViewMode}
-          classificationCounts={inbox.counts.byClassification}
-          onViewModeChange={inbox.setViewMode}
-          onClassificationChange={inbox.setClassificationFilter}
-        />
-      </div>
-
-      {/* Message List - fixed width */}
+      {/* Message List with integrated filters */}
       <div className="w-80 border-r flex-shrink-0 overflow-hidden">
         <MailList
           messages={inbox.messages}
@@ -90,6 +77,13 @@ export function InboxShell({ messages, total, filters, counts }: InboxShellProps
           page={filters.page}
           limit={filters.limit}
           isPending={inbox.isPending}
+          // Filter props
+          viewMode={filters.viewMode}
+          classificationFilter={filters.classification}
+          viewModeCounts={inbox.counts.byViewMode}
+          classificationCounts={inbox.counts.byClassification}
+          onViewModeChange={inbox.setViewMode}
+          onClassificationChange={inbox.setClassificationFilter}
         />
       </div>
 
