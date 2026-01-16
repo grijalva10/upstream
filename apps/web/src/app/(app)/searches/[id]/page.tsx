@@ -1,19 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { OverviewTab } from "./_components/overview-tab";
-import { StrategyTab } from "./_components/strategy-tab";
-import { ResultsTab } from "./_components/results-tab";
-import { CampaignTab } from "./_components/campaign-tab";
+import { ArrowLeft, Building2, Users, Mail, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SearchHeader } from "./_components/search-header";
+import { CriteriaSection } from "./_components/criteria-section";
+import { StrategySection } from "./_components/strategy-section";
+import { ResultsSection } from "./_components/results-section";
+import { CampaignSection } from "./_components/campaign-section";
 import { AgentRunner } from "./_components/agent-runner";
 import { SearchErrorBoundary } from "./_components/error-boundary";
-import { DeleteButton } from "./_components/delete-button";
-import { RetryButton } from "./_components/retry-button";
 import type { SearchWithRelations, SearchContact } from "../_lib/types";
-import { StatusBadge, getSourceLabel } from "../_lib/utils";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -53,102 +50,89 @@ export default async function SearchDetailPage({ params }: PageProps) {
   const search = await getSearch(id);
 
   const isDraft = search.status === "draft";
-  const defaultTab = isDraft ? "setup" : "overview";
+  const hasResults = (search.total_properties ?? 0) > 0;
+  const hasCampaigns = (search.campaigns?.length ?? 0) > 0;
 
   return (
-    <div className="p-4 sm:p-6 max-w-6xl">
-      <nav aria-label="Breadcrumb">
-        <Link
-          href="/searches"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" aria-hidden="true" />
-          <span className="hidden sm:inline">Back to Searches</span>
-          <span className="sm:hidden">Back</span>
-        </Link>
-      </nav>
-
-      <Header search={search} />
+    <div className="min-h-screen">
+      {/* Top bar */}
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+        <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
+          <Link
+            href="/searches"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
+            Searches
+          </Link>
+          {hasResults && (
+            <div className="flex items-center gap-4 text-sm">
+              <Link href={`/data/properties?search=${id}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                <Building2 className="h-3.5 w-3.5" />
+                <span className="font-medium">{search.total_properties?.toLocaleString()}</span>
+                <span className="hidden sm:inline">properties</span>
+              </Link>
+              <Link href={`/data/companies?search=${id}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                <Users className="h-3.5 w-3.5" />
+                <span className="font-medium">{search.total_companies?.toLocaleString()}</span>
+                <span className="hidden sm:inline">companies</span>
+              </Link>
+              <Link href={`/data/contacts?search=${id}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                <Mail className="h-3.5 w-3.5" />
+                <span className="font-medium">{search.total_contacts?.toLocaleString()}</span>
+                <span className="hidden sm:inline">contacts</span>
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
 
       <SearchErrorBoundary>
-        <Tabs defaultValue={defaultTab} className="space-y-4 sm:space-y-6">
-          <TabsList aria-label="Search details navigation" className="w-full justify-start overflow-x-auto">
-            {isDraft && (
-              <TabsTrigger value="setup" className="text-xs sm:text-sm">
-                Setup
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-            <TabsTrigger value="strategy" className="text-xs sm:text-sm">Strategy</TabsTrigger>
-            <TabsTrigger value="results" className="text-xs sm:text-sm">Results</TabsTrigger>
-            <TabsTrigger value="campaign" className="gap-1 sm:gap-2 text-xs sm:text-sm">
-              Campaign
-              {search.campaigns?.length > 0 && (
-                <Badge variant="secondary" className="h-4 sm:h-5 px-1 sm:px-1.5 text-xs">
-                  {search.campaigns.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
+        <div className="px-4 sm:px-6 py-6 max-w-5xl space-y-8">
+          {/* Header */}
+          <SearchHeader search={search} />
 
+          {/* Draft state - show agent runner */}
           {isDraft && (
-            <TabsContent value="setup">
-              <AgentRunner
-                searchId={search.id}
-                searchName={search.name}
-                initialCriteria={search.criteria_json}
-              />
-            </TabsContent>
-          )}
-          <TabsContent value="overview">
-            <OverviewTab search={search} />
-          </TabsContent>
-          <TabsContent value="strategy">
-            <StrategyTab
+            <AgentRunner
               searchId={search.id}
-              strategySummary={search.strategy_summary}
-              payloadsJson={search.payloads_json?.queries ?? null}
-              status={search.status}
+              searchName={search.name}
+              initialCriteria={search.criteria_json}
             />
-          </TabsContent>
-          <TabsContent value="results">
-            <ResultsTab
-              totalProperties={search.total_properties}
-              totalCompanies={search.total_companies}
-              totalContacts={search.total_contacts}
-              status={search.status}
-            />
-          </TabsContent>
-          <TabsContent value="campaign">
-            <CampaignTab campaigns={search.campaigns ?? []} searchStatus={search.status} />
-          </TabsContent>
-        </Tabs>
+          )}
+
+          {/* Main content - only show when not draft */}
+          {!isDraft && (
+            <>
+              {/* Criteria */}
+              <CriteriaSection criteria={search.criteria_json} />
+
+              {/* Strategy & Extraction */}
+              <StrategySection
+                searchId={search.id}
+                strategySummary={search.strategy_summary}
+                payloadsJson={search.payloads_json?.queries ?? null}
+                status={search.status}
+              />
+
+              {/* Results */}
+              {hasResults && (
+                <ResultsSection
+                  searchId={search.id}
+                  totalProperties={search.total_properties}
+                  totalCompanies={search.total_companies}
+                  totalContacts={search.total_contacts}
+                />
+              )}
+
+              {/* Campaign */}
+              {hasCampaigns && (
+                <CampaignSection campaigns={search.campaigns ?? []} />
+              )}
+            </>
+          )}
+        </div>
       </SearchErrorBoundary>
     </div>
-  );
-}
-
-interface HeaderProps {
-  search: SearchWithRelations & { source_contact: SearchContact | null };
-}
-
-function Header({ search }: HeaderProps) {
-  return (
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{search.name}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Source: {getSourceLabel(search.source)}
-          {search.source_contact && (
-            <span className="hidden sm:inline"> from {search.source_contact.first_name} {search.source_contact.last_name}</span>
-          )}
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <StatusBadge status={search.status} />
-        <RetryButton searchId={search.id} status={search.status} />
-        <DeleteButton searchId={search.id} searchName={search.name} />
-      </div>
-    </header>
   );
 }
