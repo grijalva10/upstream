@@ -20,7 +20,7 @@ const DEFAULTS: Record<string, string | number | boolean> = {
   "worker.interval_email_sync": 15,
   "worker.interval_check_replies": 5,
   "worker.interval_queue_process": 30,
-  "worker.dry_run": false,
+  "worker.dry_run": true, // Default to disabled - emails logged but not sent
   "worker.debug": false,
   "worker.paused": false,
 };

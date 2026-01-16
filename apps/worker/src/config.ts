@@ -100,7 +100,8 @@ export const config: WorkerConfig = {
   agentServiceUrl: process.env.AGENT_SERVICE_URL || 'http://localhost:8766',
 
   // Feature flags (defaults, will be overridden from DB)
-  dryRun: process.env.DRY_RUN === 'true',
+  // Default to dry run mode (emails disabled) for safety
+  dryRun: process.env.DRY_RUN !== 'false',
   debug: process.env.DEBUG === 'true',
   paused: false,
 };

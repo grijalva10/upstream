@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,8 @@ import {
   RefreshCw,
   Save,
   AlertCircle,
+  Mail,
+  MailX,
 } from "lucide-react";
 
 interface WorkerSettings {
@@ -427,6 +430,44 @@ export default function WorkerSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Email Sending Card - Prominent toggle */}
+      <Card className={settings?.["worker.dry_run"] !== false ? "border-amber-200 bg-amber-50/50" : "border-green-200 bg-green-50/50"}>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            {settings?.["worker.dry_run"] !== false ? (
+              <MailX className="h-5 w-5 text-amber-600" />
+            ) : (
+              <Mail className="h-5 w-5 text-green-600" />
+            )}
+            Email Sending
+          </CardTitle>
+          <CardDescription>
+            Control whether campaign emails are actually sent
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="email-sending" className="text-base font-medium">
+                {settings?.["worker.dry_run"] !== false ? "Emails Disabled (Dry Run)" : "Emails Enabled"}
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {settings?.["worker.dry_run"] !== false
+                  ? "Emails are logged but NOT actually sent. Enable to start sending."
+                  : "Emails will be sent to recipients. Disable to stop all sending."}
+              </p>
+            </div>
+            <Switch
+              id="email-sending"
+              checked={settings?.["worker.dry_run"] === false}
+              onCheckedChange={(checked) =>
+                updateSetting("worker.dry_run", !checked)
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Advanced Card */}
       <Card>
         <CardHeader>
@@ -434,22 +475,6 @@ export default function WorkerSettingsPage() {
           <CardDescription>Development and debugging options</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="dry-run"
-              checked={settings?.["worker.dry_run"] || false}
-              onCheckedChange={(checked) =>
-                updateSetting("worker.dry_run", checked === true)
-              }
-            />
-            <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="dry-run">Dry Run Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Emails are logged but not actually sent
-              </p>
-            </div>
-          </div>
-
           <div className="flex items-center space-x-2">
             <Checkbox
               id="debug"
