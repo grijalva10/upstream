@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight, FileJson, Play, AlertCircle, CheckCircle2, Square } from "lucide-react";
+import { ChevronDown, ChevronRight, FileJson, Play, AlertCircle, CheckCircle2, Square, Hash, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,6 +87,21 @@ function getCoStarErrorMessage(status: CoStarStatus): string {
   return "CoStar session expired. Please re-authenticate in Settings > CoStar.";
 }
 
+interface PayloadCount {
+  payload_index: number;
+  name: string;
+  property_count: number;
+  unit_count: number;
+  shopping_center_count: number;
+  space_count: number;
+}
+
+interface CountResult {
+  counts: PayloadCount[];
+  total_properties: number;
+  payload_count: number;
+}
+
 function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloads: CoStarPayload[] | null; status: string }) {
   const router = useRouter();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -96,6 +111,11 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
   const [extractSuccess, setExtractSuccess] = useState<string | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [maxProperties, setMaxProperties] = useState(20);
+
+  // Count preview state
+  const [countResult, setCountResult] = useState<CountResult | null>(null);
+  const [isCounting, setIsCounting] = useState(false);
+  const [countError, setCountError] = useState<string | null>(null);
 
   // Check CoStar service status on mount
   useEffect(() => {
@@ -167,6 +187,30 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
     }
   };
 
+  const previewCounts = async () => {
+    setIsCounting(true);
+    setCountError(null);
+
+    try {
+      const res = await fetch(`/api/searches/${searchId}/count`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setCountError(data.error || "Failed to get counts");
+        return;
+      }
+
+      setCountResult(data);
+    } catch (err) {
+      setCountError(String(err));
+    } finally {
+      setIsCounting(false);
+    }
+  };
+
   if (!payloads?.length) {
     return (
       <Card>
@@ -183,7 +227,14 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>CoStar Query Payloads ({payloads.length})</CardTitle>
+        <div className="flex items-center gap-3">
+          <CardTitle>CoStar Query Payloads ({payloads.length})</CardTitle>
+          {countResult && (
+            <span className="text-sm font-normal text-muted-foreground">
+              • {countResult.total_properties.toLocaleString()} total properties
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {costarStatus && (
             <span className={`text-xs px-2 py-1 rounded ${
@@ -195,6 +246,19 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
               {costarStatus.expires_in_minutes ? ` (${costarStatus.expires_in_minutes}m)` : ""}
             </span>
           )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={previewCounts}
+            disabled={isCounting || !canExtract}
+          >
+            {isCounting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Hash className="h-4 w-4 mr-2" />
+            )}
+            Preview
+          </Button>
           <div className="flex items-center gap-1.5">
             <Label htmlFor="max-properties" className="text-xs whitespace-nowrap">Max:</Label>
             <Input
@@ -238,6 +302,12 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
             <AlertDescription>{extractSuccess}</AlertDescription>
           </Alert>
         )}
+        {countError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{countError}</AlertDescription>
+          </Alert>
+        )}
         {!canExtract && costarStatus && !isAlreadyExtracted && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
@@ -252,6 +322,7 @@ function PayloadsCard({ searchId, payloads, status }: { searchId: string; payloa
               payload={payload}
               isExpanded={expanded.has(i)}
               onToggle={() => toggle(i)}
+              count={countResult?.counts[i]}
             />
           ))}
         </div>
@@ -265,17 +336,25 @@ interface PayloadItemProps {
   payload: CoStarPayload;
   isExpanded: boolean;
   onToggle: () => void;
+  count?: PayloadCount;
 }
 
-function PayloadItem({ index, payload, isExpanded, onToggle }: PayloadItemProps) {
+function PayloadItem({ index, payload, isExpanded, onToggle, count }: PayloadItemProps) {
   const name = payload.name ?? `Query ${index + 1}`;
   const Icon = isExpanded ? ChevronDown : ChevronRight;
 
   return (
     <div className="border rounded-lg">
-      <Button variant="ghost" className="w-full justify-start px-3 sm:px-4 py-2 sm:py-3 h-auto" onClick={onToggle}>
-        <Icon className="h-4 w-4 mr-2 shrink-0" aria-hidden="true" />
-        <span className="font-medium text-sm sm:text-base truncate">{name}</span>
+      <Button variant="ghost" className="w-full justify-between px-3 sm:px-4 py-2 sm:py-3 h-auto" onClick={onToggle}>
+        <div className="flex items-center">
+          <Icon className="h-4 w-4 mr-2 shrink-0" aria-hidden="true" />
+          <span className="font-medium text-sm sm:text-base truncate">{name}</span>
+        </div>
+        {count && (
+          <span className="text-xs text-muted-foreground ml-2 tabular-nums">
+            {count.property_count.toLocaleString()} properties
+          </span>
+        )}
       </Button>
       {isExpanded && (
         <div className="px-3 sm:px-4 pb-3 sm:pb-4">
