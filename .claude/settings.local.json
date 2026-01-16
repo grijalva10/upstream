@@ -97,7 +97,10 @@
       "Bash(start cmd /k \"python integrations/costar/service.py\")",
       "WebFetch(domain:localhost)",
       "Bash(pushd:*)",
-      "Bash(npx json:*)"
+      "Bash(npx json:*)",
+      "Bash(npm run dev:*)",
+      "Bash(netstat:*)",
+      "Bash(powershell.exe -Command \"Stop-Process -Id 227924 -Force\")"
     ]
   }
 }

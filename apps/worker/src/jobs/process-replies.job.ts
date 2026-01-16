@@ -37,6 +37,95 @@ import {
 } from '../lib/calendar-bridge.js';
 
 // =============================================================================
+// SENDER TYPE DETECTION
+// =============================================================================
+
+// Domains that should be auto-skipped (newsletters, system emails)
+const SKIP_DOMAINS = new Set([
+  // CoStar and data providers
+  'alerts.costar.com',
+  'email.costar.com',
+  'costar.com',
+  'loopnet.com',
+  'crexi.com',
+  'reonomy.com',
+  // Platform notifications
+  'crowdstreet.com',
+  'txn.dropbox.com',
+  'sharepointonline.com',
+  'n8n.io',
+  'close.com',
+  'stripe.com',
+  'docusign.net',
+  'adobe.com',
+  // CRE newsletters
+  'socalccim.com',
+  'ccim.com',
+  'crediblecre.com',
+  'bisnow.com',
+  'globest.com',
+  // System addresses
+  'noreply',
+  'no-reply',
+  'mailer-daemon',
+  'postmaster',
+]);
+
+// Internal team domain
+const INTERNAL_DOMAIN = 'lee-associates.com';
+
+// Subject patterns that indicate newsletters/spam
+const SKIP_SUBJECT_PATTERNS = [
+  /daily alert/i,
+  /newsletter/i,
+  /digest/i,
+  /security:/i,
+  /quarantine/i,
+  /unsubscribe/i,
+  /weekly report/i,
+  /market update/i,
+];
+
+// Sender type for pre-classification routing
+type SenderType = 'known_contact' | 'internal_team' | 'newsletter' | 'bounce' | 'unknown_external';
+
+/**
+ * Determine sender type before classification
+ */
+function detectSenderType(fromEmail: string, subject: string = ''): SenderType {
+  if (!fromEmail) return 'newsletter'; // No email = skip
+
+  const emailLower = fromEmail.toLowerCase();
+  const domain = emailLower.split('@')[1] || '';
+
+  // Check for bounce (postmaster, mailer-daemon)
+  if (emailLower.includes('postmaster') || emailLower.includes('mailer-daemon')) {
+    return 'bounce';
+  }
+
+  // Check for internal team
+  if (domain === INTERNAL_DOMAIN || emailLower.includes(INTERNAL_DOMAIN)) {
+    return 'internal_team';
+  }
+
+  // Check for newsletter/skip domains
+  for (const skipDomain of SKIP_DOMAINS) {
+    if (domain.includes(skipDomain) || emailLower.includes(skipDomain)) {
+      return 'newsletter';
+    }
+  }
+
+  // Check subject patterns
+  for (const pattern of SKIP_SUBJECT_PATTERNS) {
+    if (pattern.test(subject)) {
+      return 'newsletter';
+    }
+  }
+
+  return 'unknown_external';
+}
+
+// =============================================================================
 // TYPES
 // =============================================================================
 
@@ -59,7 +148,10 @@ export type Classification =
   | 'buyer_inquiry'
   | 'buyer_criteria_update'
   | 'general_update'
-  | 'unclear';
+  | 'unclear'
+  // Auto-filter classifications (set before Claude classification)
+  | 'newsletter'
+  | 'internal';
 
 interface ExtractedData {
   phone?: string;
@@ -249,12 +341,76 @@ export function createProcessRepliesHandler(boss: PgBoss) {
 async function processEmail(email: EmailRecord, boss: PgBoss): Promise<void> {
   console.log(`[process-replies] Processing email ${email.id} from ${email.from_email}`);
 
+  // Step 0: Pre-filter by sender type
+  const senderType = detectSenderType(email.from_email, email.subject || '');
+
+  // Handle newsletters and internal emails immediately (no classification needed)
+  if (senderType === 'newsletter') {
+    console.log(`[process-replies] Auto-skipping newsletter/system email from ${email.from_email}`);
+    await supabase
+      .from('synced_emails')
+      .update({
+        classification: 'newsletter',
+        classification_confidence: 1.0,
+        classified_at: new Date().toISOString(),
+        classified_by: 'process-replies-autofilter',
+        needs_human_review: false,
+      })
+      .eq('id', email.id);
+    return;
+  }
+
+  if (senderType === 'internal_team') {
+    console.log(`[process-replies] Auto-skipping internal email from ${email.from_email}`);
+    await supabase
+      .from('synced_emails')
+      .update({
+        classification: 'internal',
+        classification_confidence: 1.0,
+        classified_at: new Date().toISOString(),
+        classified_by: 'process-replies-autofilter',
+        needs_human_review: false,
+      })
+      .eq('id', email.id);
+    return;
+  }
+
+  if (senderType === 'bounce') {
+    console.log(`[process-replies] Auto-detecting bounce from ${email.from_email}`);
+    await supabase
+      .from('synced_emails')
+      .update({
+        classification: 'bounce',
+        classification_confidence: 1.0,
+        classified_at: new Date().toISOString(),
+        classified_by: 'process-replies-autofilter',
+        needs_human_review: false,
+      })
+      .eq('id', email.id);
+
+    // Add to exclusions - extract original recipient from subject if possible
+    const originalEmail = extractBounceRecipient(email.subject || '', email.body_text || '');
+    if (originalEmail) {
+      await supabase
+        .from('email_exclusions')
+        .upsert({
+          email: originalEmail.toLowerCase(),
+          reason: 'bounce',
+          source_email_id: email.id,
+        })
+        .select();
+      console.log(`[process-replies] Added bounced address to exclusions: ${originalEmail}`);
+    }
+    return;
+  }
+
   // Step 1: Match to contact if not already matched
   let contact: ContactRecord | null = null;
   let company: CompanyRecord | null = null;
   let property: PropertyRecord | null = null;
   let qualification: QualificationRecord | null = null;
   let buyerCriteria: BuyerCriteriaRecord | null = null;
+  let isNewContact = false;
 
   if (!email.matched_contact_id) {
     const { data: contactMatch } = await supabase
@@ -263,28 +419,35 @@ async function processEmail(email: EmailRecord, boss: PgBoss): Promise<void> {
       .eq('email', email.from_email.toLowerCase())
       .single();
 
-    if (!contactMatch) {
-      console.log(`[process-replies] No matching contact for ${email.from_email}, skipping`);
+    if (contactMatch) {
+      contact = contactMatch as ContactRecord;
+
+      // Update the synced email with matched contact
       await supabase
         .from('synced_emails')
-        .update({ needs_human_review: false })
+        .update({
+          matched_contact_id: contact.id,
+          matched_company_id: contact.company_id,
+        })
         .eq('id', email.id);
-      return;
+
+      email.matched_contact_id = contact.id;
+      email.matched_company_id = contact.company_id;
+    } else {
+      // NEW: No matching contact - still classify the email
+      // We'll create a contact after classification if it's actionable
+      console.log(`[process-replies] No matching contact for ${email.from_email} - will classify anyway`);
+      isNewContact = true;
+
+      // Create a temporary contact record for classification context
+      contact = {
+        id: '', // Will be created after classification if needed
+        name: email.from_name || email.from_email.split('@')[0],
+        email: email.from_email.toLowerCase(),
+        phone: undefined,
+        company_id: '',
+      };
     }
-
-    contact = contactMatch as ContactRecord;
-
-    // Update the synced email with matched contact
-    await supabase
-      .from('synced_emails')
-      .update({
-        matched_contact_id: contact.id,
-        matched_company_id: contact.company_id,
-      })
-      .eq('id', email.id);
-
-    email.matched_contact_id = contact.id;
-    email.matched_company_id = contact.company_id;
   } else {
     // Fetch existing contact
     const { data: contactData } = await supabase
@@ -297,7 +460,15 @@ async function processEmail(email: EmailRecord, boss: PgBoss): Promise<void> {
   }
 
   if (!contact) {
-    console.log(`[process-replies] Contact not found, skipping`);
+    console.log(`[process-replies] Could not establish contact context, marking for review`);
+    await supabase
+      .from('synced_emails')
+      .update({
+        classification: 'unclear',
+        needs_human_review: true,
+        classified_at: new Date().toISOString(),
+      })
+      .eq('id', email.id);
     return;
   }
 
@@ -403,6 +574,57 @@ async function processEmail(email: EmailRecord, boss: PgBoss): Promise<void> {
     `[process-replies] Classified as ${result.classification} (${result.confidence}) - ${result.reasoning}`
   );
 
+  // Step 5.5: If this is a new contact with an actionable classification, create them
+  const ACTIONABLE_CLASSIFICATIONS = new Set([
+    'hot_interested',
+    'hot_schedule',
+    'hot_confirm',
+    'hot_pricing',
+    'question',
+    'info_request',
+    'referral',
+    'doc_promised',
+    'doc_received',
+    'buyer_inquiry',
+    'buyer_criteria_update',
+  ]);
+
+  if (isNewContact && ACTIONABLE_CLASSIFICATIONS.has(result.classification)) {
+    console.log(`[process-replies] Creating contact for actionable email from ${email.from_email}`);
+    try {
+      const { contact: newContact, company: newCompany } = await createContactForSender(
+        email,
+        result.classification
+      );
+
+      // Update our local references
+      contact = newContact;
+      company = newCompany;
+
+      // Update the synced email with the new contact
+      await supabase
+        .from('synced_emails')
+        .update({
+          matched_contact_id: contact.id,
+          matched_company_id: company?.id,
+        })
+        .eq('id', email.id);
+
+      email.matched_contact_id = contact.id;
+      email.matched_company_id = company?.id;
+    } catch (err) {
+      console.error(`[process-replies] Failed to create contact:`, err);
+      // Continue anyway - we still classified the email
+    }
+  }
+
+  // For non-actionable classifications from unknown senders, just mark as classified
+  // but don't execute actions (no contact to act on)
+  if (isNewContact && !ACTIONABLE_CLASSIFICATIONS.has(result.classification)) {
+    console.log(`[process-replies] Non-actionable email from unknown sender, skipping action execution`);
+    return;
+  }
+
   // Step 6: Execute action based on classification
   await executeAction(
     result,
@@ -483,6 +705,12 @@ function buildClassificationPrompt(
       ? availableSlots.map((s) => `- ${s.display}`).join('\n')
       : 'Calendar unavailable';
 
+  // Determine if this is a known or unknown contact
+  const isKnownContact = contact.id && contact.id.length > 0;
+  const contactStatus = isKnownContact
+    ? `KNOWN CONTACT (in our CRM)`
+    : `UNKNOWN SENDER (not in our CRM - could be new prospect, unsolicited, or spam)`;
+
   const qualDisplay = qualification
     ? `
 Qualification State:
@@ -519,6 +747,8 @@ From: ${email.from_email} (${contact.name})
 Subject: ${email.subject || '(no subject)'}
 Body: ${email.body_text?.substring(0, 3000) || '(empty)'}
 Attachments: ${email.attachments?.join(', ') || 'None'}
+
+CONTACT STATUS: ${contactStatus}
 
 CONTEXT:
 Contact: ${contact.name}${contact.phone ? ` (${contact.phone})` : ''}
@@ -1500,5 +1730,102 @@ function formatSlotDisplay(date: Date): string {
     minute: '2-digit',
     timeZoneName: 'short',
   });
+}
+
+/**
+ * Extract the original recipient email from a bounce message
+ */
+function extractBounceRecipient(subject: string, body: string): string | null {
+  // Common patterns in bounce messages
+  const patterns = [
+    // "Undeliverable: [subject]" - look in body for recipient
+    /(?:to|recipient|address)[:\s]+<?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>?/i,
+    // "Mail delivery failed: returning message to sender" - extract from body
+    /(?:could not be delivered to)[:\s]+<?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>?/i,
+    // Generic email in subject
+    /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i,
+  ];
+
+  // Check body first (more reliable)
+  for (const pattern of patterns) {
+    const match = body.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  // Check subject
+  for (const pattern of patterns) {
+    const match = subject.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Create a new contact and optionally company for an unknown sender
+ */
+async function createContactForSender(
+  email: EmailRecord,
+  classification: string
+): Promise<{ contact: ContactRecord; company: CompanyRecord | null }> {
+  const emailLower = email.from_email.toLowerCase();
+  const domain = emailLower.split('@')[1] || 'unknown';
+  const senderName = email.from_name || emailLower.split('@')[0];
+
+  // First, check if a company exists for this domain
+  let company: CompanyRecord | null = null;
+
+  // Try to find existing company by domain (heuristic)
+  const { data: existingCompany } = await supabase
+    .from('companies')
+    .select('id, name, status')
+    .ilike('name', `%${domain.split('.')[0]}%`)
+    .limit(1)
+    .single();
+
+  if (existingCompany) {
+    company = existingCompany as CompanyRecord;
+  } else {
+    // Create new company
+    const { data: newCompany } = await supabase
+      .from('companies')
+      .insert({
+        name: domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1),
+        status: 'new',
+        source: 'inbound_email',
+      })
+      .select()
+      .single();
+
+    company = newCompany as CompanyRecord;
+  }
+
+  // Create the contact
+  const { data: newContact } = await supabase
+    .from('contacts')
+    .insert({
+      company_id: company?.id,
+      name: senderName,
+      email: emailLower,
+      source: 'inbound_email',
+      status: 'active',
+    })
+    .select()
+    .single();
+
+  if (!newContact) {
+    throw new Error(`Failed to create contact for ${emailLower}`);
+  }
+
+  console.log(`[process-replies] Created new contact ${newContact.id} for ${emailLower}`);
+
+  return {
+    contact: newContact as ContactRecord,
+    company,
+  };
 }
 

@@ -144,6 +144,21 @@ export const CLASSIFICATIONS = {
     group: "action",
     actions: ["reply", "mark_reviewed"],
   },
+  // AUTO-FILTERED (set by pre-classification filter, not Claude)
+  newsletter: {
+    label: "Newsletter",
+    shortLabel: "News",
+    color: "gray",
+    group: "filtered",
+    actions: ["archive"],
+  },
+  internal: {
+    label: "Internal",
+    shortLabel: "Team",
+    color: "gray",
+    group: "filtered",
+    actions: ["archive"],
+  },
 } as const;
 
 export type Classification = keyof typeof CLASSIFICATIONS;
@@ -168,6 +183,9 @@ export const classificationSchema = z.enum([
   "bounce",
   "general_update",
   "unclear",
+  // Auto-filtered (set before Claude classification)
+  "newsletter",
+  "internal",
 ]);
 
 // =============================================================================
@@ -390,11 +408,12 @@ export const CLASSIFICATION_GROUPS = {
   buyer: ["buyer_inquiry", "buyer_criteria_update"] as Classification[],
   redirect: ["referral", "broker", "wrong_contact", "ooo"] as Classification[],
   closed: ["soft_pass", "hard_pass", "bounce", "general_update", "unclear"] as Classification[],
+  filtered: ["newsletter", "internal"] as Classification[],
 } as const;
 
 export type ClassificationGroup = keyof typeof CLASSIFICATION_GROUPS;
 
-export const classificationGroupSchema = z.enum(["hot", "qualify", "buyer", "redirect", "closed"]);
+export const classificationGroupSchema = z.enum(["hot", "qualify", "buyer", "redirect", "closed", "filtered"]);
 
 export const inboxFiltersSchema = z.object({
   viewMode: viewModeSchema.default("needs_review"),
