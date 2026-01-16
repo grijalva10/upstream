@@ -7,16 +7,21 @@ export async function GET(request: NextRequest) {
 
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status");
+  const qualificationStatus = searchParams.get("qualification_status");
+  const source = searchParams.get("source");
   const type = searchParams.get("type"); // buyer, seller
+  const hasBroker = searchParams.get("has_broker"); // yes, no
   const hasProperties = searchParams.get("has_properties"); // yes, no
   const limit = parseInt(searchParams.get("limit") || "20");
   const page = parseInt(searchParams.get("page") || "1");
   const offset = (page - 1) * limit;
+  const sort = searchParams.get("sort") || "created_at";
+  const desc = searchParams.get("desc") === "true";
 
   let query = supabase
     .from("companies")
-    .select("*, contacts(id), property_companies(id)", { count: "exact" })
-    .order("created_at", { ascending: false })
+    .select("*, contacts(id), property_companies(property_id)", { count: "exact" })
+    .order(sort, { ascending: !desc })
     .range(offset, offset + limit - 1);
 
   // Apply search filter
@@ -29,11 +34,28 @@ export async function GET(request: NextRequest) {
     query = query.eq("status", status);
   }
 
+  // Apply qualification status filter
+  if (qualificationStatus && qualificationStatus !== "all") {
+    query = query.eq("qualification_status", qualificationStatus);
+  }
+
+  // Apply source filter
+  if (source && source !== "all") {
+    query = query.eq("source", source);
+  }
+
   // Apply type filter (buyer/seller)
   if (type === "buyer") {
     query = query.eq("is_buyer", true);
   } else if (type === "seller") {
     query = query.eq("is_seller", true);
+  }
+
+  // Apply has_broker filter
+  if (hasBroker === "yes") {
+    query = query.eq("has_broker", true);
+  } else if (hasBroker === "no") {
+    query = query.eq("has_broker", false);
   }
 
   const { data, error, count } = await query;

@@ -260,12 +260,12 @@ function DataTableInner<T extends { id: string }>({
       </div>
 
       {/* Table - horizontal scroll on mobile */}
-      <div className="rounded-md border overflow-x-auto">
+      <div className="rounded-xl border bg-card overflow-hidden overflow-x-auto">
         <Table className="min-w-[600px]">
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-muted/30 border-b hover:bg-muted/30">
               {enableSelection && (
-                <TableHead className="w-10 hidden sm:table-cell">
+                <TableHead className="w-10 hidden sm:table-cell px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   <Checkbox
                     checked={table.rows.length > 0 && table.selectedIds.size === table.rows.length}
                     onCheckedChange={table.toggleSelectAll}
@@ -276,10 +276,10 @@ function DataTableInner<T extends { id: string }>({
                 <TableHead
                   key={column.id}
                   className={cn(
+                    "px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider",
                     column.align === "center" && "text-center",
                     column.align === "right" && "text-right",
-                    column.enableSorting && "cursor-pointer select-none",
-                    column.className
+                    column.enableSorting && "cursor-pointer select-none"
                   )}
                   onClick={() => column.enableSorting && table.setSort(column.id)}
                 >
@@ -292,18 +292,16 @@ function DataTableInner<T extends { id: string }>({
                   >
                     {column.header}
                     {column.enableSorting && (
-                      <span className="text-muted-foreground">
-                        <SortIcon columnId={column.id} sortBy={table.sortBy} sortDesc={table.sortDesc} />
-                      </span>
+                      <SortIcon columnId={column.id} sortBy={table.sortBy} sortDesc={table.sortDesc} />
                     )}
                   </div>
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="divide-y">
             {table.rows.length === 0 ? (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={(enableSelection ? 1 : 0) + table.visibleColumns.length}
                   className="h-24 text-center text-muted-foreground"
@@ -315,10 +313,13 @@ function DataTableInner<T extends { id: string }>({
               table.rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className={cn(table.selectedIds.has(row.id) && "bg-muted/50")}
+                  className={cn(
+                    "hover:bg-muted/20 transition-colors border-0",
+                    table.selectedIds.has(row.id) && "bg-muted/50"
+                  )}
                 >
                   {enableSelection && (
-                    <TableCell className="hidden sm:table-cell">
+                    <TableCell className="hidden sm:table-cell px-4 py-3">
                       <Checkbox
                         checked={table.selectedIds.has(row.id)}
                         onCheckedChange={() => table.toggleSelect(row.id)}
@@ -331,6 +332,7 @@ function DataTableInner<T extends { id: string }>({
                       <TableCell
                         key={column.id}
                         className={cn(
+                          "px-4 py-3",
                           column.align === "center" && "text-center",
                           column.align === "right" && "text-right",
                           column.className

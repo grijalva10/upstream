@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export interface Column<T> {
@@ -171,7 +171,7 @@ export function useDataTable<T extends { id: string }>({
   );
 
   // Fetch data
-  const refresh = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!endpoint) return;
 
     setLoading(true);
@@ -198,6 +198,18 @@ export function useDataTable<T extends { id: string }>({
       setLoading(false);
     }
   }, [endpoint, dataKey, page, pageSize, search, sortBy, sortDesc, filterValues]);
+
+  // Auto-fetch when URL params change (skip initial render - we have SSR data)
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    fetchData();
+  }, [fetchData]);
+
+  const refresh = useCallback(() => fetchData(), [fetchData]);
 
   // Actions
   const setPage = useCallback(

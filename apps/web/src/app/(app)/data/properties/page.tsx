@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { PropertiesDataTable } from "../_components/properties-data-table";
 
 export default async function PropertiesPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, count } = await supabase
     .from("properties")

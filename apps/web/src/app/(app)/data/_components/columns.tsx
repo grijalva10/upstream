@@ -42,15 +42,16 @@ const contactStatusColors: Record<string, string> = {
   active: "bg-green-100 text-green-800",
   dnc: "bg-red-100 text-red-800",
   bounced: "bg-orange-100 text-orange-800",
-  bad_contact: "bg-gray-100 text-gray-500",
+  unsubscribed: "bg-gray-100 text-gray-500",
 };
 
 export const contactColumns: Column<Contact>[] = [
   {
     id: "name",
     header: "Name",
-    accessorFn: (row) => [row.first_name, row.last_name].filter(Boolean).join(" ") || "-",
+    accessorKey: "name",
     enableSorting: true,
+    cell: displayValue,
   },
   {
     id: "company",
@@ -118,7 +119,7 @@ export const contactFilters: Filter[] = [
       { value: "active", label: "Active" },
       { value: "dnc", label: "DNC" },
       { value: "bounced", label: "Bounced" },
-      { value: "bad_contact", label: "Bad Contact" },
+      { value: "unsubscribed", label: "Unsubscribed" },
     ],
   },
   {
@@ -141,17 +142,23 @@ const companyStatusColors: Record<string, string> = {
   contacted: "bg-blue-100 text-blue-800",
   engaged: "bg-yellow-100 text-yellow-800",
   qualified: "bg-green-100 text-green-800",
+  handed_off: "bg-purple-100 text-purple-800",
   dnc: "bg-red-100 text-red-800",
+  rejected: "bg-red-100 text-red-800",
 };
 
-function websiteLink(url: string | null): React.ReactNode {
-  if (!url) return "-";
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-      {url.replace(/^https?:\/\//, "")}
-    </a>
-  );
-}
+const qualificationStatusColors: Record<string, string> = {
+  new: "bg-gray-100 text-gray-800",
+  in_progress: "bg-blue-100 text-blue-800",
+  qualified: "bg-green-100 text-green-800",
+  disqualified: "bg-red-100 text-red-800",
+};
+
+const sourceColors: Record<string, string> = {
+  costar: "bg-blue-100 text-blue-800",
+  manual: "bg-gray-100 text-gray-800",
+  referral: "bg-purple-100 text-purple-800",
+};
 
 export const companyColumns: Column<Company>[] = [
   {
@@ -162,26 +169,6 @@ export const companyColumns: Column<Company>[] = [
     className: "font-medium",
   },
   {
-    id: "location",
-    header: "Location",
-    accessorFn: (row) => [row.city, row.state].filter(Boolean).join(", ") || "-",
-    className: "text-muted-foreground",
-  },
-  {
-    id: "phone",
-    header: "Phone",
-    accessorKey: "phone",
-    defaultHidden: true,
-    cell: displayValue,
-  },
-  {
-    id: "website",
-    header: "Website",
-    accessorKey: "website",
-    defaultHidden: true,
-    cell: (v) => websiteLink(v as string | null),
-  },
-  {
     id: "status",
     header: "Status",
     accessorKey: "status",
@@ -189,11 +176,41 @@ export const companyColumns: Column<Company>[] = [
     cell: (v) => coloredBadge(v as string, companyStatusColors),
   },
   {
+    id: "qualification_status",
+    header: "Qualification",
+    accessorKey: "qualification_status",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, qualificationStatusColors) : "-",
+  },
+  {
     id: "type",
     header: "Type",
     align: "center",
     accessorFn: (row) => [row.is_buyer && "Buyer", row.is_seller && "Seller"].filter(Boolean).join(", "),
     cell: (_, row) => buyerSellerBadges(row.is_buyer, row.is_seller),
+  },
+  {
+    id: "source",
+    header: "Source",
+    accessorKey: "source",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, sourceColors) : "-",
+  },
+  {
+    id: "lead_score",
+    header: "Score",
+    accessorKey: "lead_score",
+    align: "right",
+    enableSorting: true,
+    cell: (v) => v != null ? String(v) : "-",
+  },
+  {
+    id: "has_broker",
+    header: "Broker",
+    accessorKey: "has_broker",
+    align: "center",
+    defaultHidden: true,
+    cell: (v) => v ? <Badge className="bg-orange-100 text-orange-800">Yes</Badge> : "-",
   },
   {
     id: "properties",
@@ -208,10 +225,18 @@ export const companyColumns: Column<Company>[] = [
     align: "right",
   },
   {
+    id: "notes",
+    header: "Notes",
+    accessorKey: "notes",
+    defaultHidden: true,
+    cell: (v) => v ? String(v).slice(0, 50) + (String(v).length > 50 ? "..." : "") : "-",
+  },
+  {
     id: "created_at",
     header: "Created",
     accessorKey: "created_at",
     align: "right",
+    enableSorting: true,
     defaultHidden: true,
     cell: (v) => new Date(v as string).toLocaleDateString(),
   },
@@ -227,7 +252,30 @@ export const companyFilters: Filter[] = [
       { value: "contacted", label: "Contacted" },
       { value: "engaged", label: "Engaged" },
       { value: "qualified", label: "Qualified" },
+      { value: "handed_off", label: "Handed Off" },
       { value: "dnc", label: "DNC" },
+      { value: "rejected", label: "Rejected" },
+    ],
+  },
+  {
+    id: "qualification_status",
+    label: "Qualification",
+    options: [
+      { value: "all", label: "All" },
+      { value: "new", label: "New" },
+      { value: "in_progress", label: "In Progress" },
+      { value: "qualified", label: "Qualified" },
+      { value: "disqualified", label: "Disqualified" },
+    ],
+  },
+  {
+    id: "source",
+    label: "Source",
+    options: [
+      { value: "all", label: "All" },
+      { value: "costar", label: "CoStar" },
+      { value: "manual", label: "Manual" },
+      { value: "referral", label: "Referral" },
     ],
   },
   {
@@ -237,6 +285,15 @@ export const companyFilters: Filter[] = [
       { value: "all", label: "All" },
       { value: "buyer", label: "Buyer" },
       { value: "seller", label: "Seller" },
+    ],
+  },
+  {
+    id: "has_broker",
+    label: "Has Broker",
+    options: [
+      { value: "all", label: "All" },
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
     ],
   },
 ];

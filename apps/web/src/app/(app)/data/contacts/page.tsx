@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ContactsDataTable } from "../_components/contacts-data-table";
 
 export default async function ContactsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, count } = await supabase
     .from("contacts")

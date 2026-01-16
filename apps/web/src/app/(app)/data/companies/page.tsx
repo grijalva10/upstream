@@ -1,13 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { CompaniesDataTable } from "../_components/companies-data-table";
 import type { Company } from "../_components/types";
 
 export default async function CompaniesPage() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, count } = await supabase
     .from("companies")
-    .select("*, contacts(id), property_companies(id)", { count: "exact" })
+    .select("*, contacts(id), property_companies(property_id)", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(20);
 

@@ -3,8 +3,7 @@
 
 export interface Contact {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
+  name: string | null;
   email: string | null;
   phone: string | null;
   title: string | null;
@@ -18,17 +17,22 @@ export interface Contact {
 
 export interface Company {
   id: string;
+  costar_company_id: string | null;
   name: string;
-  city: string | null;
-  state: string | null;
-  phone: string | null;
-  website: string | null;
   status: string;
+  source: string | null;
+  notes: string | null;
+  has_broker: boolean | null;
+  broker_contact: string | null;
+  qualification_status: string | null;
+  lead_score: number | null;
   is_buyer: boolean | null;
   is_seller: boolean | null;
+  company_type: number | null;
   contact_count: number;
   property_count: number;
   created_at: string;
+  last_contacted_at: string | null;
 }
 
 export interface Property {

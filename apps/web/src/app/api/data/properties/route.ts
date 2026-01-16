@@ -13,11 +13,13 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get("limit") || "20");
   const page = parseInt(searchParams.get("page") || "1");
   const offset = (page - 1) * limit;
+  const sort = searchParams.get("sort") || "created_at";
+  const desc = searchParams.get("desc") === "true";
 
   let query = supabase
     .from("properties")
     .select("*", { count: "exact" })
-    .order("created_at", { ascending: false })
+    .order(sort, { ascending: !desc })
     .range(offset, offset + limit - 1);
 
   // Apply search filter
