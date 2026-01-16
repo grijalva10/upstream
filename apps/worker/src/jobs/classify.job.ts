@@ -63,38 +63,71 @@ export async function handleClassify(
     };
   }
 
-  // Build the classification prompt
-  const prompt = `You are the response-classifier agent. Classify this email response.
+  // Build the classification prompt - strict JSON-only format
+  const prompt = `Classify this email. Output ONLY valid JSON, no other text.
 
+EMAIL:
 From: ${email.from_email}
 Subject: ${email.subject}
-Body:
-${email.body_text?.substring(0, 3000) || '(empty)'}
+Body: ${email.body_text?.substring(0, 2000) || '(empty)'}
 
-Classify into one of these categories:
-- interested: Shows interest in discussing property
-- pricing_given: Provides asking price, NOI, cap rate
-- question: Asks a question needing answer
-- referral: Refers to someone else to contact
-- broker_redirect: Says to contact their broker
-- soft_pass: Polite decline, may re-engage later
-- hard_pass: Firm decline, do not contact again
-- bounce: Delivery failure, invalid email
+CATEGORIES:
+- interested: Shows interest in property discussion
+- pricing_given: Provides price, NOI, or cap rate
+- question: Asks a question
+- referral: Refers to someone else
+- broker_redirect: Says contact their broker
+- soft_pass: Polite decline
+- hard_pass: Firm decline, do not contact
+- bounce: Delivery failure
 
-Return JSON only:
-{
-  "category": "one_of_the_above",
-  "confidence": 0.0-1.0,
-  "extracted_data": { "asking_price": null, "noi": null, "cap_rate": null },
-  "reasoning": "brief explanation"
-}`;
+OUTPUT FORMAT (JSON only, no markdown, no explanation):
+{"category":"<category>","confidence":<0.0-1.0>,"extracted_data":{"asking_price":null,"noi":null,"cap_rate":null},"reasoning":"<brief>"}`;
 
   try {
+    // Check if email is matched to a contact - skip if not
+    if (!email.matched_contact_id) {
+      console.log(`[classify] Skipping ${emailId} - no matched contact`);
+      await supabase
+        .from('synced_emails')
+        .update({ needs_human_review: false })
+        .eq('id', emailId);
+      return {
+        success: true,
+        emailId,
+        classification: 'skipped',
+      };
+    }
+
     // Run Claude Code headless
     const result = await runClaudeClassify(prompt);
 
+    // Try to extract JSON from result (Claude might wrap it in markdown or prose)
+    let jsonStr = result;
+
+    // Try to find JSON object in the response
+    const jsonMatch = result.match(/\{[\s\S]*"category"[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[0];
+    }
+
     // Parse result
-    const parsed = JSON.parse(result);
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error(`[classify] Failed to parse JSON from: ${result.substring(0, 200)}`);
+      // Mark for human review and return success (don't retry)
+      await supabase
+        .from('synced_emails')
+        .update({ needs_human_review: true, review_reason: 'classification_parse_error' })
+        .eq('id', emailId);
+      return {
+        success: true,
+        emailId,
+        error: 'Failed to parse classification response',
+      };
+    }
 
     // Update the email record
     const { error: updateError } = await supabase
@@ -150,8 +183,8 @@ Return JSON only:
 
 async function runClaudeClassify(prompt: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    // Use claude CLI in headless mode
-    const proc = spawn('claude', ['-p', prompt, '--output-format', 'json'], {
+    // Use claude CLI in headless mode (no --output-format json to get raw response)
+    const proc = spawn('claude', ['-p', prompt], {
       cwd: config.python.projectRoot,
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: true,
@@ -173,18 +206,8 @@ async function runClaudeClassify(prompt: string): Promise<string> {
 
     proc.on('close', (code) => {
       if (code === 0) {
-        // Try to extract JSON from the output
-        try {
-          // Claude might wrap the JSON in markdown code blocks
-          const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            resolve(jsonMatch[0]);
-          } else {
-            resolve(stdout.trim());
-          }
-        } catch {
-          resolve(stdout.trim());
-        }
+        console.log(`[classify] Raw response: ${stdout.substring(0, 200)}...`);
+        resolve(stdout.trim());
       } else {
         reject(new Error(stderr || stdout || `Exit code ${code}`));
       }

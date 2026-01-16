@@ -47,33 +47,45 @@ export function createCheckRepliesHandler(boss: PgBoss) {
 
     let queued = 0;
     let matched = 0;
+    let skipped = 0;
 
-    // Queue classification jobs
+    // Queue classification jobs - ONLY for emails that match a known contact
     for (const email of unclassified) {
       try {
         // Try to match email to a contact by from_email
-        if (email.from_email) {
-          const { data: contact } = await supabase
-            .from('contacts')
-            .select('id, company_id')
-            .eq('email', email.from_email.toLowerCase())
-            .limit(1)
-            .single();
-
-          if (contact) {
-            // Update synced_email with matched contact/company
-            await supabase
-              .from('synced_emails')
-              .update({
-                matched_contact_id: contact.id,
-                matched_company_id: contact.company_id,
-              })
-              .eq('id', email.id);
-
-            matched++;
-            console.log(`[check-replies] Matched ${email.from_email} to contact ${contact.id}`);
-          }
+        if (!email.from_email) {
+          skipped++;
+          continue;
         }
+
+        const { data: contact } = await supabase
+          .from('contacts')
+          .select('id, company_id')
+          .eq('email', email.from_email.toLowerCase())
+          .limit(1)
+          .single();
+
+        if (!contact) {
+          // No matching contact - skip classification, mark as reviewed
+          await supabase
+            .from('synced_emails')
+            .update({ needs_human_review: false })
+            .eq('id', email.id);
+          skipped++;
+          continue;
+        }
+
+        // Found matching contact - update synced_email and queue for classification
+        await supabase
+          .from('synced_emails')
+          .update({
+            matched_contact_id: contact.id,
+            matched_company_id: contact.company_id,
+          })
+          .eq('id', email.id);
+
+        matched++;
+        console.log(`[check-replies] Matched ${email.from_email} to contact ${contact.id}`);
 
         await boss.send('classify-email', {
           emailId: email.id,
@@ -83,11 +95,11 @@ export function createCheckRepliesHandler(boss: PgBoss) {
         });
         queued++;
       } catch (err) {
-        console.error(`[check-replies] Failed to queue ${email.id}:`, err);
+        console.error(`[check-replies] Failed to process ${email.id}:`, err);
       }
     }
 
-    console.log(`[check-replies] Matched ${matched} emails to contacts`);
+    console.log(`[check-replies] Matched ${matched}, skipped ${skipped} (no matching contact)`);
 
     console.log(`[check-replies] Queued ${queued} emails for classification`);
 
