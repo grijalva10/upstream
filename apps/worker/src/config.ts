@@ -53,7 +53,6 @@ export interface WorkerConfig {
   dryRun: boolean;
   debug: boolean;
   paused: boolean;
-  autoExecuteQueries: boolean;
 }
 
 export const config: WorkerConfig = {
@@ -104,7 +103,6 @@ export const config: WorkerConfig = {
   dryRun: process.env.DRY_RUN === 'true',
   debug: process.env.DEBUG === 'true',
   paused: false,
-  autoExecuteQueries: false, // Don't auto-run CoStar queries after generating payloads
 };
 
 // Function to update config from database settings

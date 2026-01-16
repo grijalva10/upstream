@@ -5,7 +5,6 @@ import { handleCheckReplies } from './check-replies.job.js';
 import { handleSendEmail } from './send-email.job.js';
 import { handleClassify } from './classify.job.js';
 import { handleProcessQueue } from './process-queue.job.js';
-import { handleCoStarQuery } from './costar-query.job.js';
 import { handleGenerateQueries } from './generate-queries.job.js';
 
 const QUEUES = [
@@ -14,7 +13,6 @@ const QUEUES = [
   'process-queue',
   'send-email',
   'classify-email',
-  'costar-query',
   'generate-queries',
 ];
 
@@ -100,19 +98,11 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
   // );
   // === END DISABLED ===
 
-  // CoStar queries (triggered by criteria approval or manual)
-  // Only 1 concurrent - CoStar is rate-sensitive
-  await boss.work(
-    'costar-query',
-    { teamSize: 1, teamConcurrency: 1 },
-    wrapHandler('costar-query', handleCoStarQuery)
-  );
-
   // Generate queries from buyer criteria (triggered by new search)
   await boss.work(
     'generate-queries',
     { teamSize: 1, teamConcurrency: 1 },
-    wrapHandler('generate-queries', (job) => handleGenerateQueries(job, boss))
+    wrapHandler('generate-queries', handleGenerateQueries)
   );
 }
 
@@ -141,5 +131,5 @@ export async function scheduleRecurringJobs(boss: PgBoss) {
   // console.log(`  - process-queue: every minute (internal: ${processQueueSeconds}s)`);
   // === END DISABLED ===
 
-  console.log(`  (recurring jobs disabled - only generate-queries and costar-query active)`);
+  console.log(`  (recurring jobs disabled - only generate-queries active)`);
 }

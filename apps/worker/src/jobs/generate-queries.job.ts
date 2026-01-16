@@ -33,8 +33,7 @@ interface SourcingAgentResult {
  * Handle a generate-queries job.
  */
 export async function handleGenerateQueries(
-  jobOrJobs: PgBoss.Job<GenerateQueriesJob> | PgBoss.Job<GenerateQueriesJob>[],
-  boss: PgBoss
+  jobOrJobs: PgBoss.Job<GenerateQueriesJob> | PgBoss.Job<GenerateQueriesJob>[]
 ): Promise<{ success: boolean; result?: unknown; error?: string }> {
   // pg-boss may pass a single job or an array - normalize it
   const job = Array.isArray(jobOrJobs) ? jobOrJobs[0] : jobOrJobs;
@@ -86,23 +85,7 @@ export async function handleGenerateQueries(
       `[generate-queries] Generated ${result.payloads.length} payloads for search ${searchId}`
     );
 
-    // Queue costar-query jobs for each payload (if auto-execute is enabled)
-    if (config.autoExecuteQueries) {
-      for (let i = 0; i < result.payloads.length; i++) {
-        const payload = result.payloads[i];
-        await boss.send("costar-query", {
-          queryType: "find_sellers",
-          criteriaId: searchId,
-          queryName: payload.name,
-          queryIndex: i,
-          payload: payload.payload,
-          options: {
-            maxProperties: 100,
-          },
-        });
-        console.log(`[generate-queries] Queued costar-query: ${payload.name}`);
-      }
-    }
+    // Extraction is done via UI -> /api/searches/[id]/run-extraction
 
     return {
       success: true,
