@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import {
   AlertTriangle,
   Archive,
@@ -10,7 +10,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  Clock,
   ExternalLink,
   FileEdit,
   Loader2,
@@ -24,7 +23,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
@@ -615,10 +613,7 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
 
   // Computed values
   const formattedDate = message.received_at
-    ? format(new Date(message.received_at), "MMM d, yyyy 'at' h:mm a")
-    : "";
-  const relativeTime = message.received_at
-    ? formatDistanceToNow(new Date(message.received_at), { addSuffix: true })
+    ? format(new Date(message.received_at), "EEE, MMM d, yyyy 'at' h:mm a")
     : "";
 
   const lowConfidence =
@@ -631,109 +626,96 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
   const hasLinkedEntities = contactName || companyName || propertyAddress;
 
   return (
-    <div className="flex h-full flex-col bg-background">
-      <ScrollArea className="flex-1">
-        <div className="space-y-4 p-4 md:p-6">
-          {/* Classification Banner */}
-          {message.classification && (
-            <ClassificationHeader
-              classification={message.classification as Classification}
-              confidence={message.classification_confidence ?? null}
-              reasoning={message.classification_reasoning ?? null}
-              isLowConfidence={lowConfidence}
-              autoHandled={!!message.auto_handled}
-              onReclassify={handleReclassify}
-              isPending={isPending}
-            />
-          )}
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 border-b bg-background">
+        {/* Classification Banner */}
+        {message.classification && (
+          <ClassificationHeader
+            classification={message.classification as Classification}
+            confidence={message.classification_confidence ?? null}
+            reasoning={message.classification_reasoning ?? null}
+            isLowConfidence={lowConfidence}
+            autoHandled={!!message.auto_handled}
+            onReclassify={handleReclassify}
+            isPending={isPending}
+          />
+        )}
 
-          {/* Email Header */}
-          <div className="flex items-start gap-4">
+        {/* Email Header */}
+        <div className="px-6 py-4">
+          <div className="flex items-start gap-3">
             <SenderAvatar
               name={message.from_name}
               email={message.from_email}
             />
 
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h2 className="text-base font-semibold text-foreground truncate">
-                    {message.subject || "(No subject)"}
-                  </h2>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-medium text-foreground truncate">
-                      {message.from_name || message.from_email}
-                    </span>
-                    {message.from_name && (
-                      <span className="text-muted-foreground text-xs truncate">
-                        &lt;{message.from_email}&gt;
-                      </span>
-                    )}
-                  </div>
-                </div>
+            <div className="flex-1 min-w-0">
+              {/* Subject */}
+              <h1 className="text-base font-semibold text-foreground leading-tight mb-1">
+                {message.subject || "(No subject)"}
+              </h1>
 
-                <div className="flex items-center gap-1 shrink-0">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>{relativeTime}</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>{formattedDate}</TooltipContent>
-                  </Tooltip>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem disabled>
-                        <Archive className="h-4 w-4 mr-2" />
-                        Archive
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+              {/* Sender line */}
+              <div className="flex items-baseline gap-1.5 text-sm">
+                <span className="font-medium text-foreground">
+                  {message.from_name || message.from_email}
+                </span>
+                {message.from_name && (
+                  <span className="text-muted-foreground text-xs">
+                    &lt;{message.from_email}&gt;
+                  </span>
+                )}
               </div>
 
-              {message.to_emails && message.to_emails.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  To: {message.to_emails.join(", ")}
-                </p>
-              )}
+              {/* To + Date line */}
+              <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                {message.to_emails && message.to_emails.length > 0 && (
+                  <>
+                    <span>to {message.to_emails[0]}{message.to_emails.length > 1 && ` +${message.to_emails.length - 1}`}</span>
+                    <span>·</span>
+                  </>
+                )}
+                <span>{formattedDate}</span>
+              </div>
             </div>
+
+            {/* Actions */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem disabled>
+                  <Archive className="h-4 w-4 mr-2" />
+                  Archive
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Linked Entities */}
           {hasLinkedEntities && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 mt-3 -mb-1">
               {contactName && (
-                <LinkedEntityChip
-                  icon={User}
-                  label="Contact"
-                  value={contactName}
-                />
+                <LinkedEntityChip icon={User} label="Contact" value={contactName} />
               )}
               {companyName && (
-                <LinkedEntityChip
-                  icon={Building2}
-                  label="Company"
-                  value={companyName}
-                />
+                <LinkedEntityChip icon={Building2} label="Company" value={companyName} />
               )}
               {propertyAddress && (
-                <LinkedEntityChip
-                  icon={MapPin}
-                  label="Property"
-                  value={propertyAddress}
-                />
+                <LinkedEntityChip icon={MapPin} label="Property" value={propertyAddress} />
               )}
             </div>
           )}
+        </div>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-6 py-4 space-y-4">
           {/* Draft Section */}
           {hasDraft && (
             <DraftSection
@@ -761,7 +743,7 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
             bodyText={message.body_text}
           />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Reply Dialog */}
       <QuickReplyDialog

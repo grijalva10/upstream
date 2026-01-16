@@ -18,6 +18,7 @@ import {
   XCircle,
   CheckCircle2,
 } from "lucide-react";
+import { format, isToday, isYesterday, isThisWeek, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -383,19 +384,19 @@ interface MailListItemProps {
 
 function formatTime(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {
-    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  } else if (diffDays === 1) {
-    return "Yesterday";
-  } else if (diffDays < 7) {
-    return date.toLocaleDateString([], { weekday: "short" });
-  } else {
-    return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  try {
+    const date = parseISO(dateStr);
+    if (isToday(date)) {
+      return format(date, "h:mm a");
+    } else if (isYesterday(date)) {
+      return "Yesterday";
+    } else if (isThisWeek(date)) {
+      return format(date, "EEE");
+    } else {
+      return format(date, "MMM d");
+    }
+  } catch {
+    return "";
   }
 }
 
