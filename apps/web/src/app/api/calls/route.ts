@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
       created_at,
       contact:contacts(
         id,
-        first_name,
-        last_name,
+        name,
         email,
         phone,
         title,
@@ -97,7 +96,7 @@ export async function POST(request: NextRequest) {
     // Verify contact exists
     const { data: contact, error: contactError } = await supabase
       .from("contacts")
-      .select("id, first_name, last_name")
+      .select("id, name")
       .eq("id", contact_id)
       .single();
 
@@ -144,7 +143,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       id: call.id,
       status: "created",
-      message: `Call scheduled with ${contact.first_name} ${contact.last_name}`,
+      message: `Call scheduled with ${contact.name}`,
     });
   } catch (error) {
     console.error("Error in POST /api/calls:", error);

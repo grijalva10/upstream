@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Play, Pause, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Users, Play, Pause, Loader2, CheckCircle, AlertCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,12 +22,44 @@ interface CampaignActionsProps {
   campaignId: string;
   status: string;
   enrollmentCount: number;
+  scheduledStartAt?: string | null;
+  hasEmails: boolean;
 }
 
-export function CampaignActions({ campaignId, status, enrollmentCount }: CampaignActionsProps) {
+function getDefaultStartTime(): string {
+  const now = new Date();
+  // Round up to next hour
+  now.setHours(now.getHours() + 1, 0, 0, 0);
+  // If before 9am, set to 9am
+  if (now.getHours() < 9) {
+    now.setHours(9, 0, 0, 0);
+  }
+  // If after 5pm, set to 9am next day
+  if (now.getHours() >= 17) {
+    now.setDate(now.getDate() + 1);
+    now.setHours(9, 0, 0, 0);
+  }
+  // Skip weekends
+  while (now.getDay() === 0 || now.getDay() === 6) {
+    now.setDate(now.getDate() + 1);
+  }
+  return now.toISOString().slice(0, 16);
+}
+
+export function CampaignActions({
+  campaignId,
+  status,
+  enrollmentCount,
+  scheduledStartAt,
+  hasEmails,
+}: CampaignActionsProps) {
   const router = useRouter();
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
+  const [startDateTime, setStartDateTime] = useState(
+    scheduledStartAt ? new Date(scheduledStartAt).toISOString().slice(0, 16) : getDefaultStartTime()
+  );
   const [notification, setNotification] = useState<{
     type: "success" | "error";
     message: string;
@@ -60,6 +94,34 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
     }
   };
 
+  const handleActivate = async () => {
+    setIsActivating(true);
+
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/activate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scheduledStartAt: new Date(startDateTime).toISOString() }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showNotification(
+          "success",
+          `Campaign activated. ${data.emailsScheduled} emails scheduled.`
+        );
+        router.refresh();
+      } else {
+        showNotification("error", data.error || "Failed to activate campaign");
+      }
+    } catch {
+      showNotification("error", "Failed to activate campaign");
+    } finally {
+      setIsActivating(false);
+    }
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     setIsUpdating(true);
 
@@ -73,7 +135,7 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
       if (res.ok) {
         showNotification(
           "success",
-          newStatus === "active" ? "Campaign activated" : "Campaign paused"
+          newStatus === "active" ? "Campaign resumed" : "Campaign paused"
         );
         router.refresh();
       } else {
@@ -90,7 +152,7 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
   const isActive = status === "active";
   const isPaused = status === "paused";
   const canEnroll = isDraft;
-  const canActivate = isDraft && enrollmentCount > 0;
+  const canActivate = isDraft && enrollmentCount > 0 && hasEmails;
   const canPause = isActive;
   const canResume = isPaused;
 
@@ -115,12 +177,12 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
           </Button>
         )}
 
-        {/* Activate button - draft with enrollments */}
+        {/* Activate button - draft with enrollments and emails */}
         {canActivate && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button disabled={isUpdating} className="gap-2">
-                {isUpdating ? (
+              <Button disabled={isActivating} className="gap-2">
+                {isActivating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Play className="h-4 w-4" />
@@ -128,30 +190,63 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
                 Activate Campaign
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-w-md">
               <AlertDialogHeader>
                 <AlertDialogTitle>Activate this campaign?</AlertDialogTitle>
-                <AlertDialogDescription className="space-y-2">
-                  <p>
-                    This will start the email sequence for all {enrollmentCount} enrolled contacts.
-                  </p>
-                  <p className="text-amber-600 dark:text-amber-400">
-                    Note: Email sending is not yet implemented. No emails will actually be sent.
-                  </p>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-4">
+                    <p>
+                      This will schedule emails for all {enrollmentCount} enrolled contacts.
+                    </p>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="start-datetime" className="text-foreground flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Start sending at
+                      </Label>
+                      <Input
+                        id="start-datetime"
+                        type="datetime-local"
+                        value={startDateTime}
+                        onChange={(e) => setStartDateTime(e.target.value)}
+                        className="text-foreground"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Emails will be sent within the campaign send window (9am-5pm in campaign timezone)
+                      </p>
+                    </div>
+
+                    <p className="text-amber-600 dark:text-amber-400 text-sm">
+                      Note: Emails will be queued but not sent until the worker is running.
+                    </p>
+                  </div>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={() => handleStatusChange("active")}
+                  onClick={handleActivate}
                   className="gap-2"
+                  disabled={isActivating}
                 >
-                  <Play className="h-4 w-4" />
+                  {isActivating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
                   Activate
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+        )}
+
+        {/* Show why can't activate */}
+        {isDraft && enrollmentCount > 0 && !hasEmails && (
+          <p className="text-sm text-muted-foreground">Generate emails to activate</p>
+        )}
+        {isDraft && enrollmentCount === 0 && (
+          <p className="text-sm text-muted-foreground">Enroll contacts to activate</p>
         )}
 
         {/* Pause button - when active */}

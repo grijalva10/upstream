@@ -1,26 +1,10 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  createCampaignSchema,
-  listCampaignsSchema,
-  formatZodError,
-} from "@/app/(app)/campaigns/_lib/schemas";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const statusParam = searchParams.get("status");
-
-    const parsed = listCampaignsSchema.safeParse({
-      status: statusParam || undefined,
-    });
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(parsed.error) },
-        { status: 400 }
-      );
-    }
+    const status = searchParams.get("status");
 
     const supabase = createAdminClient();
 
@@ -32,8 +16,8 @@ export async function GET(request: Request) {
       `)
       .order("created_at", { ascending: false });
 
-    if (parsed.data.status) {
-      query = query.eq("status", parsed.data.status);
+    if (status && ["draft", "active", "paused", "completed"].includes(status)) {
+      query = query.eq("status", status);
     }
 
     const { data, error } = await query;
@@ -56,17 +40,16 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
+    const { search_id, name } = body;
 
-    const parsed = createCampaignSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(parsed.error) },
-        { status: 400 }
-      );
+    if (!search_id || typeof search_id !== "string") {
+      return NextResponse.json({ error: "search_id is required" }, { status: 400 });
     }
 
-    const { search_id, name } = parsed.data;
+    if (!name || typeof name !== "string") {
+      return NextResponse.json({ error: "name is required" }, { status: 400 });
+    }
+
     const supabase = createAdminClient();
 
     // Verify search exists and is ready

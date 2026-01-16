@@ -29,7 +29,7 @@ export function SearchHeader({ search }: SearchHeaderProps) {
             {search.source_contact && (
               <>
                 <span>•</span>
-                <span>{search.source_contact.first_name} {search.source_contact.last_name}</span>
+                <span>{search.source_contact.name || "Unknown Contact"}</span>
               </>
             )}
             {timeAgo && (

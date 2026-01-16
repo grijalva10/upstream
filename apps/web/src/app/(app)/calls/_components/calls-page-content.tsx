@@ -15,8 +15,7 @@ interface Call {
   notes_md: string | null;
   contact: {
     id: string;
-    first_name: string;
-    last_name: string;
+    name: string | null;
     phone?: string;
     email?: string;
     company?: {
@@ -31,7 +30,7 @@ interface Call {
       id: string;
       address: string;
       city: string;
-      state: string;
+      state_code: string;
     };
   };
 }

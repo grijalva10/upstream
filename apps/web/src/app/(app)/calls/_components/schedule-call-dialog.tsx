@@ -28,8 +28,7 @@ import { ContactCombobox } from "./contact-combobox";
 
 interface Contact {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string | null;
   email?: string;
   phone?: string;
   company?: {

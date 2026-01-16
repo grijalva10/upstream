@@ -40,8 +40,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       scheduled_at,
       contact:contacts(
         id,
-        first_name,
-        last_name,
+        name,
         email,
         phone,
         title,

@@ -36,7 +36,7 @@ async function getSearch(id: string): Promise<SearchWithRelations & { source_con
   if (data.source_contact_id) {
     const { data: contact } = await supabase
       .from("contacts")
-      .select("id, first_name, last_name, email")
+      .select("id, name, email")
       .eq("id", data.source_contact_id)
       .single();
     sourceContact = contact;

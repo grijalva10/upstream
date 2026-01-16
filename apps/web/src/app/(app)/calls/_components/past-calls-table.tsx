@@ -31,8 +31,7 @@ interface PastCall {
   notes_md: string | null;
   contact: {
     id: string;
-    first_name: string;
-    last_name: string;
+    name: string | null;
     company?: {
       id: string;
       name: string;
@@ -45,7 +44,7 @@ interface PastCall {
       id: string;
       address: string;
       city: string;
-      state: string;
+      state_code: string;
     };
   };
 }
@@ -125,7 +124,7 @@ export function PastCallsTable({ calls }: PastCallsTableProps) {
                   {format(parseISO(call.scheduled_at), "MMM d, h:mm a")}
                 </TableCell>
                 <TableCell className="font-medium">
-                  {call.contact.first_name} {call.contact.last_name}
+                  {call.contact.name || "Unknown"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {call.contact.company?.name || "-"}

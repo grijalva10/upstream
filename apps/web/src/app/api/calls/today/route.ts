@@ -21,15 +21,14 @@ export async function GET() {
       status,
       contact:contacts(
         id,
-        first_name,
-        last_name,
+        name,
         phone,
         company:companies(id, name)
       ),
       deal:deals(
         id,
         display_id,
-        property:properties(id, address, city, state)
+        property:properties(id, address, city, state_code)
       )
     `
     )

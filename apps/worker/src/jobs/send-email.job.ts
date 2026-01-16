@@ -27,9 +27,17 @@ export interface SendEmailResult {
 }
 
 export async function handleSendEmail(
-  job: PgBoss.Job<SendEmailPayload>
+  job: PgBoss.Job<SendEmailPayload> | PgBoss.Job<SendEmailPayload>[]
 ): Promise<SendEmailResult> {
-  const { queueId, toEmail, subject, bodyText, priority, jobType, sequenceId } = job.data;
+  // pg-boss 10.x passes jobs as array even for single items
+  const actualJob = Array.isArray(job) ? job[0] : job;
+
+  if (!actualJob?.data) {
+    console.error('[send-email] job.data is undefined! Full job:', job);
+    throw new Error('Job data is undefined');
+  }
+
+  const { queueId, toEmail, subject, bodyText, priority, jobType, sequenceId } = actualJob.data;
   console.log(`[send-email] Processing ${queueId} -> ${toEmail}`);
 
   // Get sequence settings if this is a campaign email

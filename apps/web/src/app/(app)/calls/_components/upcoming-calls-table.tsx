@@ -21,8 +21,7 @@ interface UpcomingCall {
   status: string;
   contact: {
     id: string;
-    first_name: string;
-    last_name: string;
+    name: string | null;
     phone?: string;
     company?: {
       id: string;
@@ -36,7 +35,7 @@ interface UpcomingCall {
       id: string;
       address: string;
       city: string;
-      state: string;
+      state_code: string;
     };
   };
 }
@@ -98,7 +97,7 @@ export function UpcomingCallsTable({ calls }: UpcomingCallsTableProps) {
                       {format(parseISO(call.scheduled_at), "h:mm a")}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {call.contact.first_name} {call.contact.last_name}
+                      {call.contact.name || "Unknown"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {call.contact.company?.name || "-"}

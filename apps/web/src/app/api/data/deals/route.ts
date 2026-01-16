@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       created_at,
       property:properties(id, address, city, state, property_type),
       company:companies(id, name),
-      contact:contacts(id, first_name, last_name)
+      contact:contacts(id, name, email)
     `,
       { count: "exact" }
     )

@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  campaignIdSchema,
-  listEnrollmentsSchema,
-  formatZodError,
-} from "@/app/(app)/campaigns/_lib/schemas";
 
 export async function GET(
   request: Request,
@@ -14,51 +9,31 @@ export async function GET(
     const { id } = await params;
     const { searchParams } = new URL(request.url);
 
-    const idParsed = campaignIdSchema.safeParse({ id });
-    if (!idParsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(idParsed.error) },
-        { status: 400 }
-      );
+    if (!id) {
+      return NextResponse.json({ error: "Campaign ID required" }, { status: 400 });
     }
 
-    const queryParsed = listEnrollmentsSchema.safeParse({
-      status: searchParams.get("status") || undefined,
-      page: searchParams.get("page") || 1,
-      limit: searchParams.get("limit") || 20,
-      search: searchParams.get("search") || undefined,
-    });
-
-    if (!queryParsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(queryParsed.error) },
-        { status: 400 }
-      );
-    }
-
-    const { status, page, limit, search } = queryParsed.data;
+    const status = searchParams.get("status") || undefined;
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
     const offset = (page - 1) * limit;
 
     const supabase = createAdminClient();
 
-    // Build query
     let query = supabase
       .from("enrollments")
       .select(`
         *,
-        contact:contacts (id, first_name, last_name, email, company_id),
-        property:properties (id, address, city, state)
+        contact:contacts(id, name, email, company_id),
+        property:properties(id, address, city, state_code)
       `, { count: "exact" })
-      .eq("campaign_id", idParsed.data.id)
+      .eq("campaign_id", id)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (status) {
       query = query.eq("status", status);
     }
-
-    // Note: search filter on contact/property would require more complex query
-    // For now, we'll do client-side filtering or skip
 
     const { data, error, count } = await query;
 

@@ -31,8 +31,7 @@ async function getCall(id: string) {
       updated_at,
       contact:contacts(
         id,
-        first_name,
-        last_name,
+        name,
         email,
         phone,
         title,

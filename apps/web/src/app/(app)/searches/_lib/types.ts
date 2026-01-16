@@ -33,8 +33,7 @@ export interface SearchCampaign {
 
 export interface SearchContact {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string | null;
   email: string;
 }
 

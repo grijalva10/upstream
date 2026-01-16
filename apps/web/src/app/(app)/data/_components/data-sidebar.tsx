@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Building2, MapPin } from "lucide-react";
+import { Users, Building2, MapPin, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/data/contacts", icon: Users, label: "Contacts" },
   { href: "/data/companies", icon: Building2, label: "Companies" },
   { href: "/data/properties", icon: MapPin, label: "Properties" },
+  { href: "/data/exclusions", icon: Ban, label: "Exclusions" },
 ];
 
 export function DataSidebar() {

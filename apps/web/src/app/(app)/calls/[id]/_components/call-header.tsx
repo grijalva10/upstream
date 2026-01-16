@@ -36,8 +36,7 @@ interface CallHeaderProps {
     status: string;
     contact: {
       id: string;
-      first_name: string;
-      last_name: string;
+      name: string | null;
       phone?: string;
       company?: {
         id: string;
@@ -50,7 +49,7 @@ interface CallHeaderProps {
       property?: {
         address: string;
         city: string;
-        state: string;
+        state_code: string;
       };
     };
   };
@@ -79,7 +78,7 @@ export function CallHeader({ call }: CallHeaderProps) {
     }
   };
 
-  const contactName = `${call.contact.first_name} ${call.contact.last_name}`;
+  const contactName = call.contact.name || "Unknown";
   const scheduledTime = format(new Date(call.scheduled_at), "EEEE, MMMM d 'at' h:mm a");
   const isScheduled = call.status === "scheduled";
   const isCompleted = call.status === "completed";

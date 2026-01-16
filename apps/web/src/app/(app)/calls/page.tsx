@@ -20,8 +20,7 @@ async function getCallsData() {
     notes_md,
     contact:contacts(
       id,
-      first_name,
-      last_name,
+      name,
       email,
       phone,
       company:companies(id, name)
@@ -29,7 +28,7 @@ async function getCallsData() {
     deal:deals(
       id,
       display_id,
-      property:properties(id, address, city, state)
+      property:properties(id, address, city, state_code)
     )
   `;
 

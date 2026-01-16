@@ -66,3 +66,12 @@ export interface Campaign {
   started_at: string | null;
   completed_at: string | null;
 }
+
+export interface Exclusion {
+  id: string;
+  email: string;
+  reason: string | null;
+  bounce_type: string | null;
+  source_email_id: string | null;
+  created_at: string;
+}

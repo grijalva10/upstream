@@ -22,15 +22,14 @@ interface DealQuickViewProps {
       id: string;
       address: string;
       city: string;
-      state: string;
+      state_code: string;
       property_type?: string;
       sqft?: number;
     };
   } | null;
   contact: {
     id: string;
-    first_name: string;
-    last_name: string;
+    name: string | null;
     company?: {
       name: string;
     };
@@ -98,7 +97,7 @@ export function DealQuickView({ deal, contact }: DealQuickViewProps) {
           <div className="text-sm">
             <p className="font-medium">{deal.property.address}</p>
             <p className="text-muted-foreground">
-              {deal.property.city}, {deal.property.state}
+              {deal.property.city}, {deal.property.state_code}
             </p>
             <p className="text-muted-foreground">
               {deal.property.property_type}

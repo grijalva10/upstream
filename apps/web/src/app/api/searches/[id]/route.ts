@@ -104,7 +104,7 @@ export async function GET(
     if (search.source_contact_id) {
       const { data: contact } = await supabase
         .from("contacts")
-        .select("id, first_name, last_name, email")
+        .select("id, name, email")
         .eq("id", search.source_contact_id)
         .single();
 

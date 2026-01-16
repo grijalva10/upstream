@@ -8,11 +8,12 @@ import {
   Mail,
   MessageSquare,
   ExternalLink,
-  Clock,
-  Building2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CampaignActions } from "./_components/campaign-actions";
+import { GenerateEmailsButton } from "./_components/generate-emails-button";
+import { EmailSequence } from "./_components/email-sequence";
+import { EnrollmentsTable } from "./_components/enrollments-table";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -38,10 +39,19 @@ async function getCampaign(id: string) {
   return data;
 }
 
-async function getEnrollments(campaignId: string) {
+interface Enrollment {
+  id: string;
+  status: string;
+  current_step: number | null;
+  created_at: string;
+  contact: { id: string; name: string | null; email: string | null } | null;
+  property: { id: string; address: string | null; city: string | null; state_code: string | null } | null;
+}
+
+async function getEnrollments(campaignId: string): Promise<{ enrollments: Enrollment[]; total: number }> {
   const supabase = createAdminClient();
 
-  const { data, count } = await supabase
+  const { data, count, error } = await supabase
     .from("enrollments")
     .select(
       `
@@ -50,15 +60,19 @@ async function getEnrollments(campaignId: string) {
       current_step,
       created_at,
       contact:contacts(id, name, email),
-      property:properties(id, address, city, state)
+      property:properties(id, address, city, state_code)
     `,
       { count: "exact" }
     )
     .eq("campaign_id", campaignId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .order("created_at", { ascending: false });
 
-  return { enrollments: data ?? [], total: count ?? 0 };
+  if (error) {
+    console.error("Error fetching enrollments:", error);
+    return { enrollments: [], total: 0 };
+  }
+
+  return { enrollments: (data ?? []) as unknown as Enrollment[], total: count ?? 0 };
 }
 
 export default async function CampaignDetailPage({ params }: PageProps) {
@@ -96,9 +110,9 @@ export default async function CampaignDetailPage({ params }: PageProps) {
   ];
 
   const emails = [
-    { num: 1, subject: campaign.email_1_subject, delay: null },
-    { num: 2, subject: campaign.email_2_subject, delay: campaign.email_2_delay_days ?? 3 },
-    { num: 3, subject: campaign.email_3_subject, delay: campaign.email_3_delay_days ?? 4 },
+    { num: 1, subject: campaign.email_1_subject, body: campaign.email_1_body, delay: null },
+    { num: 2, subject: campaign.email_2_subject, body: campaign.email_2_body, delay: campaign.email_2_delay_days ?? 3 },
+    { num: 3, subject: campaign.email_3_subject, body: campaign.email_3_body, delay: campaign.email_3_delay_days ?? 4 },
   ];
 
   return (
@@ -136,6 +150,8 @@ export default async function CampaignDetailPage({ params }: PageProps) {
           campaignId={campaign.id}
           status={campaign.status}
           enrollmentCount={total}
+          scheduledStartAt={campaign.scheduled_start_at}
+          hasEmails={Boolean(campaign.email_1_subject && campaign.email_1_body)}
         />
       </div>
 
@@ -156,27 +172,16 @@ export default async function CampaignDetailPage({ params }: PageProps) {
 
       {/* Email Sequence */}
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          Email Sequence
-        </h2>
-        <div className="rounded-xl border bg-card overflow-hidden divide-y">
-          {emails.map(({ num, subject, delay }) => (
-            <div key={num} className="flex items-center gap-4 p-4">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                {num}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">
-                  {subject || <span className="text-muted-foreground italic">No subject</span>}
-                </p>
-              </div>
-              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {delay === null ? "Immediate" : `+${delay} days`}
-              </span>
-            </div>
-          ))}
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Email Sequence
+          </h2>
+          <GenerateEmailsButton
+            campaignId={campaign.id}
+            disabled={campaign.status !== "draft"}
+          />
         </div>
+        <EmailSequence emails={emails} />
       </section>
 
       {/* Enrollments */}
@@ -187,104 +192,7 @@ export default async function CampaignDetailPage({ params }: PageProps) {
           </h2>
           <span className="text-sm text-muted-foreground">{total} total</span>
         </div>
-
-        <div className="rounded-xl border bg-card overflow-hidden">
-          {/* Table header */}
-          <div className="hidden sm:grid grid-cols-[1fr_1fr_100px_80px] gap-4 px-4 py-3 bg-muted/30 border-b text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            <div>Contact</div>
-            <div>Property</div>
-            <div>Progress</div>
-            <div className="text-right">Status</div>
-          </div>
-
-          {/* Rows */}
-          {enrollments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Users className="h-8 w-8 text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground">No contacts enrolled yet</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Click &quot;Enroll Contacts&quot; to add contacts from the search
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {enrollments.map((enrollment) => (
-                <div
-                  key={enrollment.id}
-                  className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_100px_80px] gap-2 sm:gap-4 p-4 hover:bg-muted/20 transition-colors"
-                >
-                  {/* Contact */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-primary/10 text-primary flex-shrink-0">
-                      <span className="text-sm font-medium">
-                        {(enrollment.contact?.name || "?")[0].toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">
-                        {enrollment.contact?.name || "Unknown"}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {enrollment.contact?.email || "No email"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Property */}
-                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
-                    <Building2 className="h-4 w-4 text-muted-foreground hidden sm:block" />
-                    <div className="min-w-0">
-                      <p className="text-sm truncate">
-                        {enrollment.property?.address || "Unknown property"}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {[enrollment.property?.city, enrollment.property?.state]
-                          .filter(Boolean)
-                          .join(", ") || ""}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Progress */}
-                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
-                    <div className="flex gap-1">
-                      {[1, 2, 3].map((step) => (
-                        <div
-                          key={step}
-                          className={`h-2 w-5 rounded-full ${
-                            step <= (enrollment.current_step ?? 0)
-                              ? "bg-primary"
-                              : "bg-muted"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {enrollment.current_step ?? 0}/3
-                    </span>
-                  </div>
-
-                  {/* Status */}
-                  <div className="flex items-center justify-start sm:justify-end pl-12 sm:pl-0">
-                    <Badge
-                      variant="outline"
-                      className={
-                        enrollment.status === "replied"
-                          ? "text-emerald-600 border-emerald-200"
-                          : enrollment.status === "stopped"
-                          ? "text-red-600 border-red-200"
-                          : ""
-                      }
-                    >
-                      {enrollment.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <EnrollmentsTable enrollments={enrollments} total={total} />
       </section>
     </div>
   );

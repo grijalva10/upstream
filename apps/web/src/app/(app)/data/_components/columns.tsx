@@ -2,10 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Column, Filter } from "./data-table";
-import type { Contact, Company, Property, Campaign } from "./types";
+import type { Contact, Company, Property, Campaign, Exclusion } from "./types";
 
 // Re-export types for convenience
-export type { Contact, Company, Property, Campaign };
+export type { Contact, Company, Property, Campaign, Exclusion };
 
 // ============================================================================
 // SHARED HELPERS
@@ -548,6 +548,79 @@ export const campaignFilters: Filter[] = [
       { value: "active", label: "Active" },
       { value: "paused", label: "Paused" },
       { value: "completed", label: "Completed" },
+    ],
+  },
+];
+
+// ============================================================================
+// EXCLUSIONS
+// ============================================================================
+
+const exclusionReasonColors: Record<string, string> = {
+  bounce: "bg-red-100 text-red-800",
+  hard_pass: "bg-gray-100 text-gray-800",
+  unsubscribe: "bg-yellow-100 text-yellow-800",
+  manual: "bg-blue-100 text-blue-800",
+  invalid: "bg-orange-100 text-orange-800",
+};
+
+const bounceTypeColors: Record<string, string> = {
+  hard: "bg-red-100 text-red-800",
+  soft: "bg-yellow-100 text-yellow-800",
+};
+
+export const exclusionColumns: Column<Exclusion>[] = [
+  {
+    id: "email",
+    header: "Email",
+    accessorKey: "email",
+    enableSorting: true,
+    className: "font-medium",
+  },
+  {
+    id: "reason",
+    header: "Reason",
+    accessorKey: "reason",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, exclusionReasonColors) : "-",
+  },
+  {
+    id: "bounce_type",
+    header: "Bounce Type",
+    accessorKey: "bounce_type",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, bounceTypeColors) : "-",
+  },
+  {
+    id: "created_at",
+    header: "Added",
+    accessorKey: "created_at",
+    align: "right",
+    enableSorting: true,
+    cell: (v) => new Date(v as string).toLocaleDateString(),
+  },
+];
+
+export const exclusionFilters: Filter[] = [
+  {
+    id: "reason",
+    label: "Reason",
+    options: [
+      { value: "all", label: "All" },
+      { value: "bounce", label: "Bounce" },
+      { value: "hard_pass", label: "Hard Pass" },
+      { value: "unsubscribe", label: "Unsubscribe" },
+      { value: "manual", label: "Manual" },
+      { value: "invalid", label: "Invalid" },
+    ],
+  },
+  {
+    id: "bounce_type",
+    label: "Bounce Type",
+    options: [
+      { value: "all", label: "All" },
+      { value: "hard", label: "Hard" },
+      { value: "soft", label: "Soft" },
     ],
   },
 ];

@@ -25,8 +25,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       updated_at,
       contact:contacts(
         id,
-        first_name,
-        last_name,
+        name,
         email,
         phone,
         title,

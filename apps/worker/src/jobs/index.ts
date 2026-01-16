@@ -4,7 +4,7 @@ import { handleEmailSync } from './email-sync.job.js';
 import { handleCheckReplies } from './check-replies.job.js';
 import { handleSendEmail } from './send-email.job.js';
 import { handleClassify } from './classify.job.js';
-import { handleProcessQueue } from './process-queue.job.js';
+import { createProcessQueueHandler } from './process-queue.job.js';
 import { handleGenerateQueries } from './generate-queries.job.js';
 
 const QUEUES = [
@@ -62,41 +62,21 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
     };
   };
 
-  // === DISABLED FOR NOW - focusing on search/query generation ===
-  // // Scheduled jobs (run on cron)
-  // await boss.work(
-  //   'email-sync',
-  //   { teamSize: 1, teamConcurrency: 1 },
-  //   wrapHandler('email-sync', handleEmailSync)
-  // );
+  // Queue processing (runs frequently)
+  // Use factory to inject boss instance for queueing send jobs
+  const processQueueHandler = createProcessQueueHandler(boss);
+  await boss.work(
+    'process-queue',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('process-queue', processQueueHandler)
+  );
 
-  // await boss.work(
-  //   'check-replies',
-  //   { teamSize: 1, teamConcurrency: 1 },
-  //   wrapHandler('check-replies', handleCheckReplies)
-  // );
-
-  // // Queue processing (runs frequently)
-  // await boss.work(
-  //   'process-queue',
-  //   { teamSize: 1, teamConcurrency: 1 },
-  //   wrapHandler('process-queue', handleProcessQueue)
-  // );
-
-  // // Individual email sends (triggered by process-queue)
-  // await boss.work(
-  //   'send-email',
-  //   { teamSize: 1, teamConcurrency: 1 },
-  //   wrapHandler('send-email', handleSendEmail)
-  // );
-
-  // // Email classification (triggered by check-replies)
-  // await boss.work(
-  //   'classify-email',
-  //   { teamSize: 2, teamConcurrency: 2 },
-  //   wrapHandler('classify-email', handleClassify)
-  // );
-  // === END DISABLED ===
+  // Individual email sends (triggered by process-queue)
+  await boss.work(
+    'send-email',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('send-email', handleSendEmail)
+  );
 
   // Generate queries from buyer criteria (triggered by new search)
   await boss.work(
@@ -107,29 +87,9 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
 }
 
 export async function scheduleRecurringJobs(boss: PgBoss) {
-  // === DISABLED FOR NOW - focusing on search/query generation ===
-  // const emailSyncMinutes = Math.floor(config.intervals.emailSync / 60);
-  // const checkRepliesMinutes = Math.floor(config.intervals.checkReplies / 60);
-  // const processQueueSeconds = config.intervals.queueProcess;
-
-  // // Email sync - every N minutes
-  // await boss.schedule('email-sync', `*/${emailSyncMinutes} * * * *`, undefined, {
-  //   tz: config.defaultTimezone,
-  // });
-  // console.log(`  - email-sync: every ${emailSyncMinutes} minutes`);
-
-  // // Check replies - every N minutes
-  // await boss.schedule('check-replies', `*/${checkRepliesMinutes} * * * *`, undefined, {
-  //   tz: config.defaultTimezone,
-  // });
-  // console.log(`  - check-replies: every ${checkRepliesMinutes} minutes`);
-
-  // // Process queue - pg-boss cron only supports minutes, so we use a workaround
-  // await boss.schedule('process-queue', '* * * * *', undefined, {
-  //   tz: config.defaultTimezone,
-  // });
-  // console.log(`  - process-queue: every minute (internal: ${processQueueSeconds}s)`);
-  // === END DISABLED ===
-
-  console.log(`  (recurring jobs disabled - only generate-queries active)`);
+  // Process queue - every minute
+  await boss.schedule('process-queue', '* * * * *', undefined, {
+    tz: config.defaultTimezone,
+  });
+  console.log(`  - process-queue: every minute`);
 }

@@ -13,8 +13,7 @@ import { Input } from "@/components/ui/input";
 
 interface Contact {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string | null;
   email?: string;
   phone?: string;
   company?: {
@@ -65,7 +64,7 @@ export function ContactCombobox({
   }, [open, search]);
 
   const displayValue = value
-    ? `${value.first_name} ${value.last_name}${value.company ? ` - ${value.company.name}` : ""}`
+    ? `${value.name || "Unknown"}${value.company ? ` - ${value.company.name}` : ""}`
     : "Select contact...";
 
   return (
@@ -120,7 +119,7 @@ export function ContactCombobox({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">
-                        {contact.first_name} {contact.last_name}
+                        {contact.name || "Unknown"}
                       </span>
                       {value?.id === contact.id && (
                         <Check className="h-4 w-4 text-primary" />

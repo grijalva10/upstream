@@ -3,8 +3,7 @@ import { formatCurrency, formatNumber } from "./format";
 
 interface Contact {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string | null;
   email?: string;
   phone?: string;
   title?: string;
@@ -76,7 +75,7 @@ export function generateCallPrep(data: CallPrepData): string {
   if (property) {
     sections.push(`# Call Prep: ${property.address}`);
   } else if (contact) {
-    sections.push(`# Call Prep: ${contact.first_name} ${contact.last_name}`);
+    sections.push(`# Call Prep: ${contact.name || "Unknown"}`);
   } else {
     sections.push("# Call Prep");
   }
@@ -91,7 +90,7 @@ export function generateCallPrep(data: CallPrepData): string {
   if (contact) {
     sections.push("## Contact Information");
     sections.push("");
-    sections.push(`- **Name:** ${contact.first_name} ${contact.last_name}`);
+    sections.push(`- **Name:** ${contact.name || "Unknown"}`);
     if (contact.title) {
       sections.push(`- **Title:** ${contact.title}`);
     }

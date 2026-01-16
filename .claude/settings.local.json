@@ -89,7 +89,15 @@
       "Bash(npx eslint:*)",
       "Bash(claude:*)",
       "Bash(where.exe:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(cat:*)",
+      "Bash(git diff:*)",
+      "Bash(git restore:*)",
+      "Bash(npm ls:*)",
+      "Bash(start cmd /k \"python integrations/costar/service.py\")",
+      "WebFetch(domain:localhost)",
+      "Bash(pushd:*)",
+      "Bash(npx json:*)"
     ]
   }
 }

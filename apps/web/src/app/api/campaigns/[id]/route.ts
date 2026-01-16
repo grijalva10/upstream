@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  campaignIdSchema,
-  updateCampaignSchema,
-  formatZodError,
-} from "@/app/(app)/campaigns/_lib/schemas";
 
 export async function GET(
   request: Request,
@@ -13,13 +8,8 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const parsed = campaignIdSchema.safeParse({ id });
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(parsed.error) },
-        { status: 400 }
-      );
+    if (!id) {
+      return NextResponse.json({ error: "Campaign ID required" }, { status: 400 });
     }
 
     const supabase = createAdminClient();
@@ -30,7 +20,7 @@ export async function GET(
         *,
         search:searches (id, name)
       `)
-      .eq("id", parsed.data.id)
+      .eq("id", id)
       .single();
 
     if (error) {
@@ -58,40 +48,49 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    const idParsed = campaignIdSchema.safeParse({ id });
-    if (!idParsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(idParsed.error) },
-        { status: 400 }
-      );
+    if (!id) {
+      return NextResponse.json({ error: "Campaign ID required" }, { status: 400 });
     }
 
     const body = await request.json().catch(() => ({}));
-    const parsed = updateCampaignSchema.safeParse(body);
+    const validStatuses = ["draft", "active", "paused", "completed"];
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: formatZodError(parsed.error) },
-        { status: 400 }
-      );
+    // Build update object from allowed fields
+    const updates: Record<string, unknown> = {};
+
+    if (body.name && typeof body.name === "string") {
+      updates.name = body.name;
+    }
+
+    if (body.status && validStatuses.includes(body.status)) {
+      updates.status = body.status;
+      // Handle status transitions
+      if (body.status === "active") {
+        updates.started_at = new Date().toISOString();
+      } else if (body.status === "completed") {
+        updates.completed_at = new Date().toISOString();
+      }
+    }
+
+    if (body.email_1_subject !== undefined) updates.email_1_subject = body.email_1_subject;
+    if (body.email_1_body !== undefined) updates.email_1_body = body.email_1_body;
+    if (body.email_2_subject !== undefined) updates.email_2_subject = body.email_2_subject;
+    if (body.email_2_body !== undefined) updates.email_2_body = body.email_2_body;
+    if (body.email_2_delay_days !== undefined) updates.email_2_delay_days = body.email_2_delay_days;
+    if (body.email_3_subject !== undefined) updates.email_3_subject = body.email_3_subject;
+    if (body.email_3_body !== undefined) updates.email_3_body = body.email_3_body;
+    if (body.email_3_delay_days !== undefined) updates.email_3_delay_days = body.email_3_delay_days;
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
     const supabase = createAdminClient();
 
-    // Build update object
-    const updates: Record<string, unknown> = { ...parsed.data };
-
-    // Handle status transitions
-    if (parsed.data.status === "active") {
-      updates.started_at = new Date().toISOString();
-    } else if (parsed.data.status === "completed") {
-      updates.completed_at = new Date().toISOString();
-    }
-
     const { data: campaign, error } = await supabase
       .from("campaigns")
       .update(updates)
-      .eq("id", idParsed.data.id)
+      .eq("id", id)
       .select("*")
       .single();
 

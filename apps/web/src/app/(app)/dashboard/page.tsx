@@ -46,8 +46,7 @@ async function getDashboardData() {
         id,
         scheduled_at,
         contact:contacts (
-          first_name,
-          last_name
+          name
         ),
         deal:deals (
           property:properties (
@@ -131,9 +130,7 @@ async function getDashboardData() {
         hour: "numeric",
         minute: "2-digit",
       }),
-      contactName: call.contact
-        ? `${call.contact.first_name} ${call.contact.last_name}`
-        : "Unknown",
+      contactName: call.contact?.name || "Unknown",
       propertyAddress: call.deal?.property?.address || "No property",
     })) || [];
 
