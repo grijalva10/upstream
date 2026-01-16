@@ -85,7 +85,7 @@ function calculateCounts(messages: InboxMessage[]): InboxCounts {
 
   for (const msg of messages) {
     byStatus[msg.status] = (byStatus[msg.status] || 0) + 1;
-    const classification = msg.classification || "unclassified";
+    const classification = msg.classification || "unclear";
     byClassification[classification] = (byClassification[classification] || 0) + 1;
   }
 

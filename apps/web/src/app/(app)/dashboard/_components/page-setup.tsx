@@ -1,18 +1,30 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { PageProvider } from "@/components/layout";
 
 interface PageSetupProps {
   children: ReactNode;
-  description?: string;
 }
 
-export function PageSetup({ children, description }: PageSetupProps): ReactNode {
+export function PageSetup({ children }: PageSetupProps): ReactNode {
+  const [today, setToday] = useState<string>("");
+
+  useEffect(() => {
+    setToday(
+      new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    );
+  }, []);
+
   return (
     <PageProvider
       title="Command Center"
-      description={description}
+      description={today}
       breadcrumbs={[{ label: "Dashboard" }]}
     >
       {children}

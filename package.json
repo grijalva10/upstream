@@ -10,5 +10,8 @@
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",
     "db:studio": "start http://127.0.0.1:55323"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

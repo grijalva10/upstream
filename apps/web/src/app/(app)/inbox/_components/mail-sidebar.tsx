@@ -70,7 +70,7 @@ const filterGroups: { title: string; items: FilterItem[] }[] = [
     items: [
       { id: "schedule_call", label: "Schedule Call", icon: Phone, colorClass: "text-purple-500" },
       { id: "question", label: "Question", icon: HelpCircle, colorClass: "text-yellow-500" },
-      { id: "unclassified", label: "Unclassified", icon: CircleHelp, colorClass: "text-gray-500" },
+      { id: "unclear", label: "Unclear", icon: CircleHelp, colorClass: "text-gray-500" },
     ],
   },
   {

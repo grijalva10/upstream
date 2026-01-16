@@ -1,9 +1,48 @@
-# Start Upstream development environment
+# Start Upstream development environment (single console)
 # Usage: .\scripts\dev.ps1
 
-Write-Host "Checking Supabase status..." -ForegroundColor Cyan
+Write-Host "================================" -ForegroundColor Cyan
+Write-Host "  Upstream Dev Environment" -ForegroundColor Cyan
+Write-Host "================================" -ForegroundColor Cyan
+Write-Host ""
 
-# Check if Supabase is running (suppress stderr noise)
+# Kill any existing instances first
+Write-Host "Cleaning up existing processes..." -ForegroundColor Yellow
+
+# Stop CoStar service (port 8765)
+$costarProc = Get-NetTCPConnection -LocalPort 8765 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -First 1
+if ($costarProc) {
+    Stop-Process -Id $costarProc -Force -ErrorAction SilentlyContinue
+    Write-Host "  Stopped existing CoStar service" -ForegroundColor Gray
+}
+
+# Stop Agent service (port 8766)
+$agentProc = Get-NetTCPConnection -LocalPort 8766 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -First 1
+if ($agentProc) {
+    Stop-Process -Id $agentProc -Force -ErrorAction SilentlyContinue
+    Write-Host "  Stopped existing Agent service" -ForegroundColor Gray
+}
+
+# Stop worker
+$nodeProcs = Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue | Where-Object {
+    $_.CommandLine -match "apps[/\\]worker"
+}
+if ($nodeProcs) {
+    $nodeProcs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Write-Host "  Stopped existing Worker" -ForegroundColor Gray
+}
+
+# Stop web app (port 3000)
+$webProc = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -First 1
+if ($webProc) {
+    Stop-Process -Id $webProc -Force -ErrorAction SilentlyContinue
+    Write-Host "  Stopped existing Web app" -ForegroundColor Gray
+}
+
+Write-Host ""
+
+# Check if Supabase is running
+Write-Host "Checking Supabase status..." -ForegroundColor Cyan
 $null = npx supabase status 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Starting Supabase..." -ForegroundColor Yellow
@@ -18,34 +57,23 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "Starting worker in background..." -ForegroundColor Cyan
-
-# Start worker in a new terminal window
-$workerPath = Join-Path $PSScriptRoot "..\apps\worker"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$workerPath'; Write-Host 'Starting pg-boss worker...' -ForegroundColor Green; npm run dev"
-
-Write-Host "Worker started in new terminal" -ForegroundColor Green
+Write-Host "Starting all services in parallel..." -ForegroundColor Cyan
+Write-Host "  [web]    -> http://localhost:3000" -ForegroundColor White
+Write-Host "  [worker] -> pg-boss background jobs" -ForegroundColor White
+Write-Host "  [costar] -> http://localhost:8765" -ForegroundColor White
+Write-Host "  [agent]  -> http://localhost:8766" -ForegroundColor White
 Write-Host ""
-Write-Host "Starting CoStar service in background..." -ForegroundColor Cyan
-
-# Start CoStar service in a new terminal window
-$projectRoot = Join-Path $PSScriptRoot ".."
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$projectRoot'; Write-Host 'Starting CoStar session service on port 8765...' -ForegroundColor Green; python integrations/costar/service.py"
-
-Write-Host "CoStar service started in new terminal" -ForegroundColor Green
-Write-Host "  -> Go to Settings > CoStar to authenticate" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "Starting Agent service in background..." -ForegroundColor Cyan
-
-# Start Agent service in a new terminal window
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$projectRoot'; Write-Host 'Starting Claude Agent service on port 8766...' -ForegroundColor Green; python orchestrator/service.py"
-
-Write-Host "Agent service started in new terminal" -ForegroundColor Green
-Write-Host "  -> Runs Claude agents in headless mode" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "Starting web app..." -ForegroundColor Cyan
-Write-Host "Open http://localhost:3000" -ForegroundColor Yellow
+Write-Host "Press Ctrl+C to stop all services" -ForegroundColor Yellow
 Write-Host ""
 
-Set-Location apps/web
-npm run dev
+# Run all services with concurrently
+npx concurrently `
+    --names "web,worker,costar,agent" `
+    --prefix-colors "blue,green,yellow,magenta" `
+    --prefix "[{name}]" `
+    --kill-others-on-fail `
+    --handle-input `
+    "cd apps/web && npm run dev" `
+    "cd apps/worker && npm run dev" `
+    "python integrations/costar/service.py" `
+    "python orchestrator/service.py"

@@ -5,34 +5,36 @@ import { z } from "zod";
 // =============================================================================
 
 export const CLASSIFICATIONS = {
-  interested: {
+  // HOT (seller interested)
+  hot_interested: {
     label: "Interested",
-    shortLabel: "Interested",
+    shortLabel: "Hot",
     color: "green",
     group: "hot",
     actions: ["create_deal", "schedule_call", "reply"],
   },
-  wants_offer: {
-    label: "Wants Offer",
-    shortLabel: "Offer",
+  hot_pricing: {
+    label: "Pricing Given",
+    shortLabel: "Pricing",
     color: "green",
     group: "hot",
     actions: ["create_deal", "schedule_call", "reply"],
   },
-  wants_to_buy: {
-    label: "Wants to Buy",
-    shortLabel: "Buyer",
-    color: "blue",
-    group: "hot",
-    actions: ["create_search", "schedule_call", "reply"],
-  },
-  schedule_call: {
-    label: "Schedule Call",
+  hot_schedule: {
+    label: "Wants Call",
     shortLabel: "Call",
-    color: "purple",
-    group: "action",
+    color: "green",
+    group: "hot",
     actions: ["schedule_call", "reply"],
   },
+  hot_confirm: {
+    label: "Confirmed",
+    shortLabel: "Confirm",
+    color: "green",
+    group: "hot",
+    actions: ["schedule_call", "reply"],
+  },
+  // QUALIFICATION
   question: {
     label: "Question",
     shortLabel: "?",
@@ -40,29 +42,81 @@ export const CLASSIFICATIONS = {
     group: "action",
     actions: ["reply"],
   },
-  not_interested: {
-    label: "Not Interested",
-    shortLabel: "Pass",
-    color: "gray",
-    group: "closed",
+  info_request: {
+    label: "Info Request",
+    shortLabel: "Info",
+    color: "yellow",
+    group: "action",
+    actions: ["reply"],
+  },
+  doc_promised: {
+    label: "Doc Promised",
+    shortLabel: "Promised",
+    color: "yellow",
+    group: "action",
+    actions: ["reply", "mark_reviewed"],
+  },
+  doc_received: {
+    label: "Doc Received",
+    shortLabel: "Docs",
+    color: "green",
+    group: "action",
+    actions: ["create_deal", "reply"],
+  },
+  // BUYER
+  buyer_inquiry: {
+    label: "Buyer Inquiry",
+    shortLabel: "Buyer",
+    color: "blue",
+    group: "action",
+    actions: ["create_search", "reply"],
+  },
+  buyer_criteria_update: {
+    label: "Criteria Update",
+    shortLabel: "Criteria",
+    color: "blue",
+    group: "action",
+    actions: ["reply", "mark_reviewed"],
+  },
+  // REDIRECT
+  referral: {
+    label: "Referral",
+    shortLabel: "Referral",
+    color: "orange",
+    group: "redirect",
+    actions: ["reply", "archive"],
+  },
+  broker: {
+    label: "Broker",
+    shortLabel: "Broker",
+    color: "orange",
+    group: "redirect",
     actions: ["archive"],
   },
   wrong_contact: {
     label: "Wrong Contact",
     shortLabel: "Wrong",
     color: "orange",
+    group: "redirect",
+    actions: ["archive"],
+  },
+  ooo: {
+    label: "Out of Office",
+    shortLabel: "OOO",
+    color: "gray",
+    group: "redirect",
+    actions: ["mark_reviewed"],
+  },
+  // CLOSED
+  soft_pass: {
+    label: "Soft Pass",
+    shortLabel: "Pass",
+    color: "gray",
     group: "closed",
     actions: ["archive"],
   },
-  broker_redirect: {
-    label: "Broker",
-    shortLabel: "Broker",
-    color: "orange",
-    group: "closed",
-    actions: ["archive"],
-  },
-  dnc: {
-    label: "DNC",
+  hard_pass: {
+    label: "Hard Pass",
     shortLabel: "DNC",
     color: "red",
     group: "closed",
@@ -75,9 +129,17 @@ export const CLASSIFICATIONS = {
     group: "closed",
     actions: ["confirm_bounce"],
   },
-  unclassified: {
-    label: "Unclassified",
-    shortLabel: "New",
+  // OTHER
+  general_update: {
+    label: "General",
+    shortLabel: "General",
+    color: "gray",
+    group: "action",
+    actions: ["reply", "mark_reviewed"],
+  },
+  unclear: {
+    label: "Unclear",
+    shortLabel: "?",
     color: "gray",
     group: "action",
     actions: ["reply", "mark_reviewed"],
@@ -85,20 +147,28 @@ export const CLASSIFICATIONS = {
 } as const;
 
 export type Classification = keyof typeof CLASSIFICATIONS;
-export type ClassificationGroup = "hot" | "action" | "closed";
+export type ClassificationGroup = "hot" | "action" | "redirect" | "closed";
 
 export const classificationSchema = z.enum([
-  "interested",
-  "wants_offer",
-  "wants_to_buy",
-  "schedule_call",
+  "hot_interested",
+  "hot_pricing",
+  "hot_schedule",
+  "hot_confirm",
   "question",
-  "not_interested",
+  "info_request",
+  "doc_promised",
+  "doc_received",
+  "buyer_inquiry",
+  "buyer_criteria_update",
+  "referral",
+  "broker",
   "wrong_contact",
-  "broker_redirect",
-  "dnc",
+  "ooo",
+  "soft_pass",
+  "hard_pass",
   "bounce",
-  "unclassified",
+  "general_update",
+  "unclear",
 ]);
 
 // =============================================================================
@@ -193,26 +263,37 @@ export const enrollmentSchema = z.object({
   campaign_id: z.string().uuid(),
 });
 
+// Helper for nullable UUID - accepts any string or null
+const nullableUuid = z.string().nullable().optional();
+
 export const inboxMessageSchema = z.object({
   id: z.string().uuid(),
-  outlook_id: z.string().nullable(),
-  thread_id: z.string().nullable(),
+  outlook_entry_id: z.string().nullable().optional(),
+  outlook_conversation_id: z.string().nullable().optional(),
+  thread_id: z.string().nullable().optional(),
   from_email: z.string().email(),
-  from_name: z.string().nullable(),
-  to_email: z.string().nullable(),
-  subject: z.string().nullable(),
-  body_text: z.string().nullable(),
-  body_html: z.string().nullable(),
-  received_at: z.string().datetime(),
-  enrollment_id: z.string().uuid().nullable(),
-  contact_id: z.string().uuid().nullable(),
-  property_id: z.string().uuid().nullable(),
-  classification: classificationSchema.nullable(),
-  classification_confidence: z.number().min(0).max(1).nullable(),
-  classification_reasoning: z.string().nullable(),
-  status: statusSchema,
-  action_taken: z.string().nullable(),
-  created_at: z.string().datetime(),
+  from_name: z.string().nullable().optional(),
+  to_emails: z.array(z.string()).nullable().optional(),
+  subject: z.string().nullable().optional(),
+  body_text: z.string().nullable().optional(),
+  body_html: z.string().nullable().optional(),
+  received_at: z.string().nullable().optional(),
+  sent_at: z.string().nullable().optional(),
+  direction: z.enum(["inbound", "outbound"]).default("inbound"),
+  enrollment_id: nullableUuid,
+  matched_contact_id: nullableUuid,
+  matched_company_id: nullableUuid,
+  matched_property_id: nullableUuid,
+  classification: z.string().nullable().optional(),
+  classification_confidence: z.number().min(0).max(1).nullable().optional(),
+  classification_reasoning: z.string().nullable().optional(),
+  status: z.string().nullable().default("new"),
+  action_taken: z.string().nullable().optional(),
+  needs_review: z.boolean().nullable().optional(),
+  auto_handled: z.boolean().nullable().optional(),
+  is_read: z.boolean().nullable().optional(),
+  has_attachments: z.boolean().nullable().optional(),
+  created_at: z.string().nullable().optional(),
   contact: contactSchema.nullable().optional(),
   property: propertySchema.nullable().optional(),
   enrollment: enrollmentSchema.nullable().optional(),
@@ -251,9 +332,12 @@ export const replyRequestSchema = z.object({
 // Helper Functions
 // =============================================================================
 
-export function getClassificationConfig(classification: Classification | null) {
-  if (!classification) return CLASSIFICATIONS.unclassified;
-  return CLASSIFICATIONS[classification];
+export function getClassificationConfig(classification: Classification | string | null) {
+  if (!classification) return CLASSIFICATIONS.unclear;
+  if (classification in CLASSIFICATIONS) {
+    return CLASSIFICATIONS[classification as Classification];
+  }
+  return CLASSIFICATIONS.unclear;
 }
 
 export function getAvailableActions(

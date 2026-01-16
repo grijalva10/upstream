@@ -40,16 +40,17 @@ async function getInboxData(searchParams: Record<string, string | string[] | und
 
   // Build query with server-side filtering
   let query = supabase
-    .from("inbox_messages")
+    .from("synced_emails")
     .select(
       `
       *,
-      contact:contact_id(name, email),
-      property:property_id(address, property_name),
+      contact:matched_contact_id(name, email),
+      property:matched_property_id(address, property_name),
       enrollment:enrollment_id(campaign_id)
     `,
       { count: "exact" }
     )
+    .eq("direction", "inbound")
     .order("received_at", { ascending: false });
 
   // Apply filters
@@ -58,7 +59,7 @@ async function getInboxData(searchParams: Record<string, string | string[] | und
   }
 
   if (filters.classification !== "all") {
-    if (filters.classification === "unclassified") {
+    if (filters.classification === "unclear") {
       query = query.is("classification", null);
     } else {
       query = query.eq("classification", filters.classification);
@@ -101,10 +102,11 @@ async function getInboxCounts(): Promise<{
 }> {
   const supabase = await createClient();
 
-  // Get all messages for counting (just ids and relevant fields)
+  // Get all inbound messages for counting (just ids and relevant fields)
   const { data, error } = await supabase
-    .from("inbox_messages")
-    .select("status, classification");
+    .from("synced_emails")
+    .select("status, classification")
+    .eq("direction", "inbound");
 
   if (error || !data) {
     return {
@@ -118,7 +120,7 @@ async function getInboxCounts(): Promise<{
 
   for (const row of data) {
     byStatus[row.status] = (byStatus[row.status] || 0) + 1;
-    const classification = row.classification || "unclassified";
+    const classification = row.classification || "unclear";
     byClassification[classification] = (byClassification[classification] || 0) + 1;
   }
 

@@ -29,7 +29,7 @@ export async function POST(
 
     // Get the inbox message first
     const { data: message, error: fetchError } = await supabase
-      .from("inbox_messages")
+      .from("synced_emails")
       .select("*")
       .eq("id", id)
       .single();
@@ -46,7 +46,7 @@ export async function POST(
 
     switch (action) {
       case "create_deal": {
-        if (!message.property_id) {
+        if (!message.matched_property_id) {
           return NextResponse.json(
             { error: "No property linked to this message" },
             { status: 400 }
@@ -57,7 +57,7 @@ export async function POST(
         const { data: existingDeal } = await supabase
           .from("deals")
           .select("id")
-          .eq("property_id", message.property_id)
+          .eq("property_id", message.matched_property_id)
           .single();
 
         if (existingDeal) {
@@ -71,8 +71,8 @@ export async function POST(
         const { data: deal, error: dealError } = await supabase
           .from("deals")
           .insert({
-            property_id: message.property_id,
-            contact_id: message.contact_id,
+            property_id: message.matched_property_id,
+            contact_id: message.matched_contact_id,
             enrollment_id: message.enrollment_id,
             status: "qualifying",
           })
@@ -93,7 +93,7 @@ export async function POST(
       }
 
       case "schedule_call": {
-        if (!message.contact_id) {
+        if (!message.matched_contact_id) {
           return NextResponse.json(
             { error: "No contact linked to this message" },
             { status: 400 }
@@ -102,11 +102,11 @@ export async function POST(
 
         // Get or create deal for this property if exists
         let dealId: string | null = null;
-        if (message.property_id) {
+        if (message.matched_property_id) {
           const { data: existingDeal } = await supabase
             .from("deals")
             .select("id")
-            .eq("property_id", message.property_id)
+            .eq("property_id", message.matched_property_id)
             .single();
           dealId = existingDeal?.id || null;
         }
@@ -119,7 +119,7 @@ export async function POST(
         const { data: call, error: callError } = await supabase
           .from("calls")
           .insert({
-            contact_id: message.contact_id,
+            contact_id: message.matched_contact_id,
             deal_id: dealId,
             scheduled_at: scheduledAt.toISOString(),
             status: "scheduled",
@@ -197,7 +197,7 @@ export async function POST(
           .insert({
             name: `Inbound - ${message.from_name || message.from_email}`,
             source: "inbound",
-            source_contact_id: message.contact_id,
+            source_contact_id: message.matched_contact_id,
             criteria_json: {
               source_message_id: message.id,
               notes: "Created from inbox reply - needs criteria capture",
@@ -240,7 +240,7 @@ export async function POST(
     // Update the message status
     const newStatus = action === "mark_reviewed" ? "reviewed" : "actioned";
     const { error: updateError } = await supabase
-      .from("inbox_messages")
+      .from("synced_emails")
       .update({
         status: newStatus,
         action_taken: actionTaken,

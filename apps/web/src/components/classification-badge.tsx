@@ -22,7 +22,7 @@ export function ClassificationBadge({
   size = "default",
   showLabel = true,
 }: ClassificationBadgeProps) {
-  const config = (type && CLASSIFICATIONS[type]) || CLASSIFICATIONS.unclassified;
+  const config = (type && CLASSIFICATIONS[type as Classification]) || CLASSIFICATIONS.unclear;
   const colorClass = colorClasses[config.color];
 
   if (!showLabel) {

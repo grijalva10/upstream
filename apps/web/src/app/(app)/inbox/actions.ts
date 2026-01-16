@@ -34,7 +34,7 @@ export async function reclassifyMessage(
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from("inbox_messages")
+    .from("synced_emails")
     .update({
       classification: parsed.data,
       classification_confidence: 1.0,
@@ -69,7 +69,7 @@ export async function takeAction(
 
   // Fetch message
   const { data: message, error: fetchError } = await supabase
-    .from("inbox_messages")
+    .from("synced_emails")
     .select("*")
     .eq("id", messageId)
     .single();
@@ -83,7 +83,7 @@ export async function takeAction(
 
   switch (parsed.data) {
     case "create_deal": {
-      if (!message.property_id) {
+      if (!message.matched_property_id) {
         return { success: false, error: "No property linked to this message" };
       }
 
@@ -91,7 +91,7 @@ export async function takeAction(
       const { data: existing } = await supabase
         .from("deals")
         .select("id, display_id")
-        .eq("property_id", message.property_id)
+        .eq("property_id", message.matched_property_id)
         .single();
 
       if (existing) {
@@ -101,8 +101,8 @@ export async function takeAction(
       const { data: deal, error: dealError } = await supabase
         .from("deals")
         .insert({
-          property_id: message.property_id,
-          contact_id: message.contact_id,
+          property_id: message.matched_property_id,
+          contact_id: message.matched_contact_id,
           enrollment_id: message.enrollment_id,
           status: "qualifying",
         })
@@ -120,17 +120,17 @@ export async function takeAction(
     }
 
     case "schedule_call": {
-      if (!message.contact_id) {
+      if (!message.matched_contact_id) {
         return { success: false, error: "No contact linked to this message" };
       }
 
       // Find deal if exists
       let dealId: string | null = null;
-      if (message.property_id) {
+      if (message.matched_property_id) {
         const { data: deal } = await supabase
           .from("deals")
           .select("id")
-          .eq("property_id", message.property_id)
+          .eq("property_id", message.matched_property_id)
           .single();
         dealId = deal?.id || null;
       }
@@ -141,7 +141,7 @@ export async function takeAction(
       const { data: call, error: callError } = await supabase
         .from("calls")
         .insert({
-          contact_id: message.contact_id,
+          contact_id: message.matched_contact_id,
           deal_id: dealId,
           scheduled_at: scheduledAt.toISOString(),
           status: "scheduled",
@@ -165,7 +165,7 @@ export async function takeAction(
         .insert({
           name: `Inbound - ${message.from_name || message.from_email}`,
           source: "inbound",
-          source_contact_id: message.contact_id,
+          source_contact_id: message.matched_contact_id,
           criteria_json: { source_message_id: messageId },
           status: "pending_queries",
         })
@@ -238,7 +238,7 @@ export async function takeAction(
   // Update message status
   const newStatus = action === "mark_reviewed" ? "reviewed" : "actioned";
   const { error: updateError } = await supabase
-    .from("inbox_messages")
+    .from("synced_emails")
     .update({ status: newStatus, action_taken: actionTaken })
     .eq("id", messageId);
 
@@ -269,7 +269,7 @@ export async function queueReply(
 
   // Get message
   const { data: message, error: fetchError } = await supabase
-    .from("inbox_messages")
+    .from("synced_emails")
     .select("from_email, from_name, contact_id")
     .eq("id", messageId)
     .single();
@@ -280,11 +280,11 @@ export async function queueReply(
 
   // Get company from contact
   let companyId: string | null = null;
-  if (message.contact_id) {
+  if (message.matched_contact_id) {
     const { data: contact } = await supabase
       .from("contacts")
       .select("company_id")
-      .eq("id", message.contact_id)
+      .eq("id", message.matched_contact_id)
       .single();
     companyId = contact?.company_id || null;
   }
@@ -295,7 +295,7 @@ export async function queueReply(
     subject: parsed.data.subject,
     body: parsed.data.body,
     company_id: companyId,
-    contact_id: message.contact_id,
+    contact_id: message.matched_contact_id,
     in_reply_to_email_id: messageId,
     draft_type: "qualification",
     status: "pending",

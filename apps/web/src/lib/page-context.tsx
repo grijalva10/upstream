@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 
@@ -49,8 +50,13 @@ export function PageContextProvider({
     setState(defaultState);
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ ...state, setPageContext, resetPageContext }),
+    [state, setPageContext, resetPageContext]
+  );
+
   return (
-    <PageContext.Provider value={{ ...state, setPageContext, resetPageContext }}>
+    <PageContext.Provider value={contextValue}>
       {children}
     </PageContext.Provider>
   );

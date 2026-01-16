@@ -20,7 +20,7 @@ export async function POST(
 
     // Update the inbox message classification
     const { error } = await supabase
-      .from("inbox_messages")
+      .from("synced_emails")
       .update({
         classification,
         classification_confidence: 1.0, // Human override = full confidence

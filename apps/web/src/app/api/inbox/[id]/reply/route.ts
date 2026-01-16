@@ -20,8 +20,8 @@ export async function POST(
 
     // Get the original message to extract context
     const { data: message, error: messageError } = await supabase
-      .from("inbox_messages")
-      .select("from_email, from_name, contact_id, property_id, enrollment_id")
+      .from("synced_emails")
+      .select("from_email, from_name, matched_contact_id, matched_property_id, enrollment_id")
       .eq("id", id)
       .single();
 
@@ -34,11 +34,11 @@ export async function POST(
 
     // Get company_id from contact if available
     let companyId: string | null = null;
-    if (message.contact_id) {
+    if (message.matched_contact_id) {
       const { data: contact } = await supabase
         .from("contacts")
         .select("company_id")
-        .eq("id", message.contact_id)
+        .eq("id", message.matched_contact_id)
         .single();
       companyId = contact?.company_id || null;
     }
@@ -50,7 +50,7 @@ export async function POST(
       subject: subject || "Re:",
       body: body.trim(),
       company_id: companyId,
-      contact_id: message.contact_id,
+      contact_id: message.matched_contact_id,
       in_reply_to_email_id: id,
       draft_type: "qualification",
       status: "pending",

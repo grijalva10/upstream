@@ -122,8 +122,18 @@ ALTER TABLE companies
 
 COMMENT ON COLUMN companies.company_type IS 'Primary type: owner, buyer, broker, other';
 
--- Backfill company_type from existing is_buyer/is_seller flags
-UPDATE companies SET company_type = 'buyer' WHERE is_buyer = true AND company_type = 'owner';
+-- Backfill company_type from existing is_buyer/is_seller flags (only if text column)
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'companies'
+          AND column_name = 'company_type'
+          AND data_type = 'text'
+    ) THEN
+        UPDATE companies SET company_type = 'buyer' WHERE is_buyer = true AND company_type = 'owner';
+    END IF;
+END $$;
 
 -- =============================================================================
 -- PART 4: EXTEND SYNCED_EMAILS TABLE (Consolidate from inbox_messages)
