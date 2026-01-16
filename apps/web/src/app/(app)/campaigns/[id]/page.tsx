@@ -10,6 +10,7 @@ import { EnrollmentsTab } from "./_components/enrollments-tab";
 import { ActivityTab } from "./_components/activity-tab";
 import { SettingsTab } from "./_components/settings-tab";
 import { CampaignErrorBoundary } from "./_components/error-boundary";
+import { CampaignActions } from "./_components/campaign-actions";
 import type { CampaignWithSearch } from "../_lib/types";
 import { CampaignStatusBadge } from "../_lib/utils";
 
@@ -67,7 +68,7 @@ export default async function CampaignDetailPage({ params }: PageProps) {
         </Link>
       </nav>
 
-      <Header campaign={campaign} />
+      <Header campaign={campaign} enrollmentCount={enrollmentCount} />
 
       <CampaignErrorBoundary>
         <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
@@ -107,7 +108,7 @@ export default async function CampaignDetailPage({ params }: PageProps) {
   );
 }
 
-function Header({ campaign }: { campaign: CampaignWithSearch }) {
+function Header({ campaign, enrollmentCount }: { campaign: CampaignWithSearch; enrollmentCount: number }) {
   return (
     <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4 sm:mb-6">
       <div>
@@ -124,7 +125,14 @@ function Header({ campaign }: { campaign: CampaignWithSearch }) {
           </p>
         )}
       </div>
-      <CampaignStatusBadge status={campaign.status} />
+      <div className="flex items-center gap-3">
+        <CampaignActions
+          campaignId={campaign.id}
+          status={campaign.status}
+          enrollmentCount={enrollmentCount}
+        />
+        <CampaignStatusBadge status={campaign.status} />
+      </div>
     </header>
   );
 }
