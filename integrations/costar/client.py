@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 GRAPHQL_URL = "https://product.costar.com/graphql"
 PROPERTY_SEARCH_URL = "https://product.costar.com/bff2/property/search/list-properties"
+PROPERTY_COUNT_URL = "https://product.costar.com/bff2/property/search/count"
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2.0
@@ -149,3 +150,26 @@ class CoStarClient:
 
         logger.info(f"Total: {len(all_pins)} properties")
         return all_pins
+
+    async def count_properties(self, payload: Dict) -> Dict:
+        """Get property counts for a search payload without fetching all data."""
+        await self._enforce_rate_limit()
+
+        try:
+            response = await self.tab.request.post(
+                PROPERTY_COUNT_URL,
+                json=payload,
+                timeout=REQUEST_TIMEOUT
+            )
+
+            if not response or not response.ok:
+                logger.error(f"Property count failed: status={getattr(response, 'status', 'No response')}")
+                return {"error": "Count request failed"}
+
+            data = response.json()
+            logger.info(f"Count result: {data}")
+            return data
+
+        except Exception as e:
+            logger.error(f"Count error: {e}")
+            return {"error": str(e)}

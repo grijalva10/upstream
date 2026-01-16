@@ -14,6 +14,7 @@ API Endpoints:
     POST /stop          - Stop browser session
     POST /auth          - Trigger re-authentication
     POST /query         - Execute a query using the session
+    POST /count         - Get property counts for payloads (fast preview)
 """
 
 import asyncio
@@ -331,6 +332,76 @@ def execute_query():
     return jsonify(result["data"])
 
 
+@app.route("/count", methods=["POST"])
+def count_properties():
+    """Get property counts for search payloads without fetching all data."""
+    global session, loop
+
+    if state.status != "connected" or not session:
+        return jsonify({"error": "Session not connected"}), 400
+
+    if not is_session_valid():
+        return jsonify({"error": "Session expired - please re-authenticate"}), 401
+
+    data = request.json
+    payload = data.get("payload", {})
+
+    logger.info(f"Count request for {len(payload) if isinstance(payload, list) else 1} payload(s)")
+
+    result = {"error": None, "data": None}
+    done_event = threading.Event()
+
+    async def run_count():
+        try:
+            client = CoStarClient(session.tab, rate_limit=1.0)
+
+            # Handle single payload or list of payloads
+            payload_list = [payload] if not isinstance(payload, list) else payload
+
+            counts = []
+            for i, p in enumerate(payload_list):
+                count_result = await client.count_properties(p)
+                counts.append({
+                    "payload_index": i,
+                    "property_count": count_result.get("PropertyCount", 0),
+                    "unit_count": count_result.get("UnitCount", 0),
+                    "shopping_center_count": count_result.get("ShoppingCenterCount", 0),
+                    "space_count": count_result.get("SpaceCount", 0),
+                })
+                logger.info(f"Payload {i+1}: {count_result.get('PropertyCount', 0)} properties")
+
+            total_properties = sum(c["property_count"] for c in counts)
+            result["data"] = {
+                "counts": counts,
+                "total_properties": total_properties,
+                "payload_count": len(counts),
+            }
+
+            update_state(last_activity=datetime.now().isoformat())
+
+        except Exception as e:
+            logger.error(f"Count error: {e}")
+            result["error"] = str(e)
+        finally:
+            done_event.set()
+
+    # Schedule the count on the session's event loop
+    if loop and loop.is_running():
+        asyncio.run_coroutine_threadsafe(run_count(), loop)
+    else:
+        return jsonify({"error": "Event loop not running"}), 500
+
+    # Wait for completion (with timeout)
+    timeout = data.get("timeout", 60)  # 1 min default for counts
+    if not done_event.wait(timeout):
+        return jsonify({"error": "Count timeout"}), 504
+
+    if result["error"]:
+        return jsonify({"error": result["error"]}), 500
+
+    return jsonify(result["data"])
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="CoStar Session Service")
@@ -344,6 +415,7 @@ def main():
     logger.info("  POST /stop    - Stop browser session")
     logger.info("  POST /auth    - Trigger re-authentication")
     logger.info("  POST /query   - Execute a query")
+    logger.info("  POST /count   - Get property counts (fast preview)")
 
     app.run(host="0.0.0.0", port=args.port, threaded=True)
 
