@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { DeleteButton } from "./delete-button";
 import { RetryButton } from "./retry-button";
+import { CreateCampaignButton } from "./create-campaign-button";
 import type { SearchWithRelations, SearchContact } from "../../_lib/types";
 import { StatusBadge, getSourceLabel } from "../../_lib/utils";
 
@@ -14,6 +14,10 @@ export function SearchHeader({ search }: SearchHeaderProps) {
   const timeAgo = search.created_at
     ? formatDistanceToNow(new Date(search.created_at), { addSuffix: true })
     : null;
+
+  const canCreateCampaign =
+    (search.status === "ready" || search.status === "extraction_complete") &&
+    (search.campaigns?.length ?? 0) === 0;
 
   return (
     <div className="space-y-1">
@@ -38,6 +42,9 @@ export function SearchHeader({ search }: SearchHeaderProps) {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <StatusBadge status={search.status} />
+          {canCreateCampaign && (
+            <CreateCampaignButton searchId={search.id} searchName={search.name} />
+          )}
           <RetryButton searchId={search.id} status={search.status} />
           <DeleteButton searchId={search.id} searchName={search.name} />
         </div>

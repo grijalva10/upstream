@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (search.status !== "ready" && search.status !== "campaign_created") {
+    if (search.status !== "ready" && search.status !== "extraction_complete" && search.status !== "campaign_created") {
       return NextResponse.json(
         { error: "Search must be ready before creating a campaign" },
         { status: 400 }
