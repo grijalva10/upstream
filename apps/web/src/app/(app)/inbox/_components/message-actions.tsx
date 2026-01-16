@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   Archive,
   Ban,
   Building2,
@@ -16,14 +17,13 @@ import {
   Search,
   UserPlus,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   type InboxMessage,
   type Action,
@@ -45,7 +45,7 @@ interface MessageActionsProps {
 }
 
 // =============================================================================
-// Icons
+// Icons & Styling
 // =============================================================================
 
 const actionIcons: Record<Action, React.ElementType> = {
@@ -62,13 +62,23 @@ const actionIcons: Record<Action, React.ElementType> = {
   create_contact: UserPlus,
 };
 
-const actionVariants: Partial<Record<Action, "default" | "outline" | "destructive">> = {
-  confirm_dnc: "destructive",
-  confirm_bounce: "destructive",
-  archive: "outline",
-  mark_reviewed: "outline",
-  create_contact: "outline",
+const actionStyles: Partial<Record<Action, {
+  variant: "default" | "outline" | "destructive" | "secondary" | "ghost";
+  className?: string;
+}>> = {
+  create_deal: { variant: "default", className: "bg-green-600 hover:bg-green-700" },
+  schedule_call: { variant: "default", className: "bg-blue-600 hover:bg-blue-700" },
+  reply: { variant: "outline" },
+  confirm_dnc: { variant: "destructive" },
+  confirm_bounce: { variant: "destructive" },
+  archive: { variant: "secondary" },
+  mark_reviewed: { variant: "secondary" },
+  create_contact: { variant: "outline" },
+  create_search: { variant: "outline" },
 };
+
+// Primary actions that should be highlighted
+const primaryActions: Action[] = ["create_deal", "schedule_call", "reply"];
 
 // =============================================================================
 // Component
@@ -87,13 +97,12 @@ export function MessageActions({
   const classification = message.classification as Classification | null;
 
   // Get available actions based on classification and linked entities
-  // Note: Use matched_property_id/matched_contact_id (from inbox_view)
   const availableActions = getAvailableActions(
     classification,
     !!message.matched_property_id,
     !!message.matched_contact_id,
     !!message.draft_id
-  ).filter(action => action !== "reply" && action !== "approve_draft" && action !== "edit_draft"); // Draft actions handled in mail-display
+  ).filter(action => action !== "approve_draft" && action !== "edit_draft"); // Draft actions handled in mail-display
 
   // If no classification and no actions, don't render
   if (!classification && availableActions.length === 0) {
@@ -101,6 +110,11 @@ export function MessageActions({
   }
 
   async function handleAction(action: Action) {
+    if (action === "reply") {
+      onReply();
+      return;
+    }
+
     setLoadingAction(action);
     setError(null);
 
@@ -134,75 +148,154 @@ export function MessageActions({
   const isActioned = message.status === "actioned";
   const classConfig = classification ? CLASSIFICATIONS[classification] : null;
 
+  // Separate primary and secondary actions
+  const actions = availableActions.filter(a => a !== "reply");
+  const hasReply = (classConfig?.actions as readonly string[])?.includes("reply");
+
+  // Find primary action (first one in primaryActions list that's available)
+  const primaryAction = actions.find(a => primaryActions.includes(a));
+  const secondaryActions = actions.filter(a => a !== primaryAction);
+
+  // Check for missing data warnings
+  const missingPropertyWarning =
+    (classConfig?.actions as readonly string[])?.includes("create_deal") && !message.matched_property_id;
+  const missingContactWarning =
+    (classConfig?.actions as readonly string[])?.includes("schedule_call") && !message.matched_contact_id;
+
   return (
-    <Card className="mb-4">
-      <CardHeader className="py-3">
-        <CardTitle className="text-sm font-medium">Actions</CardTitle>
-        {isActioned && message.action_taken && (
-          <CardDescription className="text-green-600">
-            Action taken: {message.action_taken.replace(/_/g, " ")}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="pt-0 pb-3">
-        {error && (
-          <p className="text-sm text-destructive mb-3" role="alert">{error}</p>
-        )}
-        <div className="flex flex-wrap gap-2">
-          {/* Reply button - always available unless actioned */}
-          {(classConfig?.actions as readonly string[])?.includes("reply") && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onReply}
-              disabled={isActioned || isPending}
-              aria-label="Reply to message"
-            >
-              <Reply className="h-4 w-4 mr-1" />
-              Reply
-            </Button>
-          )}
-
-          {/* Action buttons from config */}
-          {availableActions.map((action) => {
-            const Icon = actionIcons[action];
-            const variant = actionVariants[action] || "default";
-            const config = ACTIONS[action];
-            const isLoading = loadingAction === action;
-            const isDisabled = isActioned || isPending;
-
-            return (
-              <Button
-                key={action}
-                variant={variant}
-                size="sm"
-                onClick={() => handleAction(action)}
-                disabled={isDisabled}
-                aria-label={config.label}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Icon className="h-4 w-4 mr-1" />
-                )}
-                {config.label}
-              </Button>
-            );
-          })}
+    <div className="space-y-3">
+      {/* Success indicator */}
+      {isActioned && message.action_taken && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <span className="text-sm text-green-700 dark:text-green-300">
+            Action completed: {message.action_taken.replace(/_/g, " ")}
+          </span>
         </div>
+      )}
 
-        {/* Show warnings for missing data */}
-        {(classConfig?.actions as readonly string[])?.includes("create_deal") && !message.matched_property_id && (
-          <p className="text-xs text-muted-foreground mt-2">
-            No property linked - cannot create deal
-          </p>
+      {/* Error indicator */}
+      {error && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+          <span className="text-sm text-red-700 dark:text-red-300">{error}</span>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Reply button - always first if available */}
+        {hasReply && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onReply}
+            disabled={isActioned || isPending}
+            className="h-8"
+          >
+            <Reply className="h-3.5 w-3.5 mr-1.5" />
+            Reply
+          </Button>
         )}
-        {(classConfig?.actions as readonly string[])?.includes("schedule_call") && !message.matched_contact_id && (
-          <p className="text-xs text-muted-foreground mt-2">
-            No contact linked - cannot schedule call
-          </p>
+
+        {/* Primary action */}
+        {primaryAction && (
+          <ActionButton
+            action={primaryAction}
+            isLoading={loadingAction === primaryAction}
+            isDisabled={isActioned || isPending}
+            onClick={() => handleAction(primaryAction)}
+            isPrimary
+          />
         )}
-      </CardContent>
-    </Card>
+
+        {/* Secondary actions */}
+        {secondaryActions.map((action) => (
+          <ActionButton
+            key={action}
+            action={action}
+            isLoading={loadingAction === action}
+            isDisabled={isActioned || isPending}
+            onClick={() => handleAction(action)}
+          />
+        ))}
+      </div>
+
+      {/* Warnings for missing data */}
+      {(missingPropertyWarning || missingContactWarning) && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {missingPropertyWarning && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              No property linked - cannot create deal
+            </p>
+          )}
+          {missingContactWarning && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              No contact linked - cannot schedule call
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
+}
+
+// =============================================================================
+// Action Button Sub-component
+// =============================================================================
+
+function ActionButton({
+  action,
+  isLoading,
+  isDisabled,
+  onClick,
+  isPrimary = false,
+}: {
+  action: Action;
+  isLoading: boolean;
+  isDisabled: boolean;
+  onClick: () => void;
+  isPrimary?: boolean;
+}) {
+  const Icon = actionIcons[action];
+  const config = ACTIONS[action];
+  const style = actionStyles[action] || { variant: "outline" as const };
+
+  const button = (
+    <Button
+      variant={style.variant}
+      size="sm"
+      onClick={onClick}
+      disabled={isDisabled}
+      className={cn(
+        "h-8",
+        style.className,
+        isPrimary && !style.className && "font-medium"
+      )}
+    >
+      {isLoading ? (
+        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+      ) : (
+        <Icon className="h-3.5 w-3.5 mr-1.5" />
+      )}
+      {config.label}
+    </Button>
+  );
+
+  // Add tooltip for destructive actions
+  if (style.variant === "destructive") {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent>
+          {action === "confirm_dnc" && "Add to Do Not Contact list permanently"}
+          {action === "confirm_bounce" && "Mark email as bounced and exclude permanently"}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return button;
 }

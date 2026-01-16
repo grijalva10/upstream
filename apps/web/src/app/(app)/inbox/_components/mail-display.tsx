@@ -1,16 +1,26 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { format } from "date-fns";
+import { useState, useTransition, useMemo } from "react";
+import { format, formatDistanceToNow } from "date-fns";
 import {
+  AlertTriangle,
   Archive,
   Bot,
   Building2,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  ExternalLink,
   FileEdit,
+  Loader2,
   MapPin,
-  MoreVertical,
+  MoreHorizontal,
+  Pencil,
+  Send,
   Sparkles,
   User,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,14 +33,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ClassificationBadge } from "@/components/classification-badge";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   type InboxMessage,
   type Classification,
@@ -40,9 +56,6 @@ import { ConfidenceIndicator } from "./confidence-indicator";
 import { MessageActions } from "./message-actions";
 import { QuickReplyDialog } from "./quick-reply-dialog";
 import { reclassifyMessage, approveDraft, editDraft } from "../actions";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 
 // =============================================================================
 // Types
@@ -54,22 +67,497 @@ interface MailDisplayProps {
 }
 
 // =============================================================================
+// Constants
+// =============================================================================
+
+const classificationBorderColors: Record<string, string> = {
+  green: "border-l-green-500",
+  blue: "border-l-blue-500",
+  yellow: "border-l-amber-500",
+  orange: "border-l-orange-500",
+  red: "border-l-red-500",
+  gray: "border-l-gray-400",
+  purple: "border-l-purple-500",
+};
+
+const classificationBgColors: Record<string, string> = {
+  green: "bg-green-500/5",
+  blue: "bg-blue-500/5",
+  yellow: "bg-amber-500/5",
+  orange: "bg-orange-500/5",
+  red: "bg-red-500/5",
+  gray: "bg-gray-500/5",
+  purple: "bg-purple-500/5",
+};
+
+const classificationTextColors: Record<string, string> = {
+  green: "text-green-600 dark:text-green-400",
+  blue: "text-blue-600 dark:text-blue-400",
+  yellow: "text-amber-600 dark:text-amber-400",
+  orange: "text-orange-600 dark:text-orange-400",
+  red: "text-red-600 dark:text-red-400",
+  gray: "text-gray-600 dark:text-gray-400",
+  purple: "text-purple-600 dark:text-purple-400",
+};
+
+// =============================================================================
 // Empty State
 // =============================================================================
 
 function EmptyState() {
   return (
-    <div className="flex h-full items-center justify-center bg-muted/30">
-      <div className="text-center text-muted-foreground">
-        <p className="text-lg font-medium">No message selected</p>
-        <p className="text-sm">Select a message to view its contents</p>
+    <div className="flex h-full items-center justify-center bg-muted/20">
+      <div className="text-center space-y-2">
+        <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+          <Send className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <p className="text-sm font-medium text-muted-foreground">
+          No message selected
+        </p>
+        <p className="text-xs text-muted-foreground/70">
+          Select a message from the list to view details
+        </p>
       </div>
     </div>
   );
 }
 
 // =============================================================================
-// Component
+// Sub-Components
+// =============================================================================
+
+function SenderAvatar({ name, email }: { name?: string | null; email: string }) {
+  const initials = useMemo(() => {
+    if (name) {
+      const parts = name.split(" ");
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    }
+    return email.slice(0, 2).toUpperCase();
+  }, [name, email]);
+
+  return (
+    <Avatar className="h-10 w-10 border">
+      <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+        {initials}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+function LinkedEntityChip({
+  icon: Icon,
+  label,
+  value,
+  href,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  href?: string;
+}) {
+  const content = (
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/60 hover:bg-muted transition-colors text-xs">
+      <Icon className="h-3 w-3 text-muted-foreground shrink-0" />
+      <span className="text-muted-foreground">{label}:</span>
+      <span className="font-medium truncate max-w-[150px]">{value}</span>
+      {href && <ExternalLink className="h-2.5 w-2.5 text-muted-foreground shrink-0" />}
+    </div>
+  );
+
+  if (href) {
+    return (
+      <a href={href} className="hover:no-underline">
+        {content}
+      </a>
+    );
+  }
+
+  return content;
+}
+
+function ClassificationHeader({
+  classification,
+  confidence,
+  reasoning,
+  isLowConfidence,
+  autoHandled,
+  onReclassify,
+  isPending,
+}: {
+  classification: Classification | null;
+  confidence: number | null;
+  reasoning: string | null;
+  isLowConfidence: boolean;
+  autoHandled: boolean;
+  onReclassify: (c: Classification) => void;
+  isPending: boolean;
+}) {
+  const [showReasoning, setShowReasoning] = useState(false);
+  const config = classification ? CLASSIFICATIONS[classification] : CLASSIFICATIONS.unclear;
+  const color = config.color;
+
+  const classificationGroups = {
+    hot: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "hot"),
+    action: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "action"),
+    redirect: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "redirect"),
+    closed: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "closed"),
+  };
+
+  return (
+    <div
+      className={cn(
+        "border-l-4 rounded-r-lg px-4 py-3 transition-colors",
+        classificationBorderColors[color],
+        classificationBgColors[color]
+      )}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Sparkles className={cn("h-4 w-4", classificationTextColors[color])} />
+            <span className={cn("font-semibold text-sm", classificationTextColors[color])}>
+              {config.label}
+            </span>
+          </div>
+
+          {confidence != null && (
+            <ConfidenceIndicator confidence={confidence} size="sm" showPercentage />
+          )}
+
+          {isLowConfidence && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="gap-1 text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20">
+                  <AlertTriangle className="h-3 w-3" />
+                  Review
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                Low confidence classification. Please verify and reclassify if needed.
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {autoHandled && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="gap-1">
+                  <Bot className="h-3 w-3" />
+                  Auto
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                This message was automatically handled by AI
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isPending}
+              className="h-7 px-2 text-muted-foreground hover:text-foreground shrink-0"
+            >
+              {isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <>
+                  <span className="text-xs mr-1">Reclassify</span>
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {/* Hot Leads */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-green-600">
+              Hot Leads
+            </div>
+            {classificationGroups.hot.map(([key, cfg]) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => onReclassify(key as Classification)}
+                disabled={classification === key}
+              >
+                <span className="mr-2 h-2 w-2 rounded-full bg-green-500" />
+                {cfg.label}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+
+            {/* Action Required */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-amber-600">
+              Action Required
+            </div>
+            {classificationGroups.action.map(([key, cfg]) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => onReclassify(key as Classification)}
+                disabled={classification === key}
+              >
+                <span className={cn("mr-2 h-2 w-2 rounded-full", `bg-${cfg.color}-500`)} />
+                {cfg.label}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+
+            {/* Redirect */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-orange-600">
+              Redirect
+            </div>
+            {classificationGroups.redirect.map(([key, cfg]) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => onReclassify(key as Classification)}
+                disabled={classification === key}
+              >
+                <span className={cn("mr-2 h-2 w-2 rounded-full", `bg-${cfg.color}-500`)} />
+                {cfg.label}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+
+            {/* Closed */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-gray-600">
+              Closed
+            </div>
+            {classificationGroups.closed.map(([key, cfg]) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => onReclassify(key as Classification)}
+                disabled={classification === key}
+              >
+                <span className={cn("mr-2 h-2 w-2 rounded-full", `bg-${cfg.color}-500`)} />
+                {cfg.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {reasoning && (
+        <Collapsible open={showReasoning} onOpenChange={setShowReasoning}>
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center gap-1 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+              {showReasoning ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+              AI reasoning
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <p className="mt-2 text-xs text-muted-foreground leading-relaxed pl-4 border-l-2 border-muted">
+              {reasoning}
+            </p>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+    </div>
+  );
+}
+
+function DraftSection({
+  draftSubject,
+  draftBody,
+  draftStatus,
+  isPending,
+  onApprove,
+  onSave,
+}: {
+  draftSubject: string | null;
+  draftBody: string | null;
+  draftStatus: string | null;
+  isPending: boolean;
+  onApprove: () => void;
+  onSave: (subject: string, body: string) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [subject, setSubject] = useState(draftSubject || "");
+  const [body, setBody] = useState(draftBody || "");
+
+  const handleSave = () => {
+    onSave(subject, body);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setSubject(draftSubject || "");
+    setBody(draftBody || "");
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="border rounded-lg border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 overflow-hidden">
+      {/* Draft Header */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-blue-200/50 dark:border-blue-800/50 bg-blue-100/30 dark:bg-blue-900/20">
+        <div className="flex items-center gap-2">
+          <FileEdit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+            Draft Reply
+          </span>
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] px-1.5 py-0",
+              draftStatus === "pending" && "border-amber-300 text-amber-600 bg-amber-50 dark:bg-amber-900/20",
+              draftStatus === "approved" && "border-green-300 text-green-600 bg-green-50 dark:bg-green-900/20"
+            )}
+          >
+            {draftStatus}
+          </Badge>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {!isEditing ? (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                disabled={isPending}
+                className="h-7 text-xs"
+              >
+                <Pencil className="h-3 w-3 mr-1" />
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                onClick={onApprove}
+                disabled={isPending || draftStatus === "approved"}
+                className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
+              >
+                {isPending ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Check className="h-3 w-3 mr-1" />
+                )}
+                Approve
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancel}
+                disabled={isPending}
+                className="h-7 text-xs"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={isPending}
+                className="h-7 text-xs"
+              >
+                {isPending ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Check className="h-3 w-3 mr-1" />
+                )}
+                Save
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Draft Content */}
+      <div className="p-4 space-y-3">
+        {isEditing ? (
+          <>
+            <div>
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium mb-1.5 block">
+                Subject
+              </label>
+              <Input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="h-8 text-sm bg-white dark:bg-gray-900"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium mb-1.5 block">
+                Message
+              </label>
+              <Textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={5}
+                className="resize-none text-sm bg-white dark:bg-gray-900"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <span className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
+                Subject
+              </span>
+              <p className="text-sm mt-0.5">{draftSubject}</p>
+            </div>
+            <div>
+              <span className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
+                Message
+              </span>
+              <p className="text-sm mt-0.5 text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                {draftBody}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmailBody({
+  bodyHtml,
+  bodyText,
+}: {
+  bodyHtml: string | null | undefined;
+  bodyText: string | null | undefined;
+}) {
+  return (
+    <div className="rounded-lg border bg-card">
+      <div className="px-5 py-4">
+        {bodyHtml ? (
+          <div
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
+            className="prose prose-sm max-w-none dark:prose-invert
+                       prose-p:my-2 prose-p:leading-relaxed
+                       prose-headings:font-semibold
+                       prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                       prose-blockquote:border-l-muted-foreground/30 prose-blockquote:text-muted-foreground
+                       prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
+                       prose-pre:bg-muted prose-pre:border
+                       [&_img]:max-w-full [&_img]:h-auto
+                       [&_table]:text-sm [&_table]:border-collapse
+                       [&_td]:border [&_td]:border-muted [&_td]:p-2
+                       [&_th]:border [&_th]:border-muted [&_th]:p-2 [&_th]:bg-muted"
+          />
+        ) : (
+          <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
+            {bodyText}
+          </pre>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// Main Component
 // =============================================================================
 
 export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
@@ -80,11 +568,11 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
     return <EmptyState />;
   }
 
+  // Handlers
   async function handleReclassify(newClassification: Classification) {
     if (!message) return;
 
     startTransition(async () => {
-      // Optimistic update
       if (onOptimisticUpdate) {
         onOptimisticUpdate(message.id, {
           classification: newClassification,
@@ -95,7 +583,6 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
       const result = await reclassifyMessage(message.id, newClassification);
 
       if (!result.success) {
-        // Revert on error
         if (onOptimisticUpdate) {
           onOptimisticUpdate(message.id, {
             classification: message.classification,
@@ -105,32 +592,6 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
       }
     });
   }
-
-  const formattedDate = message.received_at
-    ? format(new Date(message.received_at), "PPpp")
-    : "";
-
-  const lowConfidence =
-    message.classification_confidence != null && message.classification_confidence < 0.7;
-
-  // Use flat fields from inbox_view
-  const contactName = message.contact_name || null;
-  const companyName = message.company_name || null;
-  const propertyAddress = message.property_address || message.property_name || null;
-
-  // Draft handling
-  const [isEditingDraft, setIsEditingDraft] = useState(false);
-  const [draftSubject, setDraftSubject] = useState(message.draft_subject || "");
-  const [draftBody, setDraftBody] = useState(message.draft_body || "");
-  const hasDraft = !!message.draft_id;
-
-  // Group classifications for the menu (6 groups)
-  const classificationGroups = {
-    hot: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "hot"),
-    action: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "action"),
-    redirect: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "redirect"),
-    closed: Object.entries(CLASSIFICATIONS).filter(([, c]) => c.group === "closed"),
-  };
 
   async function handleApproveDraft() {
     if (!message || !message.draft_id) return;
@@ -142,339 +603,163 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
     });
   }
 
-  async function handleSaveDraft() {
+  async function handleSaveDraft(subject: string, body: string) {
     if (!message || !message.draft_id) return;
     startTransition(async () => {
-      const result = await editDraft(message.draft_id!, draftSubject, draftBody);
-      if (result.success) {
-        setIsEditingDraft(false);
-      } else {
+      const result = await editDraft(message.draft_id!, subject, body);
+      if (!result.success) {
         console.error("Failed to save draft:", result.error);
       }
     });
   }
 
+  // Computed values
+  const formattedDate = message.received_at
+    ? format(new Date(message.received_at), "MMM d, yyyy 'at' h:mm a")
+    : "";
+  const relativeTime = message.received_at
+    ? formatDistanceToNow(new Date(message.received_at), { addSuffix: true })
+    : "";
+
+  const lowConfidence =
+    message.classification_confidence != null && message.classification_confidence < 0.7;
+
+  const contactName = message.contact_name || null;
+  const companyName = message.company_name || null;
+  const propertyAddress = message.property_address || message.property_name || null;
+  const hasDraft = !!message.draft_id;
+  const hasLinkedEntities = contactName || companyName || propertyAddress;
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background">
       <ScrollArea className="flex-1">
-        <div className="p-6">
-          {/* Email Header */}
-          <div className="mb-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="space-y-1">
-                <h2 className="text-lg font-semibold">
-                  {message.subject || "(No subject)"}
-                </h2>
-                <div className="text-sm text-muted-foreground">
-                  <p>
-                    <span className="font-medium text-foreground">From:</span>{" "}
-                    {message.from_name ? `${message.from_name} <${message.from_email}>` : message.from_email}
-                  </p>
-                  {message.to_emails && message.to_emails.length > 0 && (
-                    <p>
-                      <span className="font-medium text-foreground">To:</span>{" "}
-                      {message.to_emails.join(", ")}
-                    </p>
-                  )}
-                  <p>
-                    <span className="font-medium text-foreground">Date:</span>{" "}
-                    {formattedDate}
-                  </p>
-                </div>
-                {/* Auto-handled indicator */}
-                {message.auto_handled && (
-                  <Badge variant="secondary" className="flex items-center gap-1 mt-2">
-                    <Bot className="h-3 w-3" />
-                    Auto-handled
-                  </Badge>
-                )}
-              </div>
-
-              {/* Reclassify Menu */}
-              <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isPending}
-                      aria-label="Message options"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem disabled>
-                      <Archive className="h-4 w-4 mr-2" />
-                      Archive
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-
-                    {/* Hot Leads */}
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                      Hot Leads
-                    </div>
-                    {classificationGroups.hot.map(([key, config]) => (
-                      <DropdownMenuItem
-                        key={key}
-                        onClick={() => handleReclassify(key as Classification)}
-                        disabled={message.classification === key}
-                      >
-                        <span className={cn(
-                          "mr-2 h-2 w-2 rounded-full",
-                          `bg-${config.color}-500`
-                        )} />
-                        {config.label}
-                      </DropdownMenuItem>
-                    ))}
-
-                    <DropdownMenuSeparator />
-
-                    {/* Action Required */}
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                      Action Required
-                    </div>
-                    {classificationGroups.action.map(([key, config]) => (
-                      <DropdownMenuItem
-                        key={key}
-                        onClick={() => handleReclassify(key as Classification)}
-                        disabled={message.classification === key}
-                      >
-                        <span className={cn(
-                          "mr-2 h-2 w-2 rounded-full",
-                          `bg-${config.color}-500`
-                        )} />
-                        {config.label}
-                      </DropdownMenuItem>
-                    ))}
-
-                    <DropdownMenuSeparator />
-
-                    {/* Redirect */}
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                      Redirect
-                    </div>
-                    {classificationGroups.redirect.map(([key, config]) => (
-                      <DropdownMenuItem
-                        key={key}
-                        onClick={() => handleReclassify(key as Classification)}
-                        disabled={message.classification === key}
-                      >
-                        <span className={cn(
-                          "mr-2 h-2 w-2 rounded-full",
-                          `bg-${config.color}-500`
-                        )} />
-                        {config.label}
-                      </DropdownMenuItem>
-                    ))}
-
-                    <DropdownMenuSeparator />
-
-                    {/* Closed */}
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                      Closed
-                    </div>
-                    {classificationGroups.closed.map(([key, config]) => (
-                      <DropdownMenuItem
-                        key={key}
-                        onClick={() => handleReclassify(key as Classification)}
-                        disabled={message.classification === key}
-                      >
-                        <span className={cn(
-                          "mr-2 h-2 w-2 rounded-full",
-                          `bg-${config.color}-500`
-                        )} />
-                        {config.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            {/* Linked Entities */}
-            {(contactName || companyName || propertyAddress) && (
-              <Card className="mb-4">
-                <CardContent className="py-3">
-                  <div className="flex flex-wrap gap-4">
-                    {contactName && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Contact:</span>
-                        <span className="font-medium">{contactName}</span>
-                      </div>
-                    )}
-                    {companyName && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Company:</span>
-                        <span className="font-medium">{companyName}</span>
-                      </div>
-                    )}
-                    {propertyAddress && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Property:</span>
-                        <span className="font-medium">{propertyAddress}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Draft Card */}
-            {hasDraft && (
-              <Card className="mb-4 border-blue-500/50">
-                <CardHeader className="py-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileEdit className="h-4 w-4 text-blue-500" />
-                      <CardTitle className="text-sm font-medium">
-                        Pending Draft
-                      </CardTitle>
-                      <Badge variant="outline" className="text-xs">
-                        {message.draft_status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!isEditingDraft ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsEditingDraft(true)}
-                            disabled={isPending}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleApproveDraft}
-                            disabled={isPending || message.draft_status === "approved"}
-                          >
-                            Approve
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsEditingDraft(false)}
-                            disabled={isPending}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleSaveDraft}
-                            disabled={isPending}
-                          >
-                            Save
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3">
-                  {isEditingDraft ? (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Subject</label>
-                        <Input
-                          value={draftSubject}
-                          onChange={(e) => setDraftSubject(e.target.value)}
-                          className="h-8"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Body</label>
-                        <Textarea
-                          value={draftBody}
-                          onChange={(e) => setDraftBody(e.target.value)}
-                          rows={6}
-                          className="resize-none"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-sm">
-                        <span className="font-medium">Subject:</span> {message.draft_subject}
-                      </p>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {message.draft_body}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Classification Card */}
-            <Card className={cn("mb-4", lowConfidence && "border-amber-500/50")}>
-              <CardHeader className="py-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
-                    <CardTitle className="text-sm font-medium">
-                      AI Classification
-                    </CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {message.classification && (
-                      <ClassificationBadge type={message.classification as Classification} />
-                    )}
-                    {message.classification_confidence != null && (
-                      <ConfidenceIndicator
-                        confidence={message.classification_confidence}
-                        showPercentage
-                      />
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              {(lowConfidence || message.classification_reasoning) && (
-                <CardContent className="pt-0 pb-3">
-                  {lowConfidence && (
-                    <CardDescription className="text-amber-500 mb-2">
-                      Low confidence classification. Please review and reclassify if needed.
-                    </CardDescription>
-                  )}
-                  {message.classification_reasoning && (
-                    <CardDescription className="text-muted-foreground">
-                      {message.classification_reasoning}
-                    </CardDescription>
-                  )}
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Action Buttons */}
-            <MessageActions
-              message={message}
-              onReply={() => setShowReplyDialog(true)}
-              onOptimisticUpdate={onOptimisticUpdate}
+        <div className="space-y-4 p-4 md:p-6">
+          {/* Classification Banner */}
+          {message.classification && (
+            <ClassificationHeader
+              classification={message.classification as Classification}
+              confidence={message.classification_confidence ?? null}
+              reasoning={message.classification_reasoning ?? null}
+              isLowConfidence={lowConfidence}
+              autoHandled={!!message.auto_handled}
+              onReclassify={handleReclassify}
+              isPending={isPending}
             />
+          )}
+
+          {/* Email Header */}
+          <div className="flex items-start gap-4">
+            <SenderAvatar
+              name={message.from_name}
+              email={message.from_email}
+            />
+
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold text-foreground truncate">
+                    {message.subject || "(No subject)"}
+                  </h2>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-medium text-foreground truncate">
+                      {message.from_name || message.from_email}
+                    </span>
+                    {message.from_name && (
+                      <span className="text-muted-foreground text-xs truncate">
+                        &lt;{message.from_email}&gt;
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{relativeTime}</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>{formattedDate}</TooltipContent>
+                  </Tooltip>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem disabled>
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              {message.to_emails && message.to_emails.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  To: {message.to_emails.join(", ")}
+                </p>
+              )}
+            </div>
           </div>
 
-          <Separator className="my-4" />
+          {/* Linked Entities */}
+          {hasLinkedEntities && (
+            <div className="flex flex-wrap gap-2">
+              {contactName && (
+                <LinkedEntityChip
+                  icon={User}
+                  label="Contact"
+                  value={contactName}
+                />
+              )}
+              {companyName && (
+                <LinkedEntityChip
+                  icon={Building2}
+                  label="Company"
+                  value={companyName}
+                />
+              )}
+              {propertyAddress && (
+                <LinkedEntityChip
+                  icon={MapPin}
+                  label="Property"
+                  value={propertyAddress}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Draft Section */}
+          {hasDraft && (
+            <DraftSection
+              draftSubject={message.draft_subject ?? null}
+              draftBody={message.draft_body ?? null}
+              draftStatus={message.draft_status ?? null}
+              isPending={isPending}
+              onApprove={handleApproveDraft}
+              onSave={handleSaveDraft}
+            />
+          )}
+
+          {/* Action Buttons */}
+          <MessageActions
+            message={message}
+            onReply={() => setShowReplyDialog(true)}
+            onOptimisticUpdate={onOptimisticUpdate}
+          />
+
+          <Separator />
 
           {/* Email Body */}
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            {message.body_html ? (
-              <div
-                dangerouslySetInnerHTML={{ __html: message.body_html }}
-                className="whitespace-pre-wrap"
-              />
-            ) : (
-              <pre className="whitespace-pre-wrap font-sans text-sm">
-                {message.body_text}
-              </pre>
-            )}
-          </div>
+          <EmailBody
+            bodyHtml={message.body_html}
+            bodyText={message.body_text}
+          />
         </div>
       </ScrollArea>
 
