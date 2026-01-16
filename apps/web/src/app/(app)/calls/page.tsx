@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { startOfDay, endOfDay, addDays } from "date-fns";
 import { transformCalls } from "@/lib/transforms";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import { CallsPageContent } from "./_components/calls-page-content";
-import { ScheduleCallDialog } from "./_components/schedule-call-dialog";
 
 async function getCallsData() {
   const supabase = await createClient();
@@ -73,23 +74,17 @@ export default async function CallsPage() {
     todaysCalls.filter((c) => c.status === "scheduled").length +
     upcomingCalls.length;
 
-  return (
-    <div className="p-6 pb-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Calls</h1>
-          <p className="text-sm text-muted-foreground">
-            {totalScheduled} scheduled call{totalScheduled !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <ScheduleCallDialog />
-      </div>
+  const description = `${totalScheduled} scheduled call${totalScheduled !== 1 ? "s" : ""}`;
 
-      <CallsPageContent
-        todaysCalls={todaysCalls}
-        upcomingCalls={upcomingCalls}
-        pastCalls={pastCalls}
-      />
-    </div>
+  return (
+    <PageSetup description={description}>
+      <PageContainer>
+        <CallsPageContent
+          todaysCalls={todaysCalls}
+          upcomingCalls={upcomingCalls}
+          pastCalls={pastCalls}
+        />
+      </PageContainer>
+    </PageSetup>
   );
 }

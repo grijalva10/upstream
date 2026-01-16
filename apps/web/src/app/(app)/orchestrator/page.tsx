@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Activity,
@@ -243,16 +245,10 @@ export default async function OrchestratorPage() {
   const data = await getOrchestratorData();
 
   return (
-    <div className="p-6 pb-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Orchestrator Health</h1>
-        <p className="text-sm text-muted-foreground">
-          Monitor the status of background loops and agent executions
-        </p>
-      </div>
-
-      {/* Main Status Banner with Controls */}
-      <OrchestratorControls
+    <PageSetup>
+      <PageContainer>
+        {/* Main Status Banner with Controls */}
+        <OrchestratorControls
         isRunning={data.orchestrator.isRunning}
         lastHeartbeat={data.orchestrator.lastHeartbeat}
         hostname={data.orchestrator.hostname}
@@ -464,30 +460,31 @@ export default async function OrchestratorPage() {
         </Card>
       </div>
 
-      {/* Agent Stats */}
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Agent Performance Today</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {Object.entries(data.agentStats).map(([agent, stats]) => (
-              <div key={agent} className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs font-medium truncate">{agent}</p>
-                <p className="text-xl font-bold">{stats.total}</p>
-                {stats.failed > 0 && (
-                  <p className="text-xs text-red-500">{stats.failed} failed</p>
-                )}
-              </div>
-            ))}
-            {Object.keys(data.agentStats).length === 0 && (
-              <p className="text-sm text-muted-foreground col-span-full text-center">
-                No agent activity today
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Agent Stats */}
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Agent Performance Today</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {Object.entries(data.agentStats).map(([agent, stats]) => (
+                <div key={agent} className="text-center p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs font-medium truncate">{agent}</p>
+                  <p className="text-xl font-bold">{stats.total}</p>
+                  {stats.failed > 0 && (
+                    <p className="text-xs text-red-500">{stats.failed} failed</p>
+                  )}
+                </div>
+              ))}
+              {Object.keys(data.agentStats).length === 0 && (
+                <p className="text-sm text-muted-foreground col-span-full text-center">
+                  No agent activity today
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </PageContainer>
+    </PageSetup>
   );
 }

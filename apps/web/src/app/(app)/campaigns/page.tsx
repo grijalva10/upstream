@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import { CampaignsDataTable } from "../data/_components/campaigns-data-table";
-import { NewCampaignDialog } from "./_components/new-campaign-dialog";
 import type { Campaign } from "../data/_components/types";
 
 async function getCampaigns() {
@@ -39,18 +40,10 @@ export default async function CampaignsPage() {
   ]);
 
   return (
-    <div className="p-6 pb-8 space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Campaigns</h1>
-          <p className="text-sm text-muted-foreground">
-            Email outreach campaigns for your searches
-          </p>
-        </div>
-        <NewCampaignDialog searches={readySearches} />
-      </div>
-
-      <CampaignsDataTable data={campaigns as Campaign[]} total={count} />
-    </div>
+    <PageSetup searches={readySearches}>
+      <PageContainer>
+        <CampaignsDataTable data={campaigns as Campaign[]} total={count} />
+      </PageContainer>
+    </PageSetup>
   );
 }

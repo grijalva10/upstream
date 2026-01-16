@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import {
   parseInboxMessages,
   inboxFiltersSchema,
@@ -138,9 +140,13 @@ export default async function InboxPage({ searchParams }: InboxPageProps) {
   const params = await searchParams;
 
   return (
-    <Suspense fallback={<InboxSkeleton />}>
-      <InboxContent searchParams={params} />
-    </Suspense>
+    <PageSetup>
+      <PageContainer variant="full-bleed">
+        <Suspense fallback={<InboxSkeleton />}>
+          <InboxContent searchParams={params} />
+        </Suspense>
+      </PageContainer>
+    </PageSetup>
   );
 }
 

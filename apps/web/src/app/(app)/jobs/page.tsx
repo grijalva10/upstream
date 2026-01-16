@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import { JobsTabs } from "./_components/jobs-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -157,56 +159,51 @@ export default async function JobsPage() {
       : "default";
 
   return (
-    <div className="p-6 pb-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Jobs</h1>
-        <p className="text-sm text-muted-foreground">
-          Monitor email queue and background jobs
-        </p>
-      </div>
+    <PageSetup>
+      <PageContainer>
+        {/* Stats row */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          <StatCard
+            title="Worker"
+            value={workerStatus}
+            subtitle={
+              lastHeartbeat
+                ? `Last seen ${Math.round((Date.now() - lastHeartbeat.getTime()) / 1000)}s ago`
+                : "Never started"
+            }
+            variant={workerVariant as "default" | "success" | "warning" | "danger"}
+          />
+          <StatCard
+            title="Pending"
+            value={stats.pending_count + stats.scheduled_count}
+            subtitle="In queue"
+          />
+          <StatCard
+            title="Active"
+            value={stats.processing_count}
+            subtitle="Processing now"
+          />
+          <StatCard
+            title="Sent Today"
+            value={stats.sent_today}
+            variant="success"
+          />
+          <StatCard
+            title="Failed Today"
+            value={stats.failed_today}
+            variant={stats.failed_today > 0 ? "danger" : "default"}
+          />
+          <StatCard
+            title="Rate"
+            value={`${stats.hourly_count}/${stats.hourly_limit}`}
+            subtitle={`Daily: ${stats.daily_count}/${stats.daily_limit}`}
+            variant={rateVariant as "default" | "success" | "warning" | "danger"}
+          />
+        </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <StatCard
-          title="Worker"
-          value={workerStatus}
-          subtitle={
-            lastHeartbeat
-              ? `Last seen ${Math.round((Date.now() - lastHeartbeat.getTime()) / 1000)}s ago`
-              : "Never started"
-          }
-          variant={workerVariant as "default" | "success" | "warning" | "danger"}
-        />
-        <StatCard
-          title="Pending"
-          value={stats.pending_count + stats.scheduled_count}
-          subtitle="In queue"
-        />
-        <StatCard
-          title="Active"
-          value={stats.processing_count}
-          subtitle="Processing now"
-        />
-        <StatCard
-          title="Sent Today"
-          value={stats.sent_today}
-          variant="success"
-        />
-        <StatCard
-          title="Failed Today"
-          value={stats.failed_today}
-          variant={stats.failed_today > 0 ? "danger" : "default"}
-        />
-        <StatCard
-          title="Rate"
-          value={`${stats.hourly_count}/${stats.hourly_limit}`}
-          subtitle={`Daily: ${stats.daily_count}/${stats.daily_limit}`}
-          variant={rateVariant as "default" | "success" | "warning" | "danger"}
-        />
-      </div>
-
-      {/* Jobs tabs */}
-      <JobsTabs emailJobs={jobs} />
-    </div>
+        {/* Jobs tabs */}
+        <JobsTabs emailJobs={jobs} />
+      </PageContainer>
+    </PageSetup>
   );
 }

@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import { ApprovalsCard } from "./_components/approvals-card";
 import { CallsTodayCard } from "./_components/calls-today-card";
 import { NewRepliesCard } from "./_components/new-replies-card";
@@ -267,33 +269,30 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="p-6 pb-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
-        <p className="text-sm text-muted-foreground">{today}</p>
-      </div>
+    <PageSetup description={today}>
+      <PageContainer>
+        {/* Top row: Action cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <ApprovalsCard
+            emailDrafts={data.emailDrafts}
+            lowConfidence={data.lowConfidence}
+          />
+          <CallsTodayCard calls={data.calls} />
+          <NewRepliesCard replies={data.replies} total={data.totalReplies} />
+          <StalledDealsCard deals={data.stalledDeals} />
+        </div>
 
-      {/* Top row: Action cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ApprovalsCard
-          emailDrafts={data.emailDrafts}
-          lowConfidence={data.lowConfidence}
-        />
-        <CallsTodayCard calls={data.calls} />
-        <NewRepliesCard replies={data.replies} total={data.totalReplies} />
-        <StalledDealsCard deals={data.stalledDeals} />
-      </div>
+        {/* Pipeline snapshot */}
+        <div className="mb-6">
+          <PipelineSnapshot stages={data.pipelineStages} />
+        </div>
 
-      {/* Pipeline snapshot */}
-      <div className="mb-6">
-        <PipelineSnapshot stages={data.pipelineStages} />
-      </div>
-
-      {/* Bottom row: Deals ready + Agent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <DealsReadyCard deals={data.dealsReady} />
-        <AgentActivityTimeline activities={data.agentActivities} />
-      </div>
-    </div>
+        {/* Bottom row: Deals ready + Agent activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <DealsReadyCard deals={data.dealsReady} />
+          <AgentActivityTimeline activities={data.agentActivities} />
+        </div>
+      </PageContainer>
+    </PageSetup>
   );
 }

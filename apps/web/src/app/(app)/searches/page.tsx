@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import { PageContainer } from "@/components/layout";
+import { PageSetup } from "./_components/page-setup";
 import { SearchesDataTable } from "./_components/searches-data-table";
-import { NewSearchDialog } from "./_components/new-search-dialog";
 import type { SearchWithRelations } from "./_lib/types";
 
 async function getSearches(): Promise<SearchWithRelations[]> {
@@ -28,23 +29,10 @@ export default async function SearchesPage() {
   const searches = await getSearches();
 
   return (
-    <div className="p-4 sm:p-6 pb-8">
-      <Header />
-      <SearchesDataTable data={searches} />
-    </div>
-  );
-}
-
-function Header() {
-  return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Searches</h1>
-        <p className="text-sm text-muted-foreground">
-          Create and manage property searches from buyer criteria
-        </p>
-      </div>
-      <NewSearchDialog />
-    </div>
+    <PageSetup>
+      <PageContainer>
+        <SearchesDataTable data={searches} />
+      </PageContainer>
+    </PageSetup>
   );
 }
