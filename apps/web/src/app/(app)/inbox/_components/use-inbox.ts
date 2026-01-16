@@ -5,24 +5,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   type InboxMessage,
   type Classification,
+  type ClassificationGroup,
   type Status,
+  type ViewMode,
   type InboxFilters,
+  type InboxCounts,
 } from "@/lib/inbox/schemas";
+
+type ClassificationFilter = Classification | ClassificationGroup | "all";
 
 // =============================================================================
 // Types
 // =============================================================================
-
-interface InboxState {
-  messages: InboxMessage[];
-  selectedId: string | null;
-  filters: InboxFilters;
-}
-
-interface InboxCounts {
-  byStatus: Record<Status | "all", number>;
-  byClassification: Record<Classification | "all", number>;
-}
 
 interface UseInboxReturn {
   // Data
@@ -32,8 +26,9 @@ interface UseInboxReturn {
 
   // Filters
   filters: InboxFilters;
+  setViewMode: (viewMode: ViewMode) => void;
   setStatusFilter: (status: Status | "all") => void;
-  setClassificationFilter: (classification: Classification | "all") => void;
+  setClassificationFilter: (classification: ClassificationFilter) => void;
   setSearch: (search: string) => void;
 
   // Selection
@@ -54,6 +49,7 @@ interface UseInboxReturn {
 
 function getFiltersFromUrl(searchParams: URLSearchParams): InboxFilters {
   return {
+    viewMode: (searchParams.get("viewMode") as ViewMode) || "needs_review",
     status: (searchParams.get("status") as Status | "all") || "all",
     classification: (searchParams.get("classification") as Classification | "all") || "all",
     search: searchParams.get("search") || undefined,
@@ -66,6 +62,8 @@ function buildUrl(baseFilters: InboxFilters, updates: Partial<InboxFilters>): st
   const filters = { ...baseFilters, ...updates };
   const params = new URLSearchParams();
 
+  // Always include viewMode in URL (default is needs_review)
+  if (filters.viewMode !== "needs_review") params.set("viewMode", filters.viewMode);
   if (filters.status !== "all") params.set("status", filters.status);
   if (filters.classification !== "all") params.set("classification", filters.classification);
   if (filters.search) params.set("search", filters.search);
@@ -76,20 +74,27 @@ function buildUrl(baseFilters: InboxFilters, updates: Partial<InboxFilters>): st
 }
 
 // =============================================================================
-// Count Calculation
+// Count Calculation (for optimistic updates)
 // =============================================================================
 
-function calculateCounts(messages: InboxMessage[]): InboxCounts {
-  const byStatus: Record<string, number> = { all: messages.length };
+function calculateCounts(messages: InboxMessage[], serverCounts: InboxCounts): InboxCounts {
+  // Start with server counts for view mode (can't calculate from filtered list)
+  const byViewMode = serverCounts.byViewMode;
+
+  // Recalculate status and classification from current messages
+  const byStatus: Record<string, number> = { all: messages.length, new: 0, reviewed: 0, actioned: 0 };
   const byClassification: Record<string, number> = { all: messages.length };
 
   for (const msg of messages) {
-    byStatus[msg.status] = (byStatus[msg.status] || 0) + 1;
+    if (msg.status) {
+      byStatus[msg.status] = (byStatus[msg.status] || 0) + 1;
+    }
     const classification = msg.classification || "unclear";
     byClassification[classification] = (byClassification[classification] || 0) + 1;
   }
 
   return {
+    byViewMode,
     byStatus: byStatus as InboxCounts["byStatus"],
     byClassification: byClassification as InboxCounts["byClassification"],
   };
@@ -99,7 +104,10 @@ function calculateCounts(messages: InboxMessage[]): InboxCounts {
 // Hook
 // =============================================================================
 
-export function useInbox(initialMessages: InboxMessage[]): UseInboxReturn {
+export function useInbox(
+  initialMessages: InboxMessage[],
+  serverCounts: InboxCounts
+): UseInboxReturn {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -120,8 +128,11 @@ export function useInbox(initialMessages: InboxMessage[]): UseInboxReturn {
     }
   );
 
-  // Calculate counts from optimistic messages
-  const counts = useMemo(() => calculateCounts(optimisticMessages), [optimisticMessages]);
+  // Calculate counts from optimistic messages (using server counts as base)
+  const counts = useMemo(
+    () => calculateCounts(optimisticMessages, serverCounts),
+    [optimisticMessages, serverCounts]
+  );
 
   // Find selected message
   const selectedMessage = useMemo(() => {
@@ -139,6 +150,14 @@ export function useInbox(initialMessages: InboxMessage[]): UseInboxReturn {
     [router]
   );
 
+  // View mode setter
+  const setViewMode = useCallback(
+    (viewMode: ViewMode) => {
+      navigate(buildUrl(filters, { viewMode, page: 1 }));
+    },
+    [filters, navigate]
+  );
+
   // Filter setters
   const setStatusFilter = useCallback(
     (status: Status | "all") => {
@@ -148,7 +167,7 @@ export function useInbox(initialMessages: InboxMessage[]): UseInboxReturn {
   );
 
   const setClassificationFilter = useCallback(
-    (classification: Classification | "all") => {
+    (classification: ClassificationFilter) => {
       navigate(buildUrl(filters, { classification, page: 1 }));
     },
     [filters, navigate]
@@ -209,6 +228,7 @@ export function useInbox(initialMessages: InboxMessage[]): UseInboxReturn {
     selectedMessage,
     counts,
     filters,
+    setViewMode,
     setStatusFilter,
     setClassificationFilter,
     setSearch,

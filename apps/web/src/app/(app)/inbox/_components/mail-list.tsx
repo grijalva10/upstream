@@ -1,11 +1,11 @@
 "use client";
 
-import { Search, MapPin, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, Loader2, ChevronLeft, ChevronRight, FileEdit, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ClassificationBadge } from "@/components/classification-badge";
-import { type InboxMessage } from "@/lib/inbox/schemas";
+import { type InboxMessage, type Classification } from "@/lib/inbox/schemas";
 import { useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
@@ -167,7 +167,7 @@ interface MailListItemProps {
   onClick: () => void;
 }
 
-function formatTime(dateStr: string | null): string {
+function formatTime(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
   const date = new Date(dateStr);
   const now = new Date();
@@ -198,8 +198,12 @@ function MailListItem({ message, isSelected, onClick }: MailListItemProps) {
     ?.trim()
     ?.slice(0, 100) || "";
 
-  // Property location if available
-  const propertyLocation = message.property?.address || message.property?.property_name || null;
+  // Property location if available (from flattened inbox_view fields)
+  const propertyLocation = message.property_address || message.property_name || null;
+
+  // Show indicators for review needed and draft pending
+  const hasDraft = !!message.draft_id;
+  const showReviewIndicator = message.needs_review && message.status === "new";
 
   return (
     <button
@@ -260,9 +264,21 @@ function MailListItem({ message, isSelected, onClick }: MailListItemProps) {
           </p>
 
           {/* Row 4: Tags and Property */}
-          <div className="flex items-center gap-1.5 pt-0.5">
+          <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
             {message.classification && (
-              <ClassificationBadge type={message.classification} size="sm" />
+              <ClassificationBadge type={message.classification as Classification} size="sm" />
+            )}
+            {showReviewIndicator && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                <AlertCircle className="h-2.5 w-2.5" />
+                Review
+              </span>
+            )}
+            {hasDraft && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                <FileEdit className="h-2.5 w-2.5" />
+                Draft
+              </span>
             )}
             {message.status === "actioned" && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-600 border border-green-500/20">

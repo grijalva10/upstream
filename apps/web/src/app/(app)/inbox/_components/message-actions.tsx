@@ -7,11 +7,14 @@ import {
   Ban,
   Building2,
   CheckCircle,
+  FileCheck,
+  FileEdit,
   Loader2,
   MailX,
   Phone,
   Reply,
   Search,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +27,7 @@ import {
 import {
   type InboxMessage,
   type Action,
+  type Classification,
   CLASSIFICATIONS,
   ACTIONS,
   getAvailableActions,
@@ -53,6 +57,9 @@ const actionIcons: Record<Action, React.ElementType> = {
   archive: Archive,
   reply: Reply,
   mark_reviewed: CheckCircle,
+  approve_draft: FileCheck,
+  edit_draft: FileEdit,
+  create_contact: UserPlus,
 };
 
 const actionVariants: Partial<Record<Action, "default" | "outline" | "destructive">> = {
@@ -60,6 +67,7 @@ const actionVariants: Partial<Record<Action, "default" | "outline" | "destructiv
   confirm_bounce: "destructive",
   archive: "outline",
   mark_reviewed: "outline",
+  create_contact: "outline",
 };
 
 // =============================================================================
@@ -76,14 +84,16 @@ export function MessageActions({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const classification = message.classification;
+  const classification = message.classification as Classification | null;
 
   // Get available actions based on classification and linked entities
+  // Note: Use matched_property_id/matched_contact_id (from inbox_view)
   const availableActions = getAvailableActions(
     classification,
-    !!message.property_id,
-    !!message.contact_id
-  ).filter(action => action !== "reply"); // Reply handled separately
+    !!message.matched_property_id,
+    !!message.matched_contact_id,
+    !!message.draft_id
+  ).filter(action => action !== "reply" && action !== "approve_draft" && action !== "edit_draft"); // Draft actions handled in mail-display
 
   // If no classification and no actions, don't render
   if (!classification && availableActions.length === 0) {
@@ -182,12 +192,12 @@ export function MessageActions({
         </div>
 
         {/* Show warnings for missing data */}
-        {(classConfig?.actions as readonly string[])?.includes("create_deal") && !message.property_id && (
+        {(classConfig?.actions as readonly string[])?.includes("create_deal") && !message.matched_property_id && (
           <p className="text-xs text-muted-foreground mt-2">
             No property linked - cannot create deal
           </p>
         )}
-        {(classConfig?.actions as readonly string[])?.includes("schedule_call") && !message.contact_id && (
+        {(classConfig?.actions as readonly string[])?.includes("schedule_call") && !message.matched_contact_id && (
           <p className="text-xs text-muted-foreground mt-2">
             No contact linked - cannot schedule call
           </p>

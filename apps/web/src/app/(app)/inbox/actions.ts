@@ -233,6 +233,41 @@ export async function takeAction(
     case "reply":
       // Reply is handled separately via the reply dialog
       return { success: true };
+
+    case "approve_draft":
+    case "edit_draft":
+      // These are handled separately via dedicated functions
+      return { success: true };
+
+    case "create_contact": {
+      // Create a new contact from the email sender
+      const { data: newContact, error: contactError } = await supabase
+        .from("contacts")
+        .insert({
+          name: message.from_name || message.from_email?.split("@")[0] || "Unknown",
+          email: message.from_email,
+          source: "inbound",
+          contact_type: "seller",
+          status: "active",
+        })
+        .select("id")
+        .single();
+
+      if (contactError) {
+        console.error("Create contact error:", contactError);
+        return { success: false, error: "Failed to create contact" };
+      }
+
+      // Link the contact to the email
+      await supabase
+        .from("synced_emails")
+        .update({ matched_contact_id: newContact.id })
+        .eq("id", messageId);
+
+      createdId = newContact.id;
+      actionTaken = "contact_created";
+      break;
+    }
   }
 
   // Update message status
@@ -270,7 +305,7 @@ export async function queueReply(
   // Get message
   const { data: message, error: fetchError } = await supabase
     .from("synced_emails")
-    .select("from_email, from_name, contact_id")
+    .select("from_email, from_name, matched_contact_id")
     .eq("id", messageId)
     .single();
 
@@ -328,4 +363,128 @@ function getNextBusinessDay(): Date {
   date.setUTCHours(18, 0, 0, 0); // 10am PT = 18:00 UTC (winter)
 
   return date;
+}
+
+// =============================================================================
+// Draft Actions
+// =============================================================================
+
+export async function approveDraft(draftId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("email_drafts")
+    .update({ status: "approved" })
+    .eq("id", draftId);
+
+  if (error) {
+    console.error("Approve draft error:", error);
+    return { success: false, error: "Failed to approve draft" };
+  }
+
+  revalidatePath("/inbox");
+  return { success: true };
+}
+
+export async function editDraft(
+  draftId: string,
+  subject: string,
+  body: string
+): Promise<ActionResult> {
+  const parsed = replyRequestSchema.safeParse({ subject, body });
+  if (!parsed.success) {
+    return { success: false, error: "Subject and body are required" };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("email_drafts")
+    .update({
+      subject: parsed.data.subject,
+      body: parsed.data.body,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", draftId);
+
+  if (error) {
+    console.error("Edit draft error:", error);
+    return { success: false, error: "Failed to edit draft" };
+  }
+
+  revalidatePath("/inbox");
+  return { success: true };
+}
+
+// =============================================================================
+// Contact Actions
+// =============================================================================
+
+export async function createContactFromEmail(
+  messageId: string,
+  name?: string
+): Promise<ActionResult<{ contactId: string }>> {
+  const supabase = await createClient();
+
+  // Get the email
+  const { data: message, error: fetchError } = await supabase
+    .from("synced_emails")
+    .select("from_email, from_name, matched_contact_id")
+    .eq("id", messageId)
+    .single();
+
+  if (fetchError || !message) {
+    return { success: false, error: "Message not found" };
+  }
+
+  if (message.matched_contact_id) {
+    return { success: false, error: "Contact already linked to this email" };
+  }
+
+  // Check if contact already exists with this email
+  const { data: existing } = await supabase
+    .from("contacts")
+    .select("id")
+    .eq("email", message.from_email)
+    .single();
+
+  if (existing) {
+    // Link existing contact
+    await supabase
+      .from("synced_emails")
+      .update({ matched_contact_id: existing.id })
+      .eq("id", messageId);
+
+    revalidatePath("/inbox");
+    return { success: true, data: { contactId: existing.id } };
+  }
+
+  // Create new contact
+  const contactName = name || message.from_name || message.from_email?.split("@")[0] || "Unknown";
+
+  const { data: newContact, error: createError } = await supabase
+    .from("contacts")
+    .insert({
+      name: contactName,
+      email: message.from_email,
+      source: "inbound",
+      contact_type: "seller",
+      status: "active",
+    })
+    .select("id")
+    .single();
+
+  if (createError) {
+    console.error("Create contact error:", createError);
+    return { success: false, error: "Failed to create contact" };
+  }
+
+  // Link to email
+  await supabase
+    .from("synced_emails")
+    .update({ matched_contact_id: newContact.id })
+    .eq("id", messageId);
+
+  revalidatePath("/inbox");
+  return { success: true, data: { contactId: newContact.id } };
 }

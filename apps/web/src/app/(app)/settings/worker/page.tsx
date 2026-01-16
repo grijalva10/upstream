@@ -79,7 +79,7 @@ const TIMEZONES = [
 
 interface WorkerStatusBadgeProps {
   isPaused: boolean | undefined;
-  isAlive: boolean | undefined;
+  isAlive: boolean | null | undefined;
 }
 
 function WorkerStatusBadge({ isPaused, isAlive }: WorkerStatusBadgeProps) {

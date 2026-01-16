@@ -5,10 +5,13 @@ import { PageSetup } from "./_components/page-setup";
 import {
   parseInboxMessages,
   inboxFiltersSchema,
+  expandClassificationFilter,
   type InboxFilters,
   type InboxMessage,
   type Status,
   type Classification,
+  type ViewMode,
+  type InboxCounts,
 } from "@/lib/inbox/schemas";
 import { InboxShell } from "./_components/inbox-shell";
 import { InboxSkeleton } from "./_components/inbox-skeleton";
@@ -26,6 +29,7 @@ interface InboxData {
 async function getInboxData(searchParams: Record<string, string | string[] | undefined>): Promise<InboxData> {
   // Parse and validate filters
   const rawFilters = {
+    viewMode: searchParams.viewMode,
     status: searchParams.status,
     classification: searchParams.classification,
     search: searchParams.search,
@@ -38,36 +42,45 @@ async function getInboxData(searchParams: Record<string, string | string[] | und
 
   const supabase = await createClient();
 
-  // Build query with server-side filtering
+  // Query from inbox_view (includes all joined data: contact, company, property, deal, draft)
   let query = supabase
-    .from("synced_emails")
-    .select(
-      `
-      *,
-      contact:matched_contact_id(name, email),
-      property:matched_property_id(address, property_name),
-      enrollment:enrollment_id(campaign_id)
-    `,
-      { count: "exact" }
-    )
-    .eq("direction", "inbound")
+    .from("inbox_view")
+    .select("*", { count: "exact" })
     .order("received_at", { ascending: false });
 
-  // Apply filters
+  // Apply view mode filter (default: needs_review)
+  if (filters.viewMode === "needs_review") {
+    query = query.eq("needs_review", true);
+  } else if (filters.viewMode === "auto_handled") {
+    query = query.eq("auto_handled", true);
+  }
+  // "all" mode shows everything (no filter)
+
+  // Apply status filter
   if (filters.status !== "all") {
     query = query.eq("status", filters.status);
   }
 
-  if (filters.classification !== "all") {
-    if (filters.classification === "unclear") {
-      query = query.is("classification", null);
+  // Apply classification filter (supports groups like "hot" or individual like "hot_interested")
+  const classifications = expandClassificationFilter(filters.classification);
+  if (classifications) {
+    if (classifications.includes("unclear")) {
+      // Include both null and 'unclear' as unclassified
+      const others = classifications.filter(c => c !== "unclear");
+      if (others.length > 0) {
+        query = query.or(`classification.is.null,classification.in.(${classifications.join(",")})`);
+      } else {
+        query = query.or("classification.is.null,classification.eq.unclear");
+      }
+    } else if (classifications.length === 1) {
+      query = query.eq("classification", classifications[0]);
     } else {
-      query = query.eq("classification", filters.classification);
+      query = query.in("classification", classifications);
     }
   }
 
+  // Apply search filter
   if (filters.search) {
-    // Search across multiple fields using OR
     query = query.or(
       `from_email.ilike.%${filters.search}%,from_name.ilike.%${filters.search}%,subject.ilike.%${filters.search}%`
     );
@@ -96,35 +109,53 @@ async function getInboxData(searchParams: Record<string, string | string[] | und
 }
 
 // Fetch counts separately for sidebar (not affected by current filters)
-async function getInboxCounts(): Promise<{
-  byStatus: Record<Status | "all", number>;
-  byClassification: Record<Classification | "all", number>;
-}> {
+async function getInboxCounts(): Promise<InboxCounts> {
   const supabase = await createClient();
 
-  // Get all inbound messages for counting (just ids and relevant fields)
+  // Get all inbound emails for counting
   const { data, error } = await supabase
     .from("synced_emails")
-    .select("status, classification")
+    .select("status, classification, needs_review, auto_handled")
     .eq("direction", "inbound");
 
   if (error || !data) {
     return {
+      byViewMode: { needs_review: 0, auto_handled: 0, all: 0 },
       byStatus: { all: 0, new: 0, reviewed: 0, actioned: 0 },
       byClassification: { all: 0 } as Record<Classification | "all", number>,
     };
   }
 
+  // Count by view mode
+  const byViewMode: Record<ViewMode, number> = {
+    needs_review: 0,
+    auto_handled: 0,
+    all: data.length,
+  };
+
+  // Count by status
   const byStatus: Record<string, number> = { all: data.length, new: 0, reviewed: 0, actioned: 0 };
+
+  // Count by classification
   const byClassification: Record<string, number> = { all: data.length };
 
   for (const row of data) {
-    byStatus[row.status] = (byStatus[row.status] || 0) + 1;
+    // View mode counts
+    if (row.needs_review) byViewMode.needs_review++;
+    if (row.auto_handled) byViewMode.auto_handled++;
+
+    // Status counts
+    if (row.status) {
+      byStatus[row.status] = (byStatus[row.status] || 0) + 1;
+    }
+
+    // Classification counts
     const classification = row.classification || "unclear";
     byClassification[classification] = (byClassification[classification] || 0) + 1;
   }
 
   return {
+    byViewMode,
     byStatus: byStatus as Record<Status | "all", number>,
     byClassification: byClassification as Record<Classification | "all", number>,
   };

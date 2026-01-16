@@ -8,18 +8,12 @@ import { useInbox } from "./use-inbox";
 import {
   type InboxMessage,
   type InboxFilters,
-  type Status,
-  type Classification,
+  type InboxCounts,
 } from "@/lib/inbox/schemas";
 
 // =============================================================================
 // Types
 // =============================================================================
-
-interface InboxCounts {
-  byStatus: Record<Status | "all", number>;
-  byClassification: Record<Classification | "all", number>;
-}
 
 interface InboxShellProps {
   messages: InboxMessage[];
@@ -33,7 +27,7 @@ interface InboxShellProps {
 // =============================================================================
 
 export function InboxShell({ messages, total, filters, counts }: InboxShellProps) {
-  const inbox = useInbox(messages);
+  const inbox = useInbox(messages, counts);
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
@@ -73,13 +67,13 @@ export function InboxShell({ messages, total, filters, counts }: InboxShellProps
   return (
     <div className="h-full flex">
       {/* Sidebar - fixed width */}
-      <div className="hidden md:block w-48 border-r flex-shrink-0 overflow-hidden">
+      <div className="hidden md:block w-52 border-r flex-shrink-0 overflow-hidden">
         <MailSidebar
-          statusFilter={filters.status}
+          viewMode={filters.viewMode}
           classificationFilter={filters.classification}
-          statusCounts={counts.byStatus}
-          classificationCounts={counts.byClassification}
-          onStatusChange={inbox.setStatusFilter}
+          viewModeCounts={inbox.counts.byViewMode}
+          classificationCounts={inbox.counts.byClassification}
+          onViewModeChange={inbox.setViewMode}
           onClassificationChange={inbox.setClassificationFilter}
         />
       </div>
