@@ -2,10 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Column, Filter } from "./data-table";
-import type { Contact, Company, Property } from "./types";
+import type { Contact, Company, Property, Campaign } from "./types";
 
 // Re-export types for convenience
-export type { Contact, Company, Property };
+export type { Contact, Company, Property, Campaign };
 
 // ============================================================================
 // SHARED HELPERS
@@ -447,6 +447,107 @@ export const propertyFilters: Filter[] = [
       { value: "medium", label: "10K - 50K" },
       { value: "large", label: "50K - 100K" },
       { value: "xlarge", label: "> 100K sqft" },
+    ],
+  },
+];
+
+// ============================================================================
+// CAMPAIGNS
+// ============================================================================
+
+const campaignStatusColors: Record<string, string> = {
+  draft: "bg-gray-100 text-gray-800",
+  active: "bg-green-100 text-green-800",
+  paused: "bg-yellow-100 text-yellow-800",
+  completed: "bg-blue-100 text-blue-800",
+};
+
+export const campaignColumns: Column<Campaign>[] = [
+  {
+    id: "name",
+    header: "Name",
+    accessorKey: "name",
+    enableSorting: true,
+    className: "font-medium",
+  },
+  {
+    id: "search",
+    header: "Search",
+    accessorFn: (row) => row.search?.name || "-",
+    className: "text-muted-foreground",
+  },
+  {
+    id: "status",
+    header: "Status",
+    accessorKey: "status",
+    align: "center",
+    cell: (v) => coloredBadge(v as string, campaignStatusColors),
+  },
+  {
+    id: "enrolled",
+    header: "Enrolled",
+    accessorKey: "total_enrolled",
+    align: "right",
+    cell: (v) => formatNumber(v as number | null),
+  },
+  {
+    id: "sent",
+    header: "Sent",
+    accessorKey: "total_sent",
+    align: "right",
+    cell: (v) => formatNumber(v as number | null),
+  },
+  {
+    id: "opened",
+    header: "Opened",
+    accessorKey: "total_opened",
+    align: "right",
+    defaultHidden: true,
+    cell: (v) => formatNumber(v as number | null),
+  },
+  {
+    id: "replied",
+    header: "Replied",
+    accessorKey: "total_replied",
+    align: "right",
+    cell: (v) => formatNumber(v as number | null),
+  },
+  {
+    id: "stopped",
+    header: "Stopped",
+    accessorKey: "total_stopped",
+    align: "right",
+    defaultHidden: true,
+    cell: (v) => formatNumber(v as number | null),
+  },
+  {
+    id: "created_at",
+    header: "Created",
+    accessorKey: "created_at",
+    align: "right",
+    enableSorting: true,
+    cell: (v) => new Date(v as string).toLocaleDateString(),
+  },
+  {
+    id: "started_at",
+    header: "Started",
+    accessorKey: "started_at",
+    align: "right",
+    defaultHidden: true,
+    cell: (v) => v ? new Date(v as string).toLocaleDateString() : "-",
+  },
+];
+
+export const campaignFilters: Filter[] = [
+  {
+    id: "status",
+    label: "Status",
+    options: [
+      { value: "all", label: "All" },
+      { value: "draft", label: "Draft" },
+      { value: "active", label: "Active" },
+      { value: "paused", label: "Paused" },
+      { value: "completed", label: "Completed" },
     ],
   },
 ];

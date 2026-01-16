@@ -71,6 +71,7 @@ interface DataTableProps<T extends { id: string }> {
   exportFilename?: string;
   enableSelection?: boolean;
   onSelectionChange?: (ids: Set<string>) => void;
+  onRowClick?: (row: T) => void;
 }
 
 const PAGE_SIZES = [10, 20, 50, 100];
@@ -85,6 +86,7 @@ function DataTableInner<T extends { id: string }>({
   searchPlaceholder = "Search...",
   exportFilename = "export",
   enableSelection = true,
+  onRowClick,
 }: DataTableProps<T>) {
   const table = useDataTable({
     data,
@@ -315,8 +317,10 @@ function DataTableInner<T extends { id: string }>({
                   key={row.id}
                   className={cn(
                     "hover:bg-muted/20 transition-colors border-0",
-                    table.selectedIds.has(row.id) && "bg-muted/50"
+                    table.selectedIds.has(row.id) && "bg-muted/50",
+                    onRowClick && "cursor-pointer"
                   )}
+                  onClick={() => onRowClick?.(row)}
                 >
                   {enableSelection && (
                     <TableCell className="hidden sm:table-cell px-4 py-3">

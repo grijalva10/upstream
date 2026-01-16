@@ -51,3 +51,18 @@ export interface Property {
   floors: number | null;
   created_at: string;
 }
+
+export interface Campaign {
+  id: string;
+  name: string;
+  status: string;
+  search: { id: string; name: string } | null;
+  total_enrolled: number | null;
+  total_sent: number | null;
+  total_opened: number | null;
+  total_replied: number | null;
+  total_stopped: number | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+}
