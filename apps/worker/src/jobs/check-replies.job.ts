@@ -46,10 +46,35 @@ export function createCheckRepliesHandler(boss: PgBoss) {
     }
 
     let queued = 0;
+    let matched = 0;
 
     // Queue classification jobs
     for (const email of unclassified) {
       try {
+        // Try to match email to a contact by from_email
+        if (email.from_email) {
+          const { data: contact } = await supabase
+            .from('contacts')
+            .select('id, company_id')
+            .eq('email', email.from_email.toLowerCase())
+            .limit(1)
+            .single();
+
+          if (contact) {
+            // Update synced_email with matched contact/company
+            await supabase
+              .from('synced_emails')
+              .update({
+                matched_contact_id: contact.id,
+                matched_company_id: contact.company_id,
+              })
+              .eq('id', email.id);
+
+            matched++;
+            console.log(`[check-replies] Matched ${email.from_email} to contact ${contact.id}`);
+          }
+        }
+
         await boss.send('classify-email', {
           emailId: email.id,
           fromEmail: email.from_email,
@@ -61,6 +86,8 @@ export function createCheckRepliesHandler(boss: PgBoss) {
         console.error(`[check-replies] Failed to queue ${email.id}:`, err);
       }
     }
+
+    console.log(`[check-replies] Matched ${matched} emails to contacts`);
 
     console.log(`[check-replies] Queued ${queued} emails for classification`);
 
