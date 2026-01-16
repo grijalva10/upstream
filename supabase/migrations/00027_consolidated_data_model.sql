@@ -103,7 +103,20 @@ UPDATE contacts SET contact_type = 'broker' WHERE title ILIKE '%broker%' AND con
 -- PART 3: EXTEND COMPANIES TABLE
 -- =============================================================================
 
--- Add company_type column
+-- Add company_type column (handle existing integer column by dropping and recreating)
+DO $$
+BEGIN
+    -- Check if column exists and is wrong type (integer instead of text)
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'companies'
+          AND column_name = 'company_type'
+          AND data_type = 'integer'
+    ) THEN
+        ALTER TABLE companies DROP COLUMN company_type;
+    END IF;
+END $$;
+
 ALTER TABLE companies
     ADD COLUMN IF NOT EXISTS company_type TEXT DEFAULT 'owner';
 
@@ -239,222 +252,247 @@ COMMENT ON COLUMN email_drafts.source_email_id IS 'The inbound email this draft 
 -- PART 9: MIGRATE DATA FROM DEPRECATED TABLES
 -- =============================================================================
 
--- Migrate inbox_messages → synced_emails (if inbox_messages has data not in synced_emails)
-INSERT INTO synced_emails (
-    id,
-    outlook_entry_id,
-    outlook_conversation_id,
-    direction,
-    from_email,
-    from_name,
-    to_emails,
-    subject,
-    body_text,
-    body_html,
-    received_at,
-    matched_contact_id,
-    matched_property_id,
-    enrollment_id,
-    classification,
-    classification_confidence,
-    classification_reasoning,
-    status,
-    created_at
-)
-SELECT
-    im.id,
-    COALESCE(im.outlook_id, 'migrated_' || im.id::text),
-    im.thread_id,
-    'inbound',
-    im.from_email,
-    im.from_name,
-    ARRAY[im.to_email],
-    im.subject,
-    im.body_text,
-    im.body_html,
-    im.received_at,
-    im.contact_id,
-    im.property_id,
-    im.enrollment_id,
-    im.classification,
-    im.classification_confidence,
-    im.classification_reasoning,
-    COALESCE(im.status, 'new'),
-    im.created_at
-FROM inbox_messages im
-WHERE NOT EXISTS (
-    SELECT 1 FROM synced_emails se
-    WHERE se.outlook_entry_id = im.outlook_id
-       OR se.id = im.id
-)
-ON CONFLICT (outlook_entry_id) DO NOTHING;
+-- Migrate inbox_messages → synced_emails (only if inbox_messages table still exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'inbox_messages' AND table_schema = 'public') THEN
+        INSERT INTO synced_emails (
+            id,
+            outlook_entry_id,
+            outlook_conversation_id,
+            direction,
+            from_email,
+            from_name,
+            to_emails,
+            subject,
+            body_text,
+            body_html,
+            received_at,
+            matched_contact_id,
+            matched_property_id,
+            enrollment_id,
+            classification,
+            classification_confidence,
+            classification_reasoning,
+            status,
+            created_at
+        )
+        SELECT
+            im.id,
+            COALESCE(im.outlook_id, 'migrated_' || im.id::text),
+            im.thread_id,
+            'inbound',
+            im.from_email,
+            im.from_name,
+            ARRAY[im.to_email],
+            im.subject,
+            im.body_text,
+            im.body_html,
+            im.received_at,
+            im.contact_id,
+            im.property_id,
+            im.enrollment_id,
+            im.classification,
+            im.classification_confidence,
+            im.classification_reasoning,
+            COALESCE(im.status, 'new'),
+            im.created_at
+        FROM inbox_messages im
+        WHERE NOT EXISTS (
+            SELECT 1 FROM synced_emails se
+            WHERE se.outlook_entry_id = im.outlook_id
+               OR se.id = im.id
+        )
+        ON CONFLICT (outlook_entry_id) DO NOTHING;
+    END IF;
+END $$;
 
--- Migrate qualification_data → deals (create deals for qualification_data that don't have one)
-INSERT INTO deals (
-    property_id,
-    company_id,
-    status,
-    asking_price,
-    noi,
-    cap_rate,
-    price_per_sf,
-    motivation,
-    timeline,
-    decision_maker_confirmed,
-    rent_roll_status,
-    operating_statement_status,
-    rent_roll_data,
-    operating_statement_data,
-    last_response_at,
-    follow_up_count,
-    ghosted_at,
-    last_follow_up_at,
-    email_count,
-    qualified_at,
-    created_at,
-    updated_at
-)
-SELECT
-    qd.property_id,
-    qd.company_id,
-    CASE
-        WHEN qd.status = 'ready_to_package' THEN 'packaged'
-        WHEN qd.status = 'docs_received' THEN 'docs_received'
-        WHEN qd.status = 'qualified' THEN 'qualified'
-        WHEN qd.status = 'engaging' THEN 'engaging'
-        ELSE 'new'
-    END,
-    qd.asking_price,
-    qd.noi,
-    qd.cap_rate,
-    qd.price_per_sf,
-    qd.motivation,
-    qd.timeline,
-    qd.decision_maker_confirmed,
-    COALESCE(qd.rent_roll_status, 'not_requested'),
-    COALESCE(qd.operating_statement_status, 'not_requested'),
-    qd.rent_roll_data,
-    qd.operating_statement_data,
-    qd.last_response_at,
-    COALESCE(qd.follow_up_count, 0),
-    qd.ghosted_at,
-    qd.last_follow_up_at,
-    COALESCE(qd.email_count, 0),
-    qd.qualified_at,
-    qd.created_at,
-    qd.updated_at
-FROM qualification_data qd
-WHERE NOT EXISTS (
-    SELECT 1 FROM deals d
-    WHERE d.property_id = qd.property_id
-      AND d.company_id = qd.company_id
-)
-AND qd.property_id IS NOT NULL;
+-- Migrate qualification_data → deals (only if qualification_data table still exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'qualification_data' AND table_schema = 'public') THEN
+        INSERT INTO deals (
+            property_id,
+            company_id,
+            status,
+            asking_price,
+            noi,
+            cap_rate,
+            price_per_sf,
+            motivation,
+            timeline,
+            decision_maker_confirmed,
+            rent_roll_status,
+            operating_statement_status,
+            rent_roll_data,
+            operating_statement_data,
+            last_response_at,
+            follow_up_count,
+            ghosted_at,
+            last_follow_up_at,
+            email_count,
+            qualified_at,
+            created_at,
+            updated_at
+        )
+        SELECT
+            qd.property_id,
+            qd.company_id,
+            CASE
+                WHEN qd.status = 'ready_to_package' THEN 'packaged'
+                WHEN qd.status = 'docs_received' THEN 'docs_received'
+                WHEN qd.status = 'qualified' THEN 'qualified'
+                WHEN qd.status = 'engaging' THEN 'engaging'
+                ELSE 'new'
+            END,
+            qd.asking_price,
+            qd.noi,
+            qd.cap_rate,
+            qd.price_per_sf,
+            qd.motivation,
+            qd.timeline,
+            qd.decision_maker_confirmed,
+            COALESCE(qd.rent_roll_status, 'not_requested'),
+            COALESCE(qd.operating_statement_status, 'not_requested'),
+            qd.rent_roll_data,
+            qd.operating_statement_data,
+            qd.last_response_at,
+            COALESCE(qd.follow_up_count, 0),
+            qd.ghosted_at,
+            qd.last_follow_up_at,
+            COALESCE(qd.email_count, 0),
+            qd.qualified_at,
+            qd.created_at,
+            qd.updated_at
+        FROM qualification_data qd
+        WHERE NOT EXISTS (
+            SELECT 1 FROM deals d
+            WHERE d.property_id = qd.property_id
+              AND d.company_id = qd.company_id
+        )
+        AND qd.property_id IS NOT NULL;
+    END IF;
+END $$;
 
--- Migrate scheduled_calls → calls
-INSERT INTO calls (
-    contact_id,
-    company_id,
-    property_id,
-    scheduled_at,
-    duration_minutes,
-    calendar_event_id,
-    phone,
-    notes_md,
-    prep_url,
-    status,
-    source_email_id,
-    created_at,
-    updated_at
-)
-SELECT
-    sc.contact_id,
-    sc.company_id,
-    sc.property_id,
-    sc.scheduled_at,
-    COALESCE(sc.duration_minutes, 30),
-    sc.calendar_event_id,
-    sc.phone,
-    sc.notes,
-    sc.prep_url,
-    COALESCE(sc.status, 'scheduled'),
-    sc.source_email_id,
-    sc.created_at,
-    sc.updated_at
-FROM scheduled_calls sc
-WHERE NOT EXISTS (
-    SELECT 1 FROM calls c
-    WHERE c.contact_id = sc.contact_id
-      AND c.scheduled_at = sc.scheduled_at
-);
+-- Migrate scheduled_calls → calls (only if scheduled_calls table still exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'scheduled_calls' AND table_schema = 'public') THEN
+        INSERT INTO calls (
+            contact_id,
+            company_id,
+            property_id,
+            scheduled_at,
+            duration_minutes,
+            calendar_event_id,
+            phone,
+            notes_md,
+            prep_url,
+            status,
+            source_email_id,
+            created_at,
+            updated_at
+        )
+        SELECT
+            sc.contact_id,
+            sc.company_id,
+            sc.property_id,
+            sc.scheduled_at,
+            COALESCE(sc.duration_minutes, 30),
+            sc.calendar_event_id,
+            sc.phone,
+            sc.notes,
+            sc.prep_url,
+            COALESCE(sc.status, 'scheduled'),
+            sc.source_email_id,
+            sc.created_at,
+            sc.updated_at
+        FROM scheduled_calls sc
+        WHERE NOT EXISTS (
+            SELECT 1 FROM calls c
+            WHERE c.contact_id = sc.contact_id
+              AND c.scheduled_at = sc.scheduled_at
+        );
+    END IF;
+END $$;
 
--- Migrate clients → contacts (as buyers)
-INSERT INTO contacts (
-    name,
-    email,
-    phone,
-    contact_type,
-    source,
-    status,
-    created_at,
-    updated_at
-)
-SELECT
-    cl.name,
-    cl.email,
-    cl.phone,
-    'buyer',
-    'manual',
-    CASE WHEN cl.status = 'active' THEN 'active' ELSE 'active' END,
-    cl.created_at,
-    cl.updated_at
-FROM clients cl
-WHERE cl.email IS NOT NULL
-AND NOT EXISTS (
-    SELECT 1 FROM contacts c WHERE c.email = cl.email
-)
-ON CONFLICT (email) DO UPDATE SET
-    contact_type = 'buyer',
-    is_buyer = true;
+-- Migrate clients → contacts (as buyers) - only if clients table still exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'clients' AND table_schema = 'public') THEN
+        INSERT INTO contacts (
+            name,
+            email,
+            phone,
+            contact_type,
+            source,
+            status,
+            created_at,
+            updated_at
+        )
+        SELECT
+            cl.name,
+            cl.email,
+            cl.phone,
+            'buyer',
+            'manual',
+            CASE WHEN cl.status = 'active' THEN 'active' ELSE 'active' END,
+            cl.created_at,
+            cl.updated_at
+        FROM clients cl
+        WHERE cl.email IS NOT NULL
+        AND NOT EXISTS (
+            SELECT 1 FROM contacts c WHERE c.email = cl.email
+        )
+        ON CONFLICT (email) DO UPDATE SET
+            contact_type = 'buyer',
+            is_buyer = true;
 
--- Update is_buyer flag for migrated clients
-UPDATE contacts SET is_buyer = true
-WHERE email IN (SELECT email FROM clients WHERE email IS NOT NULL);
+        -- Update is_buyer flag for migrated clients
+        UPDATE contacts SET is_buyer = true
+        WHERE email IN (SELECT email FROM clients WHERE email IS NOT NULL);
+    END IF;
+END $$;
 
--- Migrate client_criteria → searches
-INSERT INTO searches (
-    name,
-    source,
-    criteria_json,
-    payloads_json,
-    strategy_summary,
-    status,
-    total_properties,
-    total_contacts,
-    created_at,
-    updated_at
-)
-SELECT
-    cc.name,
-    'manual',
-    cc.criteria_json,
-    cc.queries_json,
-    cc.strategy_summary,
-    CASE
-        WHEN cc.status = 'active' THEN 'ready'
-        WHEN cc.status = 'draft' THEN 'pending_queries'
-        ELSE 'pending_queries'
-    END,
-    COALESCE(cc.total_properties, 0),
-    COALESCE(cc.total_contacts, 0),
-    cc.created_at,
-    cc.updated_at
-FROM client_criteria cc
-WHERE NOT EXISTS (
-    SELECT 1 FROM searches s
-    WHERE s.name = cc.name
-      AND s.criteria_json = cc.criteria_json
-);
+-- Migrate client_criteria → searches - only if client_criteria table still exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'client_criteria' AND table_schema = 'public') THEN
+        INSERT INTO searches (
+            name,
+            source,
+            criteria_json,
+            payloads_json,
+            strategy_summary,
+            status,
+            total_properties,
+            total_contacts,
+            created_at,
+            updated_at
+        )
+        SELECT
+            cc.name,
+            'manual',
+            cc.criteria_json,
+            cc.queries_json,
+            cc.strategy_summary,
+            CASE
+                WHEN cc.status = 'active' THEN 'ready'
+                WHEN cc.status = 'draft' THEN 'pending_queries'
+                ELSE 'pending_queries'
+            END,
+            COALESCE(cc.total_properties, 0),
+            COALESCE(cc.total_contacts, 0),
+            cc.created_at,
+            cc.updated_at
+        FROM client_criteria cc
+        WHERE NOT EXISTS (
+            SELECT 1 FROM searches s
+            WHERE s.name = cc.name
+              AND s.criteria_json = cc.criteria_json
+        );
+    END IF;
+END $$;
 
 -- =============================================================================
 -- PART 10: RENAME DEPRECATED TABLES (NOT DROP - preserves data)
@@ -467,12 +505,25 @@ ALTER TABLE IF EXISTS qualification_data RENAME TO _deprecated_qualification_dat
 ALTER TABLE IF EXISTS clients RENAME TO _deprecated_clients;
 ALTER TABLE IF EXISTS client_criteria RENAME TO _deprecated_client_criteria;
 
--- Add comments explaining deprecation
-COMMENT ON TABLE _deprecated_inbox_messages IS 'DEPRECATED: Use synced_emails instead. Data migrated on 2026-01-16.';
-COMMENT ON TABLE _deprecated_scheduled_calls IS 'DEPRECATED: Use calls instead. Data migrated on 2026-01-16.';
-COMMENT ON TABLE _deprecated_qualification_data IS 'DEPRECATED: Use deals instead. Data migrated on 2026-01-16.';
-COMMENT ON TABLE _deprecated_clients IS 'DEPRECATED: Use contacts with contact_type=buyer instead. Data migrated on 2026-01-16.';
-COMMENT ON TABLE _deprecated_client_criteria IS 'DEPRECATED: Use searches instead. Data migrated on 2026-01-16.';
+-- Add comments explaining deprecation (only if tables exist)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '_deprecated_inbox_messages' AND table_schema = 'public') THEN
+        COMMENT ON TABLE _deprecated_inbox_messages IS 'DEPRECATED: Use synced_emails instead. Data migrated on 2026-01-16.';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '_deprecated_scheduled_calls' AND table_schema = 'public') THEN
+        COMMENT ON TABLE _deprecated_scheduled_calls IS 'DEPRECATED: Use calls instead. Data migrated on 2026-01-16.';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '_deprecated_qualification_data' AND table_schema = 'public') THEN
+        COMMENT ON TABLE _deprecated_qualification_data IS 'DEPRECATED: Use deals instead. Data migrated on 2026-01-16.';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '_deprecated_clients' AND table_schema = 'public') THEN
+        COMMENT ON TABLE _deprecated_clients IS 'DEPRECATED: Use contacts with contact_type=buyer instead. Data migrated on 2026-01-16.';
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '_deprecated_client_criteria' AND table_schema = 'public') THEN
+        COMMENT ON TABLE _deprecated_client_criteria IS 'DEPRECATED: Use searches instead. Data migrated on 2026-01-16.';
+    END IF;
+END $$;
 
 -- =============================================================================
 -- PART 11: UPDATE/CREATE VIEWS
@@ -840,15 +891,16 @@ SELECT
     'call' AS item_type,
     ca.id AS item_id,
     ca.scheduled_at AS due_at,
-    COALESCE(ca.subject, 'Call with ' || c.name) AS title,
+    'Call with ' || COALESCE(c.name, 'Unknown') AS title,
     'Scheduled call' AS description,
     c.name AS contact_name,
     co.name AS company_name,
     ca.deal_id,
     3 AS priority
 FROM calls ca
-JOIN contacts c ON ca.contact_id = c.id
-LEFT JOIN companies co ON ca.company_id = co.id
+LEFT JOIN contacts c ON ca.contact_id = c.id
+LEFT JOIN deals d ON ca.deal_id = d.id
+LEFT JOIN companies co ON d.company_id = co.id
 WHERE ca.status = 'scheduled'
   AND ca.scheduled_at::date = CURRENT_DATE
 
