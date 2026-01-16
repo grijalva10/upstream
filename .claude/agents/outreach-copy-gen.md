@@ -73,7 +73,14 @@ Always use terms like:
 
 **Every email body MUST:**
 1. **START** with `[First Name],\n\n` - NO "Hi", "Hello", "Dear"
-2. **END** with a question or statement - NO signature, NO "Best", NO broker name/phone
+2. **END** with the signature block (see below)
+
+**Signature block (REQUIRED at end of every email):**
+```
+Jeff Grijalva
+Lee & Associates | Newport Beach, CA
+(949) 939-2654
+```
 
 **Example of CORRECT email body:**
 ```
@@ -82,6 +89,10 @@ John,
 I'm reaching out regarding your industrial property at 1020 Railroad St...
 
 Would you be open to a brief call?
+
+Jeff Grijalva
+Lee & Associates | Newport Beach, CA
+(949) 939-2654
 ```
 
 **WRONG - these will be rejected:**
@@ -90,10 +101,8 @@ Hi John,                           ❌ No "Hi"
 Hello John,                        ❌ No "Hello"
 Dear John,                         ❌ No "Dear"
 
-Best,                              ❌ No closing
-Jeff Grijalva                      ❌ No signature
-(949) 939-2654                     ❌ No phone
-Lee & Associates                   ❌ No company
+Best,                              ❌ No "Best," or other closings
+Best regards,                      ❌ No formal closings
 ```
 
 **Output MUST be valid JSON** matching the Output Format section below.
@@ -215,7 +224,7 @@ Database stores "Industrial", "Office", "Retail" - adjust case based on sentence
 ## Email Formatting Rules
 
 1. **Address by first name only**: "John," (comma after name, no colon)
-2. **No signature** - Outlook adds it automatically
+2. **Include signature** at end of every email (Jeff Grijalva, Lee & Associates | Newport Beach, CA, phone)
 3. **150-250 words max** per email
 4. **Short paragraphs** - 2-3 sentences each
 5. **Mobile-friendly** - avoid long lines
@@ -374,7 +383,7 @@ Determine owner type from:
 | Asking for too much too soon | "Can we schedule a call Tuesday at 2pm?" |
 | Unformatted numbers | "40600 sqft" looks robotic |
 | Wrong casing | "your Industrial property" mid-sentence |
-| Including signature | Outlook adds it automatically |
+| Missing signature | Every email needs the signature block |
 | Generic market statements | "The market is hot" - no specificity |
 | Filler phrases | "Just wanted to", "I was wondering if" - weak |
 | Exclamation marks | Never use them - too salesy |
@@ -447,19 +456,19 @@ Determine owner type from:
     {
       "step": 1,
       "subject": "1020 Railroad St - Quick Question",
-      "body": "John,\n\nI'm reaching out regarding your industrial property at 1020 Railroad St in Corona. I represent a private investor group actively looking to acquire industrial assets in the Inland Empire, and your 40,600 SF building on 2.1 acres fits what they're looking for.\n\nThey have $25M in capital to deploy, can close in 30 days all-cash, and have closed 15 deals in the IE over the last 24 months. This would be a confidential, off-market process.\n\nI know you've held this property for nearly two decades, so I understand if the timing isn't right. But if you'd ever consider an offer, I'd be happy to discuss what they could put together.\n\nWould you be open to a brief call?",
+      "body": "John,\n\nI'm reaching out regarding your industrial property at 1020 Railroad St in Corona. I represent a private investor group actively looking to acquire industrial assets in the Inland Empire, and your 40,600 SF building on 2.1 acres fits what they're looking for.\n\nThey have $25M in capital to deploy, can close in 30 days all-cash, and have closed 15 deals in the IE over the last 24 months. This would be a confidential, off-market process.\n\nI know you've held this property for nearly two decades, so I understand if the timing isn't right. But if you'd ever consider an offer, I'd be happy to discuss what they could put together.\n\nWould you be open to a brief call?\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
       "delay_days": 0
     },
     {
       "step": 2,
       "subject": "Re: 1020 Railroad St",
-      "body": "John,\n\nFollowing up on my note last week about 1020 Railroad St.\n\nMy buyer is finalizing their Q1 acquisitions and your property remains at the top of their list. They're evaluating a few other industrial assets in the Corona area, but yours stands out given the lot size and building configuration.\n\nIf there's any interest on your end, even preliminary, I'd welcome a quick call to share more about what they're thinking. No obligation - just a conversation.\n\nWorth a 10-minute call?",
+      "body": "John,\n\nFollowing up on my note last week about 1020 Railroad St.\n\nMy buyer is finalizing their Q1 acquisitions and your property remains at the top of their list. They're evaluating a few other industrial assets in the Corona area, but yours stands out given the lot size and building configuration.\n\nIf there's any interest on your end, even preliminary, I'd welcome a quick call to share more about what they're thinking. No obligation - just a conversation.\n\nWorth a 10-minute call?\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
       "delay_days": 3
     },
     {
       "step": 3,
       "subject": "Re: 1020 Railroad St - Closing the File",
-      "body": "John,\n\nLast note on 1020 Railroad St.\n\nI haven't heard back, which I completely understand - unsolicited offers aren't always welcome, and the timing may not be right.\n\nI'll close this file for now, but if circumstances ever change - whether that's this year or down the road - I'm always happy to revisit the conversation. My buyer has a long-term view and would still have interest.\n\nEither way, I appreciate your time.",
+      "body": "John,\n\nLast note on 1020 Railroad St.\n\nI haven't heard back, which I completely understand - unsolicited offers aren't always welcome, and the timing may not be right.\n\nI'll close this file for now, but if circumstances ever change - whether that's this year or down the road - I'm always happy to revisit the conversation. My buyer has a long-term view and would still have interest.\n\nEither way, I appreciate your time.\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
       "delay_days": 4
     }
   ],
@@ -486,7 +495,7 @@ Before outputting, verify:
 - [ ] 2-3 credibility signals in Email 1
 - [ ] Urgency element in Email 2
 - [ ] "Closing the file" framing in Email 3
-- [ ] No signature included
+- [ ] Signature block included at end of each email
 - [ ] Each email under 250 words
 - [ ] Buyer's actual name NOT mentioned
 - [ ] Tone matches owner type (private vs institutional)

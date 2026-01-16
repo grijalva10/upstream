@@ -99,8 +99,12 @@ export async function POST(
 
 Email bodies must:
 - START with "{{FirstName}}," (NO "Hi", NO "Hello", NO "Dear")
-- END with a question or statement (NO signature, NO "Best", NO phone number)
 - Use "my client" / "my buyer" / "they" voice - NOT "we" (broker represents buyer)
+- END with the signature block (no "Best," or other closings before it):
+
+Jeff Grijalva
+Lee & Associates | Newport Beach, CA
+(949) 939-2654
 
 Generate a 3-email sequence for:
 
@@ -121,9 +125,9 @@ ${searchContext.strategies?.length ? `- Strategies: ${searchContext.strategies.j
 Output JSON only with this structure:
 {
   "emails": [
-    {"step": 1, "subject": "...", "body": "{{FirstName}},\\n\\n...\\n\\nWould you be open to a brief call?", "delay_days": 0},
-    {"step": 2, "subject": "Re: ...", "body": "{{FirstName}},\\n\\n...\\n\\nWorth a 10-minute call?", "delay_days": 4},
-    {"step": 3, "subject": "...", "body": "{{FirstName}},\\n\\n...\\n\\nEither way, I appreciate your time.", "delay_days": 4}
+    {"step": 1, "subject": "...", "body": "{{FirstName}},\\n\\n...\\n\\nWould you be open to a brief call?\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 0},
+    {"step": 2, "subject": "Re: ...", "body": "{{FirstName}},\\n\\n...\\n\\nWorth a 10-minute call?\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 4},
+    {"step": 3, "subject": "...", "body": "{{FirstName}},\\n\\n...\\n\\nEither way, I appreciate your time.\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 4}
   ]
 }`;
 
