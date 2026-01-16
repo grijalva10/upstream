@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CampaignActions } from "./_components/campaign-actions";
 import { GenerateEmailsButton } from "./_components/generate-emails-button";
+import { SendTestButton } from "./_components/send-test-button";
 import { EmailSequence } from "./_components/email-sequence";
 import { EnrollmentsTable } from "./_components/enrollments-table";
 
@@ -176,10 +177,16 @@ export default async function CampaignDetailPage({ params }: PageProps) {
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Email Sequence
           </h2>
-          <GenerateEmailsButton
-            campaignId={campaign.id}
-            disabled={campaign.status !== "draft"}
-          />
+          <div className="flex items-center gap-2">
+            <SendTestButton
+              campaignId={campaign.id}
+              disabled={!campaign.email_1_body || total === 0}
+            />
+            <GenerateEmailsButton
+              campaignId={campaign.id}
+              disabled={campaign.status !== "draft"}
+            />
+          </div>
         </div>
         <EmailSequence emails={emails} />
       </section>
