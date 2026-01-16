@@ -1,200 +1,291 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, Send, Mail, MessageSquare, ExternalLink } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ArrowLeft,
+  Users,
+  Send,
+  Mail,
+  MessageSquare,
+  ExternalLink,
+  Clock,
+  Building2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { OverviewTab } from "./_components/overview-tab";
-import { EmailsTab } from "./_components/emails-tab";
-import { EnrollmentsTab } from "./_components/enrollments-tab";
-import { ActivityTab } from "./_components/activity-tab";
-import { SettingsTab } from "./_components/settings-tab";
-import { CampaignErrorBoundary } from "./_components/error-boundary";
 import { CampaignActions } from "./_components/campaign-actions";
-import type { CampaignWithSearch } from "../_lib/types";
-import { CampaignStatusBadge } from "../_lib/utils";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-async function getCampaign(id: string): Promise<CampaignWithSearch> {
-  const supabase = await createClient();
+const statusColors: Record<string, string> = {
+  draft: "bg-gray-100 text-gray-800",
+  active: "bg-green-100 text-green-800",
+  paused: "bg-yellow-100 text-yellow-800",
+  completed: "bg-blue-100 text-blue-800",
+};
+
+async function getCampaign(id: string) {
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("campaigns")
-    .select(`
-      *,
-      search:searches (id, name)
-    `)
+    .select("*, search:searches(id, name)")
     .eq("id", id)
     .single();
 
-  if (error || !data) {
-    notFound();
-  }
-
-  return data as CampaignWithSearch;
+  if (error || !data) notFound();
+  return data;
 }
 
-async function getEnrollmentCount(campaignId: string): Promise<number> {
-  const supabase = await createClient();
+async function getEnrollments(campaignId: string) {
+  const supabase = createAdminClient();
 
-  const { count } = await supabase
+  const { data, count } = await supabase
     .from("enrollments")
-    .select("id", { count: "exact", head: true })
-    .eq("campaign_id", campaignId);
+    .select(
+      `
+      id,
+      status,
+      current_step,
+      created_at,
+      contact:contacts(id, name, email),
+      property:properties(id, address, city, state)
+    `,
+      { count: "exact" }
+    )
+    .eq("campaign_id", campaignId)
+    .order("created_at", { ascending: false })
+    .limit(50);
 
-  return count ?? 0;
+  return { enrollments: data ?? [], total: count ?? 0 };
 }
 
 export default async function CampaignDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [campaign, enrollmentCount] = await Promise.all([
+  const [campaign, { enrollments, total }] = await Promise.all([
     getCampaign(id),
-    getEnrollmentCount(id),
+    getEnrollments(id),
   ]);
 
-  const metrics = {
-    enrolled: campaign.total_enrolled ?? 0,
-    sent: campaign.total_sent ?? 0,
-    opened: campaign.total_opened ?? 0,
-    replied: campaign.total_replied ?? 0,
-  };
+  const metrics = [
+    {
+      label: "Enrolled",
+      value: campaign.total_enrolled ?? 0,
+      icon: Users,
+      color: "text-blue-600",
+    },
+    {
+      label: "Sent",
+      value: campaign.total_sent ?? 0,
+      icon: Send,
+      color: "text-slate-600",
+    },
+    {
+      label: "Opened",
+      value: campaign.total_opened ?? 0,
+      icon: Mail,
+      color: "text-amber-600",
+    },
+    {
+      label: "Replied",
+      value: campaign.total_replied ?? 0,
+      icon: MessageSquare,
+      color: "text-emerald-600",
+    },
+  ];
+
+  const emails = [
+    { num: 1, subject: campaign.email_1_subject, delay: null },
+    { num: 2, subject: campaign.email_2_subject, delay: campaign.email_2_delay_days ?? 3 },
+    { num: 3, subject: campaign.email_3_subject, delay: campaign.email_3_delay_days ?? 4 },
+  ];
 
   return (
-    <div className="min-h-screen">
-      {/* Sticky top bar */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-        <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
-          <Link
-            href="/campaigns"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1.5" />
-            Campaigns
-          </Link>
+    <div className="p-6 pb-8 space-y-6 max-w-5xl">
+      {/* Back link */}
+      <Link
+        href="/campaigns"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1.5" />
+        Campaigns
+      </Link>
 
-          {metrics.enrolled > 0 && (
-            <div className="hidden sm:flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Users className="h-3.5 w-3.5" />
-                <span className="font-medium text-foreground">{metrics.enrolled.toLocaleString()}</span>
-                <span>enrolled</span>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold">{campaign.name}</h1>
+            <Badge className={statusColors[campaign.status]}>{campaign.status}</Badge>
+          </div>
+          {campaign.search && (
+            <p className="text-sm text-muted-foreground">
+              Search:{" "}
+              <Link
+                href={`/searches/${campaign.search.id}`}
+                className="text-foreground hover:underline inline-flex items-center gap-1"
+              >
+                {campaign.search.name}
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </p>
+          )}
+        </div>
+        <CampaignActions
+          campaignId={campaign.id}
+          status={campaign.status}
+          enrollmentCount={total}
+        />
+      </div>
+
+      {/* Metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {metrics.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="rounded-xl border bg-card p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Icon className={`h-4 w-4 ${color}`} />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                {label}
+              </span>
+            </div>
+            <p className="text-2xl font-semibold">{value.toLocaleString()}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Email Sequence */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          Email Sequence
+        </h2>
+        <div className="rounded-xl border bg-card overflow-hidden divide-y">
+          {emails.map(({ num, subject, delay }) => (
+            <div key={num} className="flex items-center gap-4 p-4">
+              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                {num}
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Send className="h-3.5 w-3.5" />
-                <span className="font-medium text-foreground">{metrics.sent.toLocaleString()}</span>
-                <span>sent</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">
+                  {subject || <span className="text-muted-foreground italic">No subject</span>}
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Mail className="h-3.5 w-3.5" />
-                <span className="font-medium text-foreground">{metrics.opened.toLocaleString()}</span>
-                <span>opened</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <MessageSquare className="h-3.5 w-3.5" />
-                <span className="font-medium text-foreground">{metrics.replied.toLocaleString()}</span>
-                <span>replied</span>
-              </div>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {delay === null ? "Immediate" : `+${delay} days`}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Enrollments */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Enrollments
+          </h2>
+          <span className="text-sm text-muted-foreground">{total} total</span>
+        </div>
+
+        <div className="rounded-xl border bg-card overflow-hidden">
+          {/* Table header */}
+          <div className="hidden sm:grid grid-cols-[1fr_1fr_100px_80px] gap-4 px-4 py-3 bg-muted/30 border-b text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <div>Contact</div>
+            <div>Property</div>
+            <div>Progress</div>
+            <div className="text-right">Status</div>
+          </div>
+
+          {/* Rows */}
+          {enrollments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Users className="h-8 w-8 text-muted-foreground/50 mb-3" />
+              <p className="text-sm text-muted-foreground">No contacts enrolled yet</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Click &quot;Enroll Contacts&quot; to add contacts from the search
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {enrollments.map((enrollment) => (
+                <div
+                  key={enrollment.id}
+                  className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_100px_80px] gap-2 sm:gap-4 p-4 hover:bg-muted/20 transition-colors"
+                >
+                  {/* Contact */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                      <span className="text-sm font-medium">
+                        {(enrollment.contact?.name || "?")[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">
+                        {enrollment.contact?.name || "Unknown"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {enrollment.contact?.email || "No email"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Property */}
+                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
+                    <Building2 className="h-4 w-4 text-muted-foreground hidden sm:block" />
+                    <div className="min-w-0">
+                      <p className="text-sm truncate">
+                        {enrollment.property?.address || "Unknown property"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {[enrollment.property?.city, enrollment.property?.state]
+                          .filter(Boolean)
+                          .join(", ") || ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress */}
+                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map((step) => (
+                        <div
+                          key={step}
+                          className={`h-2 w-5 rounded-full ${
+                            step <= (enrollment.current_step ?? 0)
+                              ? "bg-primary"
+                              : "bg-muted"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {enrollment.current_step ?? 0}/3
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex items-center justify-start sm:justify-end pl-12 sm:pl-0">
+                    <Badge
+                      variant="outline"
+                      className={
+                        enrollment.status === "replied"
+                          ? "text-emerald-600 border-emerald-200"
+                          : enrollment.status === "stopped"
+                          ? "text-red-600 border-red-200"
+                          : ""
+                      }
+                    >
+                      {enrollment.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
-      </div>
-
-      <CampaignErrorBoundary>
-        <div className="px-4 sm:px-6 py-6 max-w-5xl space-y-6">
-          {/* Header */}
-          <Header campaign={campaign} enrollmentCount={enrollmentCount} />
-
-          {/* Tabs */}
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="h-auto p-1 bg-muted/50">
-              <TabsTrigger
-                value="overview"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="emails"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
-              >
-                Emails
-              </TabsTrigger>
-              <TabsTrigger
-                value="enrollments"
-                className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
-              >
-                Enrollments
-                {enrollmentCount > 0 && (
-                  <Badge variant="secondary" className="h-5 px-1.5 text-xs font-normal">
-                    {enrollmentCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger
-                value="activity"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
-              >
-                Activity
-              </TabsTrigger>
-              <TabsTrigger
-                value="settings"
-                className="data-[state=active]:bg-background data-[state=active]:shadow-sm px-4 py-2"
-              >
-                Settings
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="mt-6">
-              <OverviewTab campaign={campaign} />
-            </TabsContent>
-            <TabsContent value="emails" className="mt-6">
-              <EmailsTab campaign={campaign} />
-            </TabsContent>
-            <TabsContent value="enrollments" className="mt-6">
-              <EnrollmentsTab campaignId={campaign.id} />
-            </TabsContent>
-            <TabsContent value="activity" className="mt-6">
-              <ActivityTab campaignId={campaign.id} />
-            </TabsContent>
-            <TabsContent value="settings" className="mt-6">
-              <SettingsTab campaign={campaign} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </CampaignErrorBoundary>
+      </section>
     </div>
-  );
-}
-
-function Header({ campaign, enrollmentCount }: { campaign: CampaignWithSearch; enrollmentCount: number }) {
-  return (
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div className="space-y-1">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{campaign.name}</h1>
-          <CampaignStatusBadge status={campaign.status} />
-        </div>
-        {campaign.search && (
-          <p className="text-sm text-muted-foreground">
-            From search:{" "}
-            <Link
-              href={`/searches/${campaign.search.id}`}
-              className="inline-flex items-center gap-1 text-foreground hover:underline"
-            >
-              {campaign.search.name}
-              <ExternalLink className="h-3 w-3" />
-            </Link>
-          </p>
-        )}
-      </div>
-      <CampaignActions
-        campaignId={campaign.id}
-        status={campaign.status}
-        enrollmentCount={enrollmentCount}
-      />
-    </header>
   );
 }
