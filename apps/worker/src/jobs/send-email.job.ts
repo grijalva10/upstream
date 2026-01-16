@@ -158,6 +158,39 @@ export async function handleSendEmail(
     // Increment rate counter
     await incrementSendCount();
 
+    // Update company status to 'contacted' if this is first outreach
+    try {
+      const { data: queueRecord } = await supabase
+        .from('email_queue')
+        .select('contact_id')
+        .eq('id', queueId)
+        .single();
+
+      if (queueRecord?.contact_id) {
+        const { data: contact } = await supabase
+          .from('contacts')
+          .select('company_id')
+          .eq('id', queueRecord.contact_id)
+          .single();
+
+        if (contact?.company_id) {
+          // Only update if currently 'new'
+          const { error: updateError } = await supabase
+            .from('companies')
+            .update({ status: 'contacted' })
+            .eq('id', contact.company_id)
+            .eq('status', 'new');
+
+          if (!updateError) {
+            console.log(`[send-email] Updated company ${contact.company_id} status to 'contacted'`);
+          }
+        }
+      }
+    } catch (err) {
+      // Don't fail the job if status update fails
+      console.warn('[send-email] Failed to update company status:', err);
+    }
+
     console.log(`[send-email] Sent to ${toEmail}`);
 
     return {
