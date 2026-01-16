@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Play, Pause, Loader2 } from "lucide-react";
+import { Users, Play, Pause, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -26,11 +26,19 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
   const router = useRouter();
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [enrollResult, setEnrollResult] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const showNotification = (type: "success" | "error", message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   const handleEnroll = async () => {
     setIsEnrolling(true);
-    setEnrollResult(null);
+    setNotification(null);
 
     try {
       const res = await fetch(`/api/campaigns/${campaignId}/enroll`, {
@@ -39,14 +47,14 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
       const data = await res.json();
 
       if (!res.ok) {
-        setEnrollResult(`Error: ${data.error}`);
+        showNotification("error", data.error || "Failed to enroll contacts");
         return;
       }
 
-      setEnrollResult(`Enrolled ${data.enrolled} contacts`);
+      showNotification("success", `Successfully enrolled ${data.enrolled} contacts`);
       router.refresh();
     } catch {
-      setEnrollResult("Failed to enroll contacts");
+      showNotification("error", "Failed to enroll contacts");
     } finally {
       setIsEnrolling(false);
     }
@@ -63,8 +71,16 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
       });
 
       if (res.ok) {
+        showNotification(
+          "success",
+          newStatus === "active" ? "Campaign activated" : "Campaign paused"
+        );
         router.refresh();
+      } else {
+        showNotification("error", "Failed to update campaign status");
       }
+    } catch {
+      showNotification("error", "Failed to update campaign status");
     } finally {
       setIsUpdating(false);
     }
@@ -79,93 +95,115 @@ export function CampaignActions({ campaignId, status, enrollmentCount }: Campaig
   const canResume = isPaused;
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Enroll button - only in draft */}
-      {canEnroll && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleEnroll}
-          disabled={isEnrolling}
+    <div className="flex flex-col items-end gap-2">
+      {/* Action buttons */}
+      <div className="flex items-center gap-2">
+        {/* Enroll button - only in draft */}
+        {canEnroll && (
+          <Button
+            variant="outline"
+            onClick={handleEnroll}
+            disabled={isEnrolling}
+            className="gap-2"
+          >
+            {isEnrolling ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Users className="h-4 w-4" />
+            )}
+            {enrollmentCount > 0 ? "Enroll More" : "Enroll Contacts"}
+          </Button>
+        )}
+
+        {/* Activate button - draft with enrollments */}
+        {canActivate && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button disabled={isUpdating} className="gap-2">
+                {isUpdating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+                Activate Campaign
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Activate this campaign?</AlertDialogTitle>
+                <AlertDialogDescription className="space-y-2">
+                  <p>
+                    This will start the email sequence for all {enrollmentCount} enrolled contacts.
+                  </p>
+                  <p className="text-amber-600 dark:text-amber-400">
+                    Note: Email sending is not yet implemented. No emails will actually be sent.
+                  </p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleStatusChange("active")}
+                  className="gap-2"
+                >
+                  <Play className="h-4 w-4" />
+                  Activate
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {/* Pause button - when active */}
+        {canPause && (
+          <Button
+            variant="outline"
+            onClick={() => handleStatusChange("paused")}
+            disabled={isUpdating}
+            className="gap-2"
+          >
+            {isUpdating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Pause className="h-4 w-4" />
+            )}
+            Pause
+          </Button>
+        )}
+
+        {/* Resume button - when paused */}
+        {canResume && (
+          <Button
+            onClick={() => handleStatusChange("active")}
+            disabled={isUpdating}
+            className="gap-2"
+          >
+            {isUpdating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
+            Resume
+          </Button>
+        )}
+      </div>
+
+      {/* Notification toast */}
+      {notification && (
+        <div
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm animate-in fade-in slide-in-from-top-2 ${
+            notification.type === "success"
+              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+          }`}
         >
-          {isEnrolling ? (
-            <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+          {notification.type === "success" ? (
+            <CheckCircle className="h-4 w-4" />
           ) : (
-            <Users className="h-4 w-4 mr-1.5" />
+            <AlertCircle className="h-4 w-4" />
           )}
-          {enrollmentCount > 0 ? "Enroll More" : "Enroll Contacts"}
-        </Button>
-      )}
-
-      {/* Activate button - draft with enrollments */}
-      {canActivate && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button size="sm" disabled={isUpdating}>
-              {isUpdating ? (
-                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-              ) : (
-                <Play className="h-4 w-4 mr-1.5" />
-              )}
-              Activate
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Activate Campaign?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will mark the campaign as active. Email sending is not yet implemented,
-                so no emails will actually be sent.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleStatusChange("active")}>
-                Activate
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-
-      {/* Pause button - when active */}
-      {canPause && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => handleStatusChange("paused")}
-          disabled={isUpdating}
-        >
-          {isUpdating ? (
-            <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-          ) : (
-            <Pause className="h-4 w-4 mr-1.5" />
-          )}
-          Pause
-        </Button>
-      )}
-
-      {/* Resume button - when paused */}
-      {canResume && (
-        <Button
-          size="sm"
-          onClick={() => handleStatusChange("active")}
-          disabled={isUpdating}
-        >
-          {isUpdating ? (
-            <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-          ) : (
-            <Play className="h-4 w-4 mr-1.5" />
-          )}
-          Resume
-        </Button>
-      )}
-
-      {/* Enroll result message */}
-      {enrollResult && (
-        <span className={`text-sm ${enrollResult.startsWith("Error") ? "text-red-600" : "text-green-600"}`}>
-          {enrollResult}
-        </span>
+          {notification.message}
+        </div>
       )}
     </div>
   );
