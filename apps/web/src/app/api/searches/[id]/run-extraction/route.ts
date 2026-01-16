@@ -196,12 +196,6 @@ export async function POST(
     // Handle both response formats: {contacts: [...]} or {data: {contacts: [...]}}
     const contacts: ExtractedContact[] = result.contacts || result.data?.contacts || [];
 
-    // DEBUG: Log received contacts
-    console.log(`[extraction] Received ${contacts.length} contacts from CoStar`);
-    if (contacts.length > 0) {
-      console.log(`[extraction] First contact:`, JSON.stringify(contacts[0], null, 2));
-    }
-
     // Upsert extracted data
     const stats = await upsertExtractedData(supabase, id, contacts);
 
@@ -247,7 +241,6 @@ async function upsertExtractedData(
   const uniqueCompanies = new Map<number, ExtractedContact>();
 
   for (const contact of contacts) {
-    console.log(`[extraction] Contact property_id=${contact.property_id} (type: ${typeof contact.property_id}), company_id=${contact.company_id}`);
     if (contact.property_id && !uniqueProperties.has(contact.property_id)) {
       uniqueProperties.set(contact.property_id, contact);
     }
@@ -255,8 +248,6 @@ async function upsertExtractedData(
       uniqueCompanies.set(contact.company_id, contact);
     }
   }
-
-  console.log(`[extraction] uniqueProperties: ${uniqueProperties.size}, uniqueCompanies: ${uniqueCompanies.size}`);
 
   // 1. Upsert properties with all available fields
   for (const [costarId, contact] of uniqueProperties) {
