@@ -95,12 +95,26 @@ export async function POST(
     };
 
     // Format the prompt
+    const priceMin = (searchContext.priceRange as Record<string, number>)?.min;
+    const priceMax = (searchContext.priceRange as Record<string, number>)?.max;
+    const capRateMin = (searchContext.capRate as Record<string, number>)?.min;
+
+    const criteriaDetails = [
+      priceMin ? `$${(priceMin / 1000000).toFixed(0)}M+` : null,
+      priceMax ? `up to $${(priceMax / 1000000).toFixed(0)}M` : null,
+      capRateMin ? `${capRateMin}%+ cap` : null,
+    ].filter(Boolean).join(", ");
+
     const prompt = `IMPORTANT: Output ONLY valid JSON. No markdown. No explanations.
+
+STYLE: Write like a top producer texting a peer. Short, casual, professional. 3-5 sentences max (50-80 words per email).
 
 Email bodies must:
 - START with "{{FirstName}}," (NO "Hi", NO "Hello", NO "Dear")
 - Use "my client" / "my buyer" / "they" voice - NOT "we" (broker represents buyer)
-- END with the signature block (no "Best," or other closings before it):
+- Be SHORT: 3-5 sentences, 50-80 words max
+- Include 2-3 buyer criteria specifics (price range, property type, etc.)
+- END with signature (no "Best," or closings before it):
 
 Jeff Grijalva
 Lee & Associates | Newport Beach, CA
@@ -110,24 +124,32 @@ Generate a 3-email sequence for:
 
 Buyer Profile:
 - Well-capitalized, experienced buyer
-- Can close quickly (around 30 days)
+- Can close quickly, no financing contingency
 - Single decision maker, no committees
-- Serious, won't retrade or waste time
-${buyerContext.deadline ? `- 1031 exchange buyer (use soft timeframe like "end of Q1" - NOT exact dates)` : ""}
+${buyerContext.deadline ? `- 1031 exchange (use soft timeframe like "end of Q1" - NOT exact dates)` : ""}
 
 Search Criteria:
 - Markets: ${Array.isArray(searchContext.markets) ? searchContext.markets.join(", ") : "Not specified"}
 - Property types: ${Array.isArray(searchContext.propertyTypes) ? searchContext.propertyTypes.join(", ") : "Not specified"}
-- Price range: $${(searchContext.priceRange as Record<string, number>)?.min?.toLocaleString() || "?"} - $${(searchContext.priceRange as Record<string, number>)?.max?.toLocaleString() || "?"}
-- Cap rate: ${(searchContext.capRate as Record<string, number>)?.min || "?"}%+
-${searchContext.strategies?.length ? `- Strategies: ${searchContext.strategies.join(", ")}` : ""}
+- Price: ${criteriaDetails || "Not specified"}
 
-Output JSON only with this structure:
+EXAMPLE Email 1 (follow this style):
+{{FirstName}},
+
+Got a buyer looking for industrial in the IE - your building on {{PropertyAddress}} came up. They're targeting $5-15M, 1+ acres, and can close quick with no financing contingency.
+
+Worth a conversation?
+
+Jeff Grijalva
+Lee & Associates | Newport Beach, CA
+(949) 939-2654
+
+Output JSON only:
 {
   "emails": [
-    {"step": 1, "subject": "...", "body": "{{FirstName}},\\n\\n...\\n\\nWould you be open to a brief call?\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 0},
-    {"step": 2, "subject": "Re: ...", "body": "{{FirstName}},\\n\\n...\\n\\nWorth a 10-minute call?\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 4},
-    {"step": 3, "subject": "...", "body": "{{FirstName}},\\n\\n...\\n\\nEither way, I appreciate your time.\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 4}
+    {"step": 1, "subject": "...", "body": "{{FirstName}},\\n\\n[2-3 sentences + soft CTA]\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 0},
+    {"step": 2, "subject": "Re: ...", "body": "{{FirstName}},\\n\\n[2-3 sentences, different angle]\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 4},
+    {"step": 3, "subject": "...", "body": "{{FirstName}},\\n\\n[2-3 sentences, final touch]\\n\\nJeff Grijalva\\nLee & Associates | Newport Beach, CA\\n(949) 939-2654", "delay_days": 4}
   ]
 }`;
 

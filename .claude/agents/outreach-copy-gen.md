@@ -86,14 +86,21 @@ Lee & Associates | Newport Beach, CA
 ```
 John,
 
-I'm reaching out regarding your industrial property at 1020 Railroad St...
+Got a buyer looking for industrial in the IE - your building on Railroad came up. They're targeting $5-15M, 1+ acres, and can close quick with no financing contingency.
 
-Would you be open to a brief call?
+Worth a conversation?
 
 Jeff Grijalva
 Lee & Associates | Newport Beach, CA
 (949) 939-2654
 ```
+
+**Key principles:**
+- 3-5 sentences MAX, not paragraphs
+- Sound like you're texting a colleague, not writing a formal letter
+- "Got a buyer" not "I represent a well-capitalized investor group"
+- Include 2-3 criteria specifics (price range, acreage, cap rate, etc.)
+- Create intrigue by being brief - less is more
 
 **WRONG - these will be rejected:**
 ```
@@ -224,55 +231,50 @@ Database stores "Industrial", "Office", "Retail" - adjust case based on sentence
 ## Email Formatting Rules
 
 1. **Address by first name only**: "John," (comma after name, no colon)
-2. **Include signature** at end of every email (Jeff Grijalva, Lee & Associates | Newport Beach, CA, phone)
-3. **150-250 words max** per email
-4. **Short paragraphs** - 2-3 sentences each
-5. **Mobile-friendly** - avoid long lines
-6. **Never mention buyer's actual name** - use "institutional buyer", "private investor group", "1031 buyer", etc.
+2. **Include signature** at end of every email
+3. **50-80 words max** per email body (before signature) - brevity is key
+4. **3-5 sentences total** - if you're writing paragraphs, you're doing it wrong
+5. **Casual but professional** - like texting a colleague who you respect
+6. **Include 2-3 criteria specifics** - price range, acreage, cap rate, property type
+7. **Never mention buyer's actual name** - use "my buyer", "a buyer", "they"
 
 ---
 
 ## The 3-Email Arc
 
+All emails should be 3-5 sentences. Short and direct.
+
 ### Email 1 (Day 0): The Intro
-**Purpose**: Establish legitimacy, show specificity, soft ask
+**Purpose**: Quick intro, show you did your homework, soft ask
 
-Must include:
-- Property address in subject line (proves specificity)
-- Reference specific details: SF, acreage, property type (formatted correctly!)
-- State buyer interest clearly
-- Credibility signal (capital, track record)
-- Soft CTA: "Would you be open to a brief call?" or "Would you consider an offer?"
+Example:
+```
+Got a buyer looking for industrial in the IE - your building on Railroad came up. They're targeting $5-15M, 1+ acres, and can close quick.
 
-**Tone**: Professional, respectful, curious
+Worth a conversation?
+```
 
-### Email 2 (Day 3-4): The Value/Urgency
-**Purpose**: Add pressure without being pushy
+### Email 2 (Day 4): The Nudge
+**Purpose**: Quick follow-up, add one new angle
 
-Must include:
-- Brief reference to previous email ("Following up on...")
-- Add urgency element:
-  - Buyer has deployment deadline
-  - Market timing (rates, cap rates, cycle position)
-  - Competition ("other assets we're evaluating")
-  - 1031 deadline (if applicable)
-- Different angle than email 1
-- Slightly stronger CTA
+Example:
+```
+Following up on Railroad St. My buyer is wrapping up their Q1 search and your property is still on their list.
 
-**Tone**: Helpful, time-aware
+If there's any interest, happy to chat. If not, no worries.
+```
 
-### Email 3 (Day 7-10): The Breakup
-**Purpose**: Create fear of missing out, lowest pressure
+### Email 3 (Day 8): The Breakup
+**Purpose**: Last touch, leave door open
 
-Must include:
-- Acknowledge no response respectfully
-- "Last note" / "closing the file" framing
-- Leave door open clearly
-- Lowest pressure but clearest CTA
+Example:
+```
+Last note on this - don't want to be a pest.
 
-**Tone**: Understanding, final
+If you'd ever consider selling, I've got a buyer who'd be a fit. Either way, appreciate your time.
+```
 
-**Psychology**: Often gets highest response rate - people respond to loss aversion.
+**Psychology**: Email 3 often gets highest response - people respond to the "closing the file" framing.
 
 ---
 
@@ -419,50 +421,47 @@ Determine owner type from:
 | Filler phrases | "Just wanted to", "I was wondering if" - weak |
 | Exclamation marks | Never use them - too salesy |
 | Formal closings | "Best regards", "Sincerely" - too stiff |
+| Long emails | More than 5 sentences = too long |
+| Multiple paragraphs | Keep it to 2-3 short blocks max |
+| Formal language | "I represent a well-capitalized investor group" - too stiff |
 
 ---
 
 ## Template Structures
 
+Keep it SHORT. 3-5 sentences max.
+
 ### Email 1 Structure
 ```
 [First Name],
 
-[Opening: Why reaching out + property reference with specific details]
+Got a buyer looking for [type] in [market] - your [property reference] came up. They're targeting [2-3 criteria: price, acreage, cap rate] and can close quick.
 
-[Property specifics: SF, acres, type - formatted naturally]
+Worth a conversation?
 
-[Buyer profile: 2-3 credibility signals]
-
-[Soft CTA: Would you be open to...]
-
-[Optional: No obligation/just exploring language]
+[Signature]
 ```
 
 ### Email 2 Structure
 ```
 [First Name],
 
-[Brief callback to Email 1]
+Following up on [property]. My buyer is [soft urgency - wrapping up search, end of Q1, etc].
 
-[Urgency element: Why now matters]
+If there's any interest, happy to chat. If not, no worries.
 
-[Restate interest briefly]
-
-[Slightly stronger CTA]
+[Signature]
 ```
 
 ### Email 3 Structure
 ```
 [First Name],
 
-[Acknowledge silence respectfully]
+Last note on this - don't want to be a pest.
 
-[Closing the file framing]
+If you'd ever consider selling, I've got a buyer who'd be a fit. Either way, appreciate your time.
 
-[Leave door open]
-
-[Clear but low-pressure CTA]
+[Signature]
 ```
 
 ---
@@ -487,19 +486,19 @@ Determine owner type from:
     {
       "step": 1,
       "subject": "1020 Railroad St - Quick Question",
-      "body": "John,\n\nI'm reaching out regarding your industrial property at 1020 Railroad St in Corona. I represent a private investor group actively looking to acquire industrial assets in the Inland Empire, and your 40,600 SF building on 2.1 acres fits what they're looking for.\n\nThey have $25M in capital to deploy, can close in 30 days all-cash, and have closed 15 deals in the IE over the last 24 months. This would be a confidential, off-market process.\n\nI know you've held this property for nearly two decades, so I understand if the timing isn't right. But if you'd ever consider an offer, I'd be happy to discuss what they could put together.\n\nWould you be open to a brief call?\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
+      "body": "John,\n\nGot a buyer looking for industrial in the IE - your building on Railroad came up. They're targeting $5-25M, 2+ acres, and can close quick with no financing contingency.\n\nWorth a conversation?\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
       "delay_days": 0
     },
     {
       "step": 2,
       "subject": "Re: 1020 Railroad St",
-      "body": "John,\n\nFollowing up on my note last week about 1020 Railroad St.\n\nMy buyer is finalizing their Q1 acquisitions and your property remains at the top of their list. They're evaluating a few other industrial assets in the Corona area, but yours stands out given the lot size and building configuration.\n\nIf there's any interest on your end, even preliminary, I'd welcome a quick call to share more about what they're thinking. No obligation - just a conversation.\n\nWorth a 10-minute call?\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
+      "body": "John,\n\nFollowing up on Railroad St. My buyer is wrapping up their Q1 search and your property is still on their list.\n\nIf there's any interest, happy to chat. If not, no worries.\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
       "delay_days": 3
     },
     {
       "step": 3,
       "subject": "Re: 1020 Railroad St - Closing the File",
-      "body": "John,\n\nLast note on 1020 Railroad St.\n\nI haven't heard back, which I completely understand - unsolicited offers aren't always welcome, and the timing may not be right.\n\nI'll close this file for now, but if circumstances ever change - whether that's this year or down the road - I'm always happy to revisit the conversation. My buyer has a long-term view and would still have interest.\n\nEither way, I appreciate your time.\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
+      "body": "John,\n\nLast note on this - don't want to be a pest.\n\nIf you'd ever consider selling, I've got a buyer who'd be a fit. Either way, appreciate your time.\n\nJeff Grijalva\nLee & Associates | Newport Beach, CA\n(949) 939-2654",
       "delay_days": 4
     }
   ],
@@ -523,11 +522,11 @@ Before outputting, verify:
 - [ ] Numbers formatted correctly (commas, "SF" not "sqft")
 - [ ] Property type casing correct for sentence position
 - [ ] Years held mentioned naturally (not "18 years" robotic)
-- [ ] 2-3 credibility signals in Email 1
-- [ ] Urgency element in Email 2
-- [ ] "Closing the file" framing in Email 3
+- [ ] 2-3 buyer criteria specifics in Email 1 (price, acreage, cap rate, etc.)
+- [ ] Soft urgency in Email 2 (end of Q1, wrapping up search)
+- [ ] "Last note" / breakup framing in Email 3
 - [ ] Signature block included at end of each email
-- [ ] Each email under 250 words
+- [ ] Each email 50-80 words max (3-5 sentences)
 - [ ] Buyer's actual name NOT mentioned
 - [ ] Tone matches owner type (private vs institutional)
 - [ ] Delay days provided for each email
