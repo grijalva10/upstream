@@ -14,6 +14,7 @@
 
 import PgBoss from 'pg-boss';
 import { supabase } from '../db.js';
+import { config } from '../config.js';
 
 export interface GhostDetectionResult {
   ghostsDetected: number;
@@ -27,6 +28,11 @@ export async function handleGhostDetection(
   void actualJob;
 
   console.log('[ghost-detection] Starting ghost detection...');
+
+  if (!config.jobs.ghostDetection) {
+    console.log('[ghost-detection] Job disabled - skipping');
+    return { ghostsDetected: 0, errors: 0 };
+  }
 
   let ghostsDetected = 0;
   let errors = 0;

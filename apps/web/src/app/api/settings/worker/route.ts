@@ -2,25 +2,51 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const WORKER_SETTINGS_KEYS = [
+  // Rate limits
   "worker.rate_limit_hourly",
   "worker.rate_limit_daily",
+  // Timezone
   "worker.default_timezone",
+  // Intervals
   "worker.interval_email_sync",
   "worker.interval_check_replies",
   "worker.interval_queue_process",
-  "worker.dry_run",
+  // Job toggles
+  "worker.job.email_sync",
+  "worker.job.process_replies",
+  "worker.job.auto_follow_up",
+  "worker.job.ghost_detection",
+  // Email sending by type
+  "worker.email.campaign",
+  "worker.email.manual",
+  "worker.email.ai",
+  // General flags
   "worker.debug",
   "worker.paused",
+  // Legacy (kept for migration)
+  "worker.dry_run",
 ];
 
 const DEFAULTS: Record<string, string | number | boolean> = {
+  // Rate limits
   "worker.rate_limit_hourly": 1000,
   "worker.rate_limit_daily": 10000,
+  // Timezone
   "worker.default_timezone": "America/Los_Angeles",
+  // Intervals
   "worker.interval_email_sync": 15,
   "worker.interval_check_replies": 5,
   "worker.interval_queue_process": 30,
-  "worker.dry_run": true, // Default to disabled - emails logged but not sent
+  // Job toggles - all enabled by default
+  "worker.job.email_sync": true,
+  "worker.job.process_replies": true,
+  "worker.job.auto_follow_up": true,
+  "worker.job.ghost_detection": true,
+  // Email sending - all disabled by default for safety
+  "worker.email.campaign": false,
+  "worker.email.manual": false,
+  "worker.email.ai": false,
+  // General
   "worker.debug": false,
   "worker.paused": false,
 };
@@ -94,7 +120,14 @@ export async function PATCH(request: NextRequest) {
         );
       }
       updates.push({ key, value: String(num) });
-    } else if (key.includes("dry_run") || key.includes("debug") || key.includes("paused")) {
+    } else if (
+      key.includes("dry_run") ||
+      key.includes("debug") ||
+      key.includes("paused") ||
+      key.startsWith("worker.job.") ||
+      key.startsWith("worker.email.")
+    ) {
+      // Boolean settings
       updates.push({ key, value: String(value === true || value === "true") });
     } else {
       updates.push({ key, value: JSON.stringify(value) });

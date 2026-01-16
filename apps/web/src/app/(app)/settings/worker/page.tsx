@@ -33,7 +33,16 @@ interface WorkerSettings {
   "worker.interval_email_sync": number;
   "worker.interval_check_replies": number;
   "worker.interval_queue_process": number;
-  "worker.dry_run": boolean;
+  // Job toggles
+  "worker.job.email_sync": boolean;
+  "worker.job.process_replies": boolean;
+  "worker.job.auto_follow_up": boolean;
+  "worker.job.ghost_detection": boolean;
+  // Email sending by type
+  "worker.email.campaign": boolean;
+  "worker.email.manual": boolean;
+  "worker.email.ai": boolean;
+  // General
   "worker.debug": boolean;
   "worker.paused": boolean;
 }
@@ -67,6 +76,33 @@ const TIMEZONES = [
   "Pacific/Honolulu",
   "UTC",
 ];
+
+interface WorkerStatusBadgeProps {
+  isPaused: boolean | undefined;
+  isAlive: boolean | undefined;
+}
+
+function WorkerStatusBadge({ isPaused, isAlive }: WorkerStatusBadgeProps) {
+  if (isPaused) {
+    return (
+      <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+        Paused
+      </Badge>
+    );
+  }
+  if (isAlive) {
+    return (
+      <Badge variant="default" className="bg-green-100 text-green-800">
+        Running
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="destructive" className="bg-red-100 text-red-800">
+      Stopped
+    </Badge>
+  );
+}
 
 export default function WorkerSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -225,18 +261,7 @@ export default function WorkerSettingsPage() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Badge
-                variant={isPaused ? "secondary" : isAlive ? "default" : "destructive"}
-                className={
-                  isPaused
-                    ? "bg-amber-100 text-amber-800"
-                    : isAlive
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }
-              >
-                {isPaused ? "Paused" : isAlive ? "Running" : "Stopped"}
-              </Badge>
+              <WorkerStatusBadge isPaused={isPaused} isAlive={isAlive} />
               {worker?.hostname && (
                 <span className="text-sm text-muted-foreground">
                   on {worker.hostname} (PID: {worker.pid})
@@ -430,41 +455,120 @@ export default function WorkerSettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Email Sending Card - Prominent toggle */}
-      <Card className={settings?.["worker.dry_run"] !== false ? "border-amber-200 bg-amber-50/50" : "border-green-200 bg-green-50/50"}>
+      {/* Job Toggles Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Job Toggles</CardTitle>
+          <CardDescription>Enable or disable specific background jobs</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="job-email-sync" className="font-medium">Email Sync</Label>
+                <p className="text-xs text-muted-foreground">Sync emails from Outlook</p>
+              </div>
+              <Switch
+                id="job-email-sync"
+                checked={settings?.["worker.job.email_sync"] !== false}
+                onCheckedChange={(checked) => updateSetting("worker.job.email_sync", checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="job-process-replies" className="font-medium">Process Replies</Label>
+                <p className="text-xs text-muted-foreground">Classify and act on inbound emails</p>
+              </div>
+              <Switch
+                id="job-process-replies"
+                checked={settings?.["worker.job.process_replies"] !== false}
+                onCheckedChange={(checked) => updateSetting("worker.job.process_replies", checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="job-auto-follow-up" className="font-medium">Auto Follow-Up</Label>
+                <p className="text-xs text-muted-foreground">Send automated follow-ups</p>
+              </div>
+              <Switch
+                id="job-auto-follow-up"
+                checked={settings?.["worker.job.auto_follow_up"] !== false}
+                onCheckedChange={(checked) => updateSetting("worker.job.auto_follow_up", checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label htmlFor="job-ghost-detection" className="font-medium">Ghost Detection</Label>
+                <p className="text-xs text-muted-foreground">Mark unresponsive contacts</p>
+              </div>
+              <Switch
+                id="job-ghost-detection"
+                checked={settings?.["worker.job.ghost_detection"] !== false}
+                onCheckedChange={(checked) => updateSetting("worker.job.ghost_detection", checked)}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Email Sending by Type Card */}
+      <Card className={
+        (settings?.["worker.email.campaign"] || settings?.["worker.email.manual"] || settings?.["worker.email.ai"])
+          ? "border-green-200 bg-green-50/50"
+          : "border-amber-200 bg-amber-50/50"
+      }>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            {settings?.["worker.dry_run"] !== false ? (
-              <MailX className="h-5 w-5 text-amber-600" />
-            ) : (
+            {(settings?.["worker.email.campaign"] || settings?.["worker.email.manual"] || settings?.["worker.email.ai"]) ? (
               <Mail className="h-5 w-5 text-green-600" />
+            ) : (
+              <MailX className="h-5 w-5 text-amber-600" />
             )}
             Email Sending
           </CardTitle>
           <CardDescription>
-            Control whether campaign emails are actually sent
+            Control which types of emails are actually sent (vs just logged)
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="email-sending" className="text-base font-medium">
-                {settings?.["worker.dry_run"] !== false ? "Emails Disabled (Dry Run)" : "Emails Enabled"}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {settings?.["worker.dry_run"] !== false
-                  ? "Emails are logged but NOT actually sent. Enable to start sending."
-                  : "Emails will be sent to recipients. Disable to stop all sending."}
-              </p>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="email-campaign" className="font-medium">Campaign Emails</Label>
+              <p className="text-xs text-muted-foreground">Automated drip sequences and cold outreach</p>
             </div>
             <Switch
-              id="email-sending"
-              checked={settings?.["worker.dry_run"] === false}
-              onCheckedChange={(checked) =>
-                updateSetting("worker.dry_run", !checked)
-              }
+              id="email-campaign"
+              checked={settings?.["worker.email.campaign"] === true}
+              onCheckedChange={(checked) => updateSetting("worker.email.campaign", checked)}
             />
           </div>
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="email-manual" className="font-medium">Manual Emails</Label>
+              <p className="text-xs text-muted-foreground">User-initiated one-off emails</p>
+            </div>
+            <Switch
+              id="email-manual"
+              checked={settings?.["worker.email.manual"] === true}
+              onCheckedChange={(checked) => updateSetting("worker.email.manual", checked)}
+            />
+          </div>
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="email-ai" className="font-medium">AI-Generated Emails</Label>
+              <p className="text-xs text-muted-foreground">Auto follow-ups, AI replies, and responses</p>
+            </div>
+            <Switch
+              id="email-ai"
+              checked={settings?.["worker.email.ai"] === true}
+              onCheckedChange={(checked) => updateSetting("worker.email.ai", checked)}
+            />
+          </div>
+          {!(settings?.["worker.email.campaign"] || settings?.["worker.email.manual"] || settings?.["worker.email.ai"]) && (
+            <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
+              All email sending is currently disabled. Enable at least one type to start sending.
+            </p>
+          )}
         </CardContent>
       </Card>
 

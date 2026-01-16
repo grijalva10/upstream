@@ -53,16 +53,6 @@ export async function handleClassify(
     };
   }
 
-  if (config.dryRun) {
-    console.log('[classify] DRY RUN - skipping actual classification');
-    return {
-      success: true,
-      emailId,
-      classification: 'dry_run',
-      confidence: 1.0,
-    };
-  }
-
   // Build the classification prompt - strict JSON-only format
   const prompt = `Classify this email. Output ONLY valid JSON, no other text.
 

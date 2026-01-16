@@ -49,8 +49,22 @@ export interface WorkerConfig {
   // Claude Agent service
   agentServiceUrl: string;
 
-  // Feature flags
-  dryRun: boolean;
+  // Job-specific enable/disable flags
+  jobs: {
+    emailSync: boolean;           // Sync emails from Outlook
+    processReplies: boolean;      // Classify and act on replies
+    autoFollowUp: boolean;        // Send automated follow-ups
+    ghostDetection: boolean;      // Mark unresponsive contacts
+  };
+
+  // Email sending by type (granular control)
+  emailSending: {
+    campaign: boolean;            // Emails from drip campaigns/sequences
+    manual: boolean;              // User-initiated emails
+    ai: boolean;                  // AI-generated emails (follow-ups, responses)
+  };
+
+  // General flags
   debug: boolean;
   paused: boolean;
 }
@@ -99,40 +113,83 @@ export const config: WorkerConfig = {
   // Claude Agent service
   agentServiceUrl: process.env.AGENT_SERVICE_URL || 'http://localhost:8766',
 
-  // Feature flags (defaults, will be overridden from DB)
-  // Default to dry run mode (emails disabled) for safety
-  dryRun: process.env.DRY_RUN !== 'false',
+  // Job-specific enable/disable flags (defaults, will be overridden from DB)
+  // All jobs enabled by default
+  jobs: {
+    emailSync: true,
+    processReplies: true,
+    autoFollowUp: true,
+    ghostDetection: true,
+  },
+
+  // Email sending by type (defaults, will be overridden from DB)
+  // All disabled by default for safety - must explicitly enable
+  emailSending: {
+    campaign: false,
+    manual: false,
+    ai: false,
+  },
+
+  // General flags
   debug: process.env.DEBUG === 'true',
   paused: false,
 };
 
+// Helper to parse boolean from DB value
+function parseBool(value: unknown, defaultValue: boolean): boolean {
+  if (value === undefined) return defaultValue;
+  return value === true || value === 'true';
+}
+
+// Setting update mappings
+type SettingUpdater = (value: unknown) => void;
+
+const SETTING_UPDATERS: Record<string, SettingUpdater> = {
+  // Rate limits
+  'worker.rate_limit_hourly': (v) => { config.rateLimits.hourly = Number(v); },
+  'worker.rate_limit_daily': (v) => { config.rateLimits.daily = Number(v); },
+
+  // Timezone
+  'worker.default_timezone': (v) => { config.defaultTimezone = String(v).replace(/"/g, ''); },
+
+  // Intervals (minutes to seconds conversion for sync/replies)
+  'worker.interval_email_sync': (v) => { config.intervals.emailSync = Number(v) * 60; },
+  'worker.interval_check_replies': (v) => { config.intervals.checkReplies = Number(v) * 60; },
+  'worker.interval_queue_process': (v) => { config.intervals.queueProcess = Number(v); },
+
+  // Job toggles (default true)
+  'worker.job.email_sync': (v) => { config.jobs.emailSync = parseBool(v, true); },
+  'worker.job.process_replies': (v) => { config.jobs.processReplies = parseBool(v, true); },
+  'worker.job.auto_follow_up': (v) => { config.jobs.autoFollowUp = parseBool(v, true); },
+  'worker.job.ghost_detection': (v) => { config.jobs.ghostDetection = parseBool(v, true); },
+
+  // Email sending by type (default false for safety)
+  'worker.email.campaign': (v) => { config.emailSending.campaign = parseBool(v, false); },
+  'worker.email.manual': (v) => { config.emailSending.manual = parseBool(v, false); },
+  'worker.email.ai': (v) => { config.emailSending.ai = parseBool(v, false); },
+
+  // General flags
+  'worker.debug': (v) => { config.debug = parseBool(v, false); },
+  'worker.paused': (v) => { config.paused = parseBool(v, false); },
+};
+
 // Function to update config from database settings
-export function updateConfigFromSettings(settings: Record<string, string | number | boolean>) {
-  if (settings['worker.rate_limit_hourly'] !== undefined) {
-    config.rateLimits.hourly = Number(settings['worker.rate_limit_hourly']);
+export function updateConfigFromSettings(settings: Record<string, string | number | boolean>): void {
+  // Apply all known settings
+  for (const [key, updater] of Object.entries(SETTING_UPDATERS)) {
+    if (settings[key] !== undefined) {
+      updater(settings[key]);
+    }
   }
-  if (settings['worker.rate_limit_daily'] !== undefined) {
-    config.rateLimits.daily = Number(settings['worker.rate_limit_daily']);
-  }
-  if (settings['worker.default_timezone'] !== undefined) {
-    config.defaultTimezone = String(settings['worker.default_timezone']).replace(/"/g, '');
-  }
-  if (settings['worker.interval_email_sync'] !== undefined) {
-    config.intervals.emailSync = Number(settings['worker.interval_email_sync']) * 60;
-  }
-  if (settings['worker.interval_check_replies'] !== undefined) {
-    config.intervals.checkReplies = Number(settings['worker.interval_check_replies']) * 60;
-  }
-  if (settings['worker.interval_queue_process'] !== undefined) {
-    config.intervals.queueProcess = Number(settings['worker.interval_queue_process']);
-  }
-  if (settings['worker.dry_run'] !== undefined) {
-    config.dryRun = settings['worker.dry_run'] === true || settings['worker.dry_run'] === 'true';
-  }
-  if (settings['worker.debug'] !== undefined) {
-    config.debug = settings['worker.debug'] === true || settings['worker.debug'] === 'true';
-  }
-  if (settings['worker.paused'] !== undefined) {
-    config.paused = settings['worker.paused'] === true || settings['worker.paused'] === 'true';
+
+  // Legacy: Map old dry_run to email sending settings if new settings not present
+  if (settings['worker.dry_run'] !== undefined &&
+      settings['worker.email.campaign'] === undefined &&
+      settings['worker.email.manual'] === undefined &&
+      settings['worker.email.ai'] === undefined) {
+    const sendingEnabled = !parseBool(settings['worker.dry_run'], true);
+    config.emailSending.campaign = sendingEnabled;
+    config.emailSending.manual = sendingEnabled;
+    config.emailSending.ai = sendingEnabled;
   }
 }

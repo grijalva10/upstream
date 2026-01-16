@@ -9,9 +9,9 @@
  */
 
 import PgBoss from 'pg-boss';
-import { spawn } from 'child_process';
 import { supabase } from '../db.js';
 import { config } from '../config.js';
+import { runClaude } from '../lib/claude-runner.js';
 
 export interface AutoFollowUpResult {
   docFollowUps: number;
@@ -27,6 +27,11 @@ export function createAutoFollowUpHandler(boss: PgBoss) {
     void actualJob;
 
     console.log('[auto-follow-up] Starting auto follow-up processing...');
+
+    if (!config.jobs.autoFollowUp) {
+      console.log('[auto-follow-up] Job disabled - skipping');
+      return { docFollowUps: 0, oooFollowUps: 0, errors: 0 };
+    }
 
     let docFollowUps = 0;
     let oooFollowUps = 0;
@@ -151,12 +156,7 @@ Rules:
 
 Output ONLY the email body text, nothing else.`;
 
-  let draft: string;
-  if (config.dryRun) {
-    draft = `Just circling back on the ${pendingDocs.join(' and ')} when you have a chance. No rush!`;
-  } else {
-    draft = await runClaude(prompt);
-  }
+  const draft = await runClaude(prompt);
 
   // Queue the email
   await boss.send('send-email', {
@@ -223,12 +223,7 @@ Rules:
 
 Output ONLY the email body text.`;
 
-  let draft: string;
-  if (config.dryRun) {
-    draft = `Hope you had a good time away! Just wanted to circle back on our conversation about ${propertyAddress || 'the property'}. Let me know if you'd like to continue the discussion.`;
-  } else {
-    draft = await runClaude(prompt);
-  }
+  const draft = await runClaude(prompt);
 
   // Queue the email
   await boss.send('send-email', {
@@ -244,41 +239,3 @@ Output ONLY the email body text.`;
   console.log(`[auto-follow-up] Sent OOO follow-up to ${contact.email}`);
 }
 
-async function runClaude(prompt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('claude', ['-p', prompt], {
-      cwd: config.python.projectRoot,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true,
-      env: { ...process.env },
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    proc.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    proc.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    proc.on('close', (code) => {
-      if (code === 0) {
-        resolve(stdout.trim());
-      } else {
-        reject(new Error(stderr || stdout || `Exit code ${code}`));
-      }
-    });
-
-    proc.on('error', (error) => {
-      reject(error);
-    });
-
-    setTimeout(() => {
-      proc.kill('SIGTERM');
-      reject(new Error('Claude timeout'));
-    }, 60000);
-  });
-}

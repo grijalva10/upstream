@@ -16,8 +16,8 @@ export async function handleEmailSync(
   console.log('[email-sync] Starting Outlook sync...');
   const startTime = Date.now();
 
-  if (config.dryRun) {
-    console.log('[email-sync] DRY RUN - skipping actual sync');
+  if (!config.jobs.emailSync) {
+    console.log('[email-sync] Job disabled - skipping');
     return {
       success: true,
       newEmails: 0,

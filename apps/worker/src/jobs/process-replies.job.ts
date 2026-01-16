@@ -27,9 +27,9 @@
  */
 
 import PgBoss from 'pg-boss';
-import { spawn } from 'child_process';
 import { supabase } from '../db.js';
 import { config } from '../config.js';
+import { runClaude } from '../lib/claude-runner.js';
 import {
   getCalendarAvailability,
   createCalendarMeeting,
@@ -187,6 +187,11 @@ export function createProcessRepliesHandler(boss: PgBoss) {
     void actualJob;
 
     console.log('[process-replies] Starting reply processing...');
+
+    if (!config.jobs.processReplies) {
+      console.log('[process-replies] Job disabled - skipping');
+      return { processed: 0, errors: 0 };
+    }
 
     // Fetch unclassified inbound emails
     const { data: emails, error: fetchError } = await supabase
@@ -437,17 +442,8 @@ async function classifyEmail(
     availableSlots
   );
 
-  if (config.dryRun) {
-    console.log('[process-replies] DRY RUN - returning mock classification');
-    return {
-      classification: 'unclear',
-      confidence: 0.5,
-      extracted: {},
-      reasoning: 'Dry run mode',
-    };
-  }
-
-  const rawResult = await runClaude(prompt);
+  // Use longer timeout for classification (3 minutes)
+  const rawResult = await runClaude(prompt, { timeoutMs: 3 * 60 * 1000 });
 
   // Parse JSON from response
   const jsonMatch = rawResult.match(/\{[\s\S]*\}/);
@@ -1506,41 +1502,3 @@ function formatSlotDisplay(date: Date): string {
   });
 }
 
-async function runClaude(prompt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('claude', ['-p', prompt], {
-      cwd: config.python.projectRoot,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true,
-      env: { ...process.env },
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    proc.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    proc.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    proc.on('close', (code) => {
-      if (code === 0) {
-        resolve(stdout.trim());
-      } else {
-        reject(new Error(stderr || stdout || `Exit code ${code}`));
-      }
-    });
-
-    proc.on('error', (error) => {
-      reject(error);
-    });
-
-    setTimeout(() => {
-      proc.kill('SIGTERM');
-      reject(new Error('Classification timeout'));
-    }, 3 * 60 * 1000);
-  });
-}

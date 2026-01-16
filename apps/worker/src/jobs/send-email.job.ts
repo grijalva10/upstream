@@ -38,7 +38,30 @@ export async function handleSendEmail(
   }
 
   const { queueId, toEmail, subject, bodyText, priority, jobType, sequenceId } = actualJob.data;
-  console.log(`[send-email] Processing ${queueId} -> ${toEmail}`);
+  console.log(`[send-email] Processing ${queueId} -> ${toEmail} (type: ${jobType})`);
+
+  // Determine email category based on job type
+  const emailCategory = getEmailCategory(jobType, sequenceId);
+  const sendingEnabled = config.emailSending[emailCategory];
+
+  if (!sendingEnabled) {
+    console.log(`[send-email] ${emailCategory} emails disabled - marking as skipped`);
+
+    // Mark as skipped so it doesn't keep retrying
+    await supabase
+      .from('email_queue')
+      .update({
+        status: 'skipped',
+        last_error: `${emailCategory} emails disabled`,
+      })
+      .eq('id', queueId);
+
+    return {
+      success: true,
+      queueId,
+      error: `${emailCategory} emails disabled`,
+    };
+  }
 
   // Get sequence settings if this is a campaign email
   let sendWindowStart = '09:00';
@@ -70,8 +93,7 @@ export async function handleSendEmail(
   }
 
   // For campaign emails, check send window
-  const isCampaignEmail = jobType === 'cold_outreach' || jobType === 'follow_up';
-
+  const isCampaignEmail = emailCategory === 'campaign';
   if (isCampaignEmail) {
     const inWindow = isWithinSendWindow(
       sendWindowStart,
@@ -137,12 +159,7 @@ export async function handleSendEmail(
 
   // Send the email
   try {
-    if (config.dryRun) {
-      console.log(`[send-email] DRY RUN: Would send to ${toEmail}`);
-      console.log(`  Subject: ${subject}`);
-    } else {
-      await sendViaOutlook(toEmail, subject, bodyText);
-    }
+    await sendViaOutlook(toEmail, subject, bodyText);
 
     const sentAt = new Date().toISOString();
 
@@ -227,4 +244,20 @@ export async function handleSendEmail(
 
     throw error;
   }
+}
+
+// Categorize email by job type for sending controls
+type EmailCategory = 'campaign' | 'manual' | 'ai';
+
+function getEmailCategory(jobType: string, sequenceId?: string): EmailCategory {
+  // Campaign emails: cold outreach or sequence-based follow-ups
+  if (jobType === 'cold_outreach' || (jobType === 'follow_up' && sequenceId)) {
+    return 'campaign';
+  }
+  // AI emails: automated replies and non-sequence follow-ups
+  if (jobType === 'manual_reply' || jobType === 'ai_response' || (jobType === 'follow_up' && !sequenceId)) {
+    return 'ai';
+  }
+  // Default to manual for explicit manual type or unknown types
+  return 'manual';
 }

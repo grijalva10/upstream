@@ -23,10 +23,18 @@ async function main() {
 
   // Load settings from database
   await loadSettings();
-  console.log(`Dry run:  ${config.dryRun}`);
   console.log(`Debug:    ${config.debug}`);
   console.log(`Timezone: ${config.defaultTimezone}`);
   console.log(`Rate limits: ${config.rateLimits.hourly}/hr, ${config.rateLimits.daily}/day`);
+  console.log('Jobs enabled:');
+  console.log(`  - Email sync:      ${config.jobs.emailSync}`);
+  console.log(`  - Process replies: ${config.jobs.processReplies}`);
+  console.log(`  - Auto follow-up:  ${config.jobs.autoFollowUp}`);
+  console.log(`  - Ghost detection: ${config.jobs.ghostDetection}`);
+  console.log('Email sending:');
+  console.log(`  - Campaign:  ${config.emailSending.campaign}`);
+  console.log(`  - Manual:    ${config.emailSending.manual}`);
+  console.log(`  - AI:        ${config.emailSending.ai}`);
 
   // Initialize pg-boss
   boss = new PgBoss({
