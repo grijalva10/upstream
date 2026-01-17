@@ -50,7 +50,7 @@ import {
   type Classification,
   CLASSIFICATIONS,
 } from "@/lib/inbox/schemas";
-import { ConfidenceIndicator } from "./confidence-indicator";
+import { ConfidenceScore } from "@/components/ui/confidence-score";
 import { MessageActions } from "./message-actions";
 import { QuickReplyDialog } from "./quick-reply-dialog";
 import { reclassifyMessage, approveDraft, editDraft } from "../actions";
@@ -222,7 +222,7 @@ function ClassificationHeader({
           </div>
 
           {confidence != null && (
-            <ConfidenceIndicator confidence={confidence} size="sm" showPercentage />
+            <ConfidenceScore score={confidence} variant="dot" showLabel size="sm" />
           )}
 
           {isLowConfidence && (

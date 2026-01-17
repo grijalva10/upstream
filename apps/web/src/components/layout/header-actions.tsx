@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, LogOut, Settings, Sparkles } from "lucide-react";
+import { Search, Bell, LogOut, Settings, Sparkles, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,6 +15,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { createClient } from "@/lib/supabase/client";
 import { useAISheet } from "@/components/ai-sheet";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function HeaderActions(): ReactNode {
   const router = useRouter();
@@ -77,6 +78,8 @@ export function HeaderActions(): ReactNode {
         <Bell className="h-4 w-4" />
         <span className="sr-only">Notifications</span>
       </Button>
+
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

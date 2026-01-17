@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       .eq("direction", "inbound");
 
     // Step 2: Reset classification fields on all inbound emails
-    const { error: resetError, count: resetCount } = await supabase
+    const { error: resetError, data: resetData } = await supabase
       .from("synced_emails")
       .update({
         classification: null,
@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
         status: "new",
       })
       .eq("direction", "inbound")
-      .select("*", { count: "exact", head: true });
+      .select("id");
+
+    const resetCount = resetData?.length ?? 0;
 
     if (resetError) {
       console.error("[reprocess-all] Failed to reset emails:", resetError);

@@ -35,7 +35,7 @@ export function ApprovalsCard({ emailDrafts, lowConfidence }: ApprovalsCardProps
           <span className="font-medium text-amber-500">{lowConfidence}</span>
         </div>
         <Button variant="ghost" className="w-full mt-2 justify-between" asChild>
-          <Link href="/approvals">
+          <Link href="/inbox?viewMode=needs_review">
             Review All
             <ChevronRight className="h-4 w-4" />
           </Link>
