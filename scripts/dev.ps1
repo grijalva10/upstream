@@ -16,13 +16,6 @@ if ($costarProc) {
     Write-Host "  Stopped existing CoStar service" -ForegroundColor Gray
 }
 
-# Stop Agent service (port 8766)
-$agentProc = Get-NetTCPConnection -LocalPort 8766 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -First 1
-if ($agentProc) {
-    Stop-Process -Id $agentProc -Force -ErrorAction SilentlyContinue
-    Write-Host "  Stopped existing Agent service" -ForegroundColor Gray
-}
-
 # Stop worker
 $nodeProcs = Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue | Where-Object {
     $_.CommandLine -match "apps[/\\]worker"
@@ -61,19 +54,17 @@ Write-Host "Starting all services in parallel..." -ForegroundColor Cyan
 Write-Host "  [web]    -> http://localhost:3000" -ForegroundColor White
 Write-Host "  [worker] -> pg-boss background jobs" -ForegroundColor White
 Write-Host "  [costar] -> http://localhost:8765" -ForegroundColor White
-Write-Host "  [agent]  -> http://localhost:8766" -ForegroundColor White
 Write-Host ""
 Write-Host "Press Ctrl+C to stop all services" -ForegroundColor Yellow
 Write-Host ""
 
 # Run all services with concurrently
 npx concurrently `
-    --names "web,worker,costar,agent" `
-    --prefix-colors "blue,green,yellow,magenta" `
+    --names "web,worker,costar" `
+    --prefix-colors "blue,green,yellow" `
     --prefix "[{name}]" `
     --kill-others-on-fail `
     --handle-input `
     "cd apps/web && npm run dev" `
     "cd apps/worker && npm run dev" `
-    "python integrations/costar/service.py" `
-    "python orchestrator/service.py"
+    "python integrations/costar/service.py"

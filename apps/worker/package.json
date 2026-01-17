@@ -10,7 +10,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.2",
+    "@upstream/claude-cli": "file:../../packages/claude-cli",
     "@supabase/supabase-js": "^2.47.10",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

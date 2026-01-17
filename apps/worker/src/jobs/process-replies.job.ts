@@ -29,7 +29,7 @@
 import PgBoss from 'pg-boss';
 import { supabase } from '../db.js';
 import { config } from '../config.js';
-import { runClaude } from '../lib/claude-runner.js';
+import { runBatch } from '@upstream/claude-cli';
 import {
   getCalendarAvailability,
   createCalendarMeeting,
@@ -671,7 +671,18 @@ async function classifyEmail(
   );
 
   // Use longer timeout for classification (3 minutes)
-  const rawResult = await runClaude(prompt, { timeoutMs: 3 * 60 * 1000 });
+  const result = await runBatch({
+    prompt,
+    maxTurns: 1,
+    timeout: 3 * 60 * 1000,
+    cwd: config.python.projectRoot,
+  });
+
+  if (!result.success) {
+    throw new Error(result.error || 'Claude request failed');
+  }
+
+  const rawResult = result.output;
 
   // Parse JSON from response
   const jsonMatch = rawResult.match(/\{[\s\S]*\}/);

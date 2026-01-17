@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const AGENT_SERVICE_URL = process.env.AGENT_SERVICE_URL || "http://localhost:8766";
+import { runBatch } from "@upstream/claude-cli";
+import { resolve } from "path";
 
 export async function POST(
   request: Request,
@@ -41,33 +41,6 @@ export async function POST(
         status: "generating_queries",
       })
       .eq("id", id);
-
-    // Check if agent service is available
-    let serviceAvailable = false;
-    try {
-      const statusRes = await fetch(`${AGENT_SERVICE_URL}/status`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      serviceAvailable = statusRes.ok;
-    } catch {
-      // Service not available
-    }
-
-    if (!serviceAvailable) {
-      // Revert to draft status
-      await supabase
-        .from("searches")
-        .update({ status: "draft" })
-        .eq("id", id);
-
-      return NextResponse.json(
-        {
-          error: `Agent service not available at ${AGENT_SERVICE_URL}. Start it with: python orchestrator/service.py`,
-        },
-        { status: 503 }
-      );
-    }
 
     // Build the prompt for the sourcing agent - request structured, concise output
     const prompt = `Generate CoStar API payloads for this buyer criteria:
@@ -117,21 +90,15 @@ Then add a 3-5 bullet strategy summary.
 - Use FilterType: 132 for market geography
 - Output the JSON block FIRST, then the summary`;
 
-    // Call the agent service
-    const agentRes = await fetch(`${AGENT_SERVICE_URL}/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        agent: "sourcing-agent",
-        prompt,
-        context: { criteria_type: criteria_json.type, search_id: id },
-        max_turns: 10,  // Need enough turns to generate multiple payloads
-      }),
+    // Run via Claude CLI
+    const result = await runBatch({
+      prompt,
+      maxTurns: 10,
+      timeout: 300000, // 5 minutes
+      cwd: resolve(process.cwd(), "../.."), // Project root
     });
 
-    const agentResult = await agentRes.json();
-
-    if (!agentResult.success) {
+    if (!result.success) {
       // Update search status to failed
       await supabase
         .from("searches")
@@ -140,14 +107,13 @@ Then add a 3-5 bullet strategy summary.
 
       return NextResponse.json({
         success: false,
-        error: agentResult.error || "Agent execution failed",
-        output: agentResult.output || "",
-        execution_id: agentResult.execution_id,
+        error: result.error || "Agent execution failed",
+        output: result.output || "",
       });
     }
 
     // Parse the agent output to extract payloads JSON and strategy summary
-    const output = agentResult.output || "";
+    const output = result.output || "";
     let payloadsJson = null;
     let strategySummary = output;
 
@@ -173,17 +139,16 @@ Then add a 3-5 bullet strategy summary.
       .update({
         status: "pending_extraction",
         payloads_json: payloadsJson,
-        strategy_summary: strategySummary.slice(0, 2000) || null,  // Allow full summary
+        strategy_summary: strategySummary.slice(0, 2000) || null,
       })
       .eq("id", id);
 
     return NextResponse.json({
       success: true,
-      output: agentResult.output,
+      output: result.output,
       payloads: payloadsJson,
       strategy_summary: strategySummary,
-      execution_id: agentResult.execution_id,
-      session_id: agentResult.session_id,
+      session_id: result.sessionId,
     });
   } catch (error) {
     console.error("Run agent error:", error);

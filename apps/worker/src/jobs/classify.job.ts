@@ -1,7 +1,7 @@
 import PgBoss from 'pg-boss';
-import { spawn } from 'child_process';
 import { supabase } from '../db.js';
 import { config } from '../config.js';
+import { runSimple } from '@upstream/claude-cli';
 
 export interface ClassifyEmailPayload {
   emailId: string;
@@ -89,8 +89,11 @@ OUTPUT FORMAT (JSON only, no markdown, no explanation):
       };
     }
 
-    // Run Claude Code headless
-    const result = await runClaudeClassify(prompt);
+    // Run Claude Code headless via @upstream/claude-cli
+    const result = await runSimple(prompt, {
+      cwd: config.python.projectRoot,
+      timeout: 2 * 60 * 1000,
+    });
 
     // Try to extract JSON from result (Claude might wrap it in markdown or prose)
     let jsonStr = result;
@@ -169,48 +172,4 @@ OUTPUT FORMAT (JSON only, no markdown, no explanation):
 
     throw error;
   }
-}
-
-async function runClaudeClassify(prompt: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // Use claude CLI in headless mode (no --output-format json to get raw response)
-    const proc = spawn('claude', ['-p', prompt], {
-      cwd: config.python.projectRoot,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true,
-      env: {
-        ...process.env,
-      },
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    proc.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    proc.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    proc.on('close', (code) => {
-      if (code === 0) {
-        console.log(`[classify] Raw response: ${stdout.substring(0, 200)}...`);
-        resolve(stdout.trim());
-      } else {
-        reject(new Error(stderr || stdout || `Exit code ${code}`));
-      }
-    });
-
-    proc.on('error', (error) => {
-      reject(error);
-    });
-
-    // Timeout after 2 minutes
-    setTimeout(() => {
-      proc.kill('SIGTERM');
-      reject(new Error('Classification timeout'));
-    }, 2 * 60 * 1000);
-  });
 }

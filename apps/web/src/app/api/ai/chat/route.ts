@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic();
+import { runBatch } from "@upstream/claude-cli";
+import { resolve } from "path";
 
 interface EntityContext {
   type: string | null;
@@ -136,6 +135,24 @@ Always confirm before taking actions. Show what you'll create and let the user a
 Be concise and professional. You're talking to an experienced CRE broker who values efficiency.`;
 }
 
+function buildPromptFromMessages(messages: ChatMessage[], systemPrompt: string): string {
+  // Build a prompt that includes the conversation history
+  let prompt = systemPrompt + "\n\n--- CONVERSATION HISTORY ---\n\n";
+
+  for (const msg of messages.slice(0, -1)) {
+    const role = msg.role === "user" ? "User" : "Assistant";
+    prompt += `${role}: ${msg.content}\n\n`;
+  }
+
+  // Add the latest user message as the actual query
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage) {
+    prompt += `User: ${lastMessage.content}\n\nAssistant:`;
+  }
+
+  return prompt;
+}
+
 function parseAction(content: string): SuggestedAction | undefined {
   const actionMatch = content.match(/```action\s*([\s\S]*?)\s*```/);
   if (!actionMatch) return undefined;
@@ -171,23 +188,25 @@ export async function POST(request: Request) {
     }
 
     const systemPrompt = buildSystemPrompt(context);
+    const prompt = buildPromptFromMessages(messages, systemPrompt);
 
-    // Convert to Anthropic message format
-    const anthropicMessages: Anthropic.MessageParam[] = messages.map((m) => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    }));
-
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: anthropicMessages,
+    // Use CLI for chat - simple single-turn with history in prompt
+    const result = await runBatch({
+      prompt,
+      maxTurns: 1,
+      timeout: 30000,
+      cwd: resolve(process.cwd(), "../.."), // Project root
     });
 
-    // Extract text content
-    const textContent = response.content.find((c) => c.type === "text");
-    const rawContent = textContent?.type === "text" ? textContent.text : "";
+    if (!result.success) {
+      console.error("AI chat error:", result.error);
+      return NextResponse.json(
+        { error: "Failed to process chat request" },
+        { status: 500 }
+      );
+    }
+
+    const rawContent = result.output;
 
     // Parse action if present
     const action = parseAction(rawContent);

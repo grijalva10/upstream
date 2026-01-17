@@ -11,7 +11,7 @@
 import PgBoss from 'pg-boss';
 import { supabase } from '../db.js';
 import { config } from '../config.js';
-import { runClaude } from '../lib/claude-runner.js';
+import { runSimple } from '@upstream/claude-cli';
 
 export interface AutoFollowUpResult {
   docFollowUps: number;
@@ -156,7 +156,7 @@ Rules:
 
 Output ONLY the email body text, nothing else.`;
 
-  const draft = await runClaude(prompt);
+  const draft = await runSimple(prompt, { cwd: config.python.projectRoot });
 
   // Queue the email
   await boss.send('send-email', {
@@ -223,7 +223,7 @@ Rules:
 
 Output ONLY the email body text.`;
 
-  const draft = await runClaude(prompt);
+  const draft = await runSimple(prompt, { cwd: config.python.projectRoot });
 
   // Queue the email
   await boss.send('send-email', {

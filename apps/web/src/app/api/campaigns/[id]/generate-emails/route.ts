@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const AGENT_SERVICE_URL = process.env.AGENT_SERVICE_URL || "http://localhost:8766";
+import { runBatch } from "@upstream/claude-cli";
+import { resolve } from "path";
 
 export async function POST(
   request: Request,
@@ -46,27 +46,6 @@ export async function POST(
       return NextResponse.json(
         { error: "Campaign has no associated search" },
         { status: 400 }
-      );
-    }
-
-    // Check if agent service is available
-    let serviceAvailable = false;
-    try {
-      const statusRes = await fetch(`${AGENT_SERVICE_URL}/status`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      serviceAvailable = statusRes.ok;
-    } catch {
-      // Service not available
-    }
-
-    if (!serviceAvailable) {
-      return NextResponse.json(
-        {
-          error: `Agent service not available at ${AGENT_SERVICE_URL}. Start it with: python orchestrator/service.py`,
-        },
-        { status: 503 }
       );
     }
 
@@ -153,55 +132,35 @@ Output JSON only:
   ]
 }`;
 
-    // Call the agent service
-    const agentRes = await fetch(`${AGENT_SERVICE_URL}/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        agent: "outreach-copy-gen",
-        prompt,
-        context: { campaign_id: id, search_id: campaign.search.id },
-        max_turns: 5,
-      }),
+    // Run via Claude CLI
+    const result = await runBatch({
+      prompt,
+      maxTurns: 5,
+      timeout: 120000,
+      cwd: resolve(process.cwd(), "../.."), // Project root
     });
 
-    const agentResult = await agentRes.json();
-
-    if (!agentResult.success) {
+    if (!result.success) {
       return NextResponse.json({
         success: false,
-        error: agentResult.error || "Agent execution failed",
-        output: agentResult.output || "",
+        error: result.error || "Agent execution failed",
+        output: result.output || "",
       }, { status: 500 });
     }
 
     // Parse the agent output to extract JSON
-    const output = agentResult.output || "";
+    const output = result.output || "";
     let generatedEmails = null;
 
-    // Try to extract JSON from output
-    let jsonStr = output.trim();
-
-    // Remove markdown code blocks if present
+    // Extract JSON from output, handling markdown code blocks
     const jsonMatch = output.match(/```json\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1].trim();
-    } else {
-      // Try to find raw JSON
-      if (jsonStr.startsWith("```json")) {
-        jsonStr = jsonStr.slice(7);
-      } else if (jsonStr.startsWith("```")) {
-        jsonStr = jsonStr.slice(3);
-      }
-      if (jsonStr.endsWith("```")) {
-        jsonStr = jsonStr.slice(0, -3);
-      }
-      jsonStr = jsonStr.trim();
-    }
+    const jsonStr = jsonMatch
+      ? jsonMatch[1].trim()
+      : output.replace(/^```(?:json)?|```$/g, "").trim();
 
     try {
       generatedEmails = JSON.parse(jsonStr);
-    } catch (parseError) {
+    } catch {
       console.error("Failed to parse agent response:", output);
       return NextResponse.json(
         { error: "Failed to parse generated emails", raw: output },
@@ -222,15 +181,14 @@ Output JSON only:
     }
 
     // Map the generated emails to campaign fields
-    const email1 = generatedEmails.emails.find((e: { step?: number; email_number?: number }) =>
-      e.step === 1 || e.email_number === 1
-    ) || generatedEmails.emails[0];
-    const email2 = generatedEmails.emails.find((e: { step?: number; email_number?: number }) =>
-      e.step === 2 || e.email_number === 2
-    ) || generatedEmails.emails[1];
-    const email3 = generatedEmails.emails.find((e: { step?: number; email_number?: number }) =>
-      e.step === 3 || e.email_number === 3
-    ) || generatedEmails.emails[2];
+    type EmailEntry = { step?: number; email_number?: number; subject?: string; body?: string; delay_days?: number };
+    const findEmail = (step: number): EmailEntry | undefined =>
+      generatedEmails.emails.find((e: EmailEntry) => e.step === step || e.email_number === step) ||
+      generatedEmails.emails[step - 1];
+
+    const email1 = findEmail(1);
+    const email2 = findEmail(2);
+    const email3 = findEmail(3);
 
     // Update the campaign with generated emails
     const { data: updatedCampaign, error: updateError } = await supabase

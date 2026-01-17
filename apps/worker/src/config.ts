@@ -46,9 +46,6 @@ export interface WorkerConfig {
   // CoStar service
   costarServiceUrl: string;
 
-  // Claude Agent service
-  agentServiceUrl: string;
-
   // Job-specific enable/disable flags
   jobs: {
     emailSync: boolean;           // Sync emails from Outlook
@@ -109,9 +106,6 @@ export const config: WorkerConfig = {
 
   // CoStar service
   costarServiceUrl: process.env.COSTAR_SERVICE_URL || 'http://localhost:8765',
-
-  // Claude Agent service
-  agentServiceUrl: process.env.AGENT_SERVICE_URL || 'http://localhost:8766',
 
   // Job-specific enable/disable flags (defaults, will be overridden from DB)
   // All jobs enabled by default

@@ -3,16 +3,18 @@
  *
  * This job:
  * 1. Takes buyer criteria from a search
- * 2. Runs sourcing agent via the Agent HTTP Service
+ * 2. Runs sourcing agent via Claude CLI
  * 3. Reads generated files from output/queries/
  * 4. Updates search with results
  * 5. Optionally queues costar-query jobs for each payload
  */
 
+import * as fs from "fs/promises";
+import * as path from "path";
 import PgBoss from "pg-boss";
 import { pool } from "../db.js";
 import { config } from "../config.js";
-import { getAgentClient } from "../lib/agent-client.js";
+import { runBatch } from "@upstream/claude-cli";
 
 export interface GenerateQueriesJob {
   searchId: string;
@@ -67,7 +69,7 @@ export async function handleGenerateQueries(
       [searchId]
     );
 
-    // Run sourcing agent via HTTP service
+    // Run sourcing agent via CLI
     const result = await runSourcingAgent(criteriaJson, name);
 
     // Update search with results
@@ -112,27 +114,13 @@ export async function handleGenerateQueries(
 }
 
 /**
- * Run the sourcing agent via the Agent HTTP Service.
+ * Run the sourcing agent via Claude CLI.
  * The agent writes files to output/queries/, which we then read.
  */
 async function runSourcingAgent(
   criteriaJson: Record<string, unknown>,
   searchName: string
 ): Promise<SourcingAgentResult> {
-  const fs = await import("fs/promises");
-  const path = await import("path");
-
-  const client = getAgentClient();
-
-  // Check if agent service is running
-  const isAvailable = await client.isAvailable();
-  if (!isAvailable) {
-    throw new Error(
-      `Agent service not available at ${config.agentServiceUrl}. ` +
-      `Start it with: python orchestrator/service.py`
-    );
-  }
-
   // Sanitize name for filename
   const safeName = searchName.replace(/[^a-zA-Z0-9]/g, "_");
   const outputDir = path.join(config.python.projectRoot, "output", "queries");
@@ -142,17 +130,9 @@ async function runSourcingAgent(
   // Ensure output directory exists
   await fs.mkdir(outputDir, { recursive: true });
 
-  // Delete old output files if they exist
-  try {
-    await fs.unlink(payloadsFile);
-  } catch {
-    /* ignore */
-  }
-  try {
-    await fs.unlink(strategyFile);
-  } catch {
-    /* ignore */
-  }
+  // Delete old output files if they exist (ignore errors if missing)
+  await fs.unlink(payloadsFile).catch(() => {});
+  await fs.unlink(strategyFile).catch(() => {});
 
   // Write criteria to temp file for the agent
   const tempCriteriaFile = path.join(outputDir, `${safeName}_input.json`);
@@ -160,7 +140,6 @@ async function runSourcingAgent(
 
   console.log(`[generate-queries] Invoking sourcing agent for: ${searchName}`);
   console.log(`[generate-queries] Criteria file: ${tempCriteriaFile}`);
-  console.log(`[generate-queries] Agent service: ${config.agentServiceUrl}`);
 
   // Build the prompt for the sourcing agent
   const prompt = `Read the buyer criteria from: ${tempCriteriaFile} and generate CoStar query payloads.
@@ -170,12 +149,12 @@ Save strategy to: ${strategyFile}
 
 Use reference/costar/ for market ID lookups. DO NOT run extraction - just generate the files.`;
 
-  // Run via HTTP service
-  const result = await client.run({
-    agent: "sourcing-agent",
+  // Run via Claude CLI directly
+  const result = await runBatch({
     prompt,
-    context: { criteria_type: criteriaJson.type },
+    maxTurns: 10,
     timeout: 300000, // 5 minutes
+    cwd: config.python.projectRoot,
   });
 
   if (!result.success) {

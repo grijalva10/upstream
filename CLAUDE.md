@@ -19,10 +19,12 @@ For CoStar API reference, the filter mappings in `reference/costar/` may still n
 ```
 upstream/
 ├── .claude/agents/      # Subagent definitions (6 agents)
-├── apps/web/            # Next.js UI (placeholder for now)
+├── apps/web/            # Next.js UI
+├── apps/worker/         # Background job processing (pg-boss)
+├── packages/claude-cli/ # Shared TypeScript wrapper for Claude CLI
 ├── packages/db/         # Supabase schema source files
 ├── packages/shared/     # Shared types (placeholder)
-├── orchestrator/        # Python orchestrator (placeholder)
+├── integrations/costar/ # CoStar data extraction service
 ├── reference/costar/    # CoStar API lookups and payload docs
 ├── supabase/            # Supabase local dev (migrations, seed, config)
 ├── docs/                # Documentation
@@ -30,6 +32,39 @@ upstream/
 ├── PRD.md               # High-level product requirements
 └── CLAUDE.md            # This file
 ```
+
+## Claude CLI Integration
+
+All AI functionality uses the `@upstream/claude-cli` package, a TypeScript wrapper around the Claude CLI:
+
+```typescript
+// Batch mode (for worker jobs)
+import { runBatch } from '@upstream/claude-cli';
+
+const result = await runBatch({
+  prompt: 'Classify this email...',
+  maxTurns: 1,
+  timeout: 60000,
+  cwd: projectRoot,
+});
+
+// Simple mode (for quick queries)
+import { runSimple } from '@upstream/claude-cli';
+
+const response = await runSimple('What is 2 + 2?');
+```
+
+### CLI Flags Reference
+
+| Flag | Purpose |
+|------|---------|
+| `-p` | Print mode (non-interactive) |
+| `--output-format json` | Structured JSON response |
+| `--output-format stream-json` | Streaming JSON events |
+| `--max-turns N` | Limit agentic loops |
+| `--resume <id>` | Continue conversation |
+| `--allowedTools "Read,Write"` | Restrict tools |
+| `--system-prompt "..."` | Custom system prompt |
 
 ## Subagents (6 total)
 
@@ -243,6 +278,13 @@ POST /api/searches/[id]/run-extraction
 ## Commands
 
 ```bash
+# Development (starts web, worker, and CoStar service)
+npm run dev                 # Starts all services via scripts/dev.ps1
+
+# Individual services
+npm run dev:web            # Start Next.js web app
+npm run dev:worker         # Start pg-boss worker
+
 # Supabase
 npx supabase start          # Start local instance
 npx supabase stop           # Stop (keeps data)
