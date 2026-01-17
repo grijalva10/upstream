@@ -51,7 +51,7 @@ export function HeaderActions(): ReactNode {
         </Tooltip>
       </TooltipProvider>
 
-      <Button variant="ghost" size="icon" onClick={toggle} className="sm:hidden h-8 w-8">
+      <Button variant="ghost" size="icon-sm" onClick={toggle} className="sm:hidden">
         <Sparkles className="h-4 w-4" />
         <span className="sr-only">AI Assistant</span>
       </Button>
@@ -68,19 +68,19 @@ export function HeaderActions(): ReactNode {
         </kbd>
       </Button>
 
-      <Button variant="ghost" size="icon" className="sm:hidden h-8 w-8">
+      <Button variant="ghost" size="icon-sm" className="sm:hidden">
         <Search className="h-4 w-4" />
         <span className="sr-only">Search</span>
       </Button>
 
-      <Button variant="ghost" size="icon" className="h-8 w-8 relative">
+      <Button variant="ghost" size="icon-sm" className="relative">
         <Bell className="h-4 w-4" />
         <span className="sr-only">Notifications</span>
       </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+          <Button variant="ghost" size="icon-sm" className="rounded-full">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="text-[10px]">JG</AvatarFallback>
             </Avatar>

@@ -148,7 +148,7 @@ function DataTableInner<T extends { id: string }>({
                         value={table.filterValues[filter.id]}
                         onValueChange={(v) => table.setFilter(filter.id, v)}
                       >
-                        <SelectTrigger className="h-8 mt-1">
+                        <SelectTrigger size="sm" className="mt-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -220,7 +220,7 @@ function DataTableInner<T extends { id: string }>({
                 size="icon"
                 onClick={table.refresh}
                 disabled={table.loading}
-                className="h-9 w-9 flex-shrink-0"
+                className="flex-shrink-0"
               >
                 <RefreshCw className={cn("h-4 w-4", table.loading && "animate-spin")} />
               </Button>
@@ -362,7 +362,7 @@ function DataTableInner<T extends { id: string }>({
             value={String(table.pageSize)}
             onValueChange={(v) => table.setPageSize(Number(v))}
           >
-            <SelectTrigger className="w-16 h-8">
+            <SelectTrigger size="sm" className="w-16">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -379,8 +379,8 @@ function DataTableInner<T extends { id: string }>({
           {/* First/Last buttons hidden on mobile */}
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8 hidden sm:inline-flex"
+            size="icon-sm"
+            className="hidden sm:inline-flex"
             onClick={() => table.setPage(1)}
             disabled={table.page === 1}
           >
@@ -388,8 +388,7 @@ function DataTableInner<T extends { id: string }>({
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => table.setPage(table.page - 1)}
             disabled={table.page === 1}
           >
@@ -400,8 +399,7 @@ function DataTableInner<T extends { id: string }>({
           </span>
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => table.setPage(table.page + 1)}
             disabled={table.page >= table.totalPages}
           >
@@ -409,8 +407,8 @@ function DataTableInner<T extends { id: string }>({
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8 hidden sm:inline-flex"
+            size="icon-sm"
+            className="hidden sm:inline-flex"
             onClick={() => table.setPage(table.totalPages)}
             disabled={table.page >= table.totalPages}
           >

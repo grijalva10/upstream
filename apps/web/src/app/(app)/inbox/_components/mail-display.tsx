@@ -683,7 +683,7 @@ export function MailDisplay({ message, onOptimisticUpdate }: MailDisplayProps) {
             {/* Actions */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <Button variant="ghost" size="icon-sm" className="shrink-0">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

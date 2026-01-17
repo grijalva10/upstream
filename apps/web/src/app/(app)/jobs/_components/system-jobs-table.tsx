@@ -334,7 +334,7 @@ export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
             value={String(pageSize)}
             onValueChange={(v) => setPageSize(Number(v))}
           >
-            <SelectTrigger className="w-[70px] h-8">
+            <SelectTrigger size="sm" className="w-[70px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -358,8 +358,7 @@ export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => setCurrentPage(1)}
             disabled={currentPage === 1}
           >
@@ -367,8 +366,7 @@ export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
           >
@@ -379,8 +377,7 @@ export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
           </span>
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage >= totalPages}
           >
@@ -388,8 +385,7 @@ export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
           </Button>
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage >= totalPages}
           >
