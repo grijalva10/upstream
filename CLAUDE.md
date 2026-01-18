@@ -98,6 +98,23 @@ sourcing-agent → drip-campaign-exec → [email sent]
 | `bounce` | Delivery failure → add to exclusions |
 | `other` | OOO, newsletters, unclear → no action |
 
+## Slash Commands
+
+Operator commands in `.claude/commands/` for common workflows:
+
+| Command | Purpose | Usage |
+|---------|---------|-------|
+| `/prep` | Generate call prep sheet with contact, property, loan, and deal context | `/prep John Smith` |
+| `/triage` | Daily inbox review - pending drafts, hot leads, low confidence items | `/triage` |
+| `/source` | Convert natural language to CoStar search and run extraction | `/source industrial OC, loan maturing 2026` |
+| `/pipeline` | Pipeline snapshot - funnel counts, active deals, stalled deals | `/pipeline` |
+| `/campaign` | Campaign status with metrics, reply rates, hot leads | `/campaign Industrial OC 2026` |
+
+Each command contains:
+- SQL queries to gather relevant data
+- Output format specification (markdown or React artifact)
+- Key rules for presentation
+
 ## CoStar API Reference
 
 **Endpoint:** `POST https://product.costar.com/bff2/property/search/list-properties`
