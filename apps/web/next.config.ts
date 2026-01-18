@@ -3,7 +3,8 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: path.resolve(__dirname),
+    // Point to monorepo root where node_modules is hoisted
+    root: path.resolve(__dirname, "../.."),
   },
 };
 

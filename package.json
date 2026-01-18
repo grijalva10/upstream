@@ -1,11 +1,17 @@
 {
   "name": "upstream",
   "private": true,
+  "workspaces": [
+    "packages/claude-cli",
+    "apps/web",
+    "apps/worker"
+  ],
   "scripts": {
+    "build:packages": "npm run build --workspace=@upstream/claude-cli",
     "dev": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
     "stop": "powershell -ExecutionPolicy Bypass -File scripts/stop.ps1",
-    "dev:web": "npm run dev --prefix apps/web",
-    "dev:worker": "npm run dev --prefix apps/worker",
+    "dev:web": "npm run build:packages && npm run dev --prefix apps/web",
+    "dev:worker": "npm run build:packages && npm run dev --prefix apps/worker",
     "db:start": "npx supabase start",
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",

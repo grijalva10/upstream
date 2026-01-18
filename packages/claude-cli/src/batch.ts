@@ -63,7 +63,7 @@ export async function runBatch(options: ClaudeRunOptions): Promise<ClaudeResult>
     return {
       success: true,
       output: stdout.trim(),
-      sessionId: extractSessionId(stdout),
+      sessionId: extractSessionId(stdout) ?? undefined,
       durationMs,
     };
   } catch (err) {

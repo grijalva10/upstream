@@ -112,20 +112,28 @@ export async function spawnClaude(
     return { process: proc, cleanup: async () => {} };
   }
 
-  // Long prompt - use temp file and pipe via shell
+  // Long prompt - use temp file and pipe via PowerShell (Windows) or shell (Unix)
   const tempFile = await createPromptFile(options.prompt);
   const isWindows = process.platform === 'win32';
-  const shell = isWindows ? 'cmd' : 'sh';
-  const catCmd = isWindows ? 'type' : 'cat';
-  const shellArg = isWindows ? '/c' : '-c';
-  const pipeCmd = `${catCmd} "${tempFile}" | claude ${args.join(' ')}`;
 
-  const proc = spawn(shell, [shellArg, pipeCmd], {
-    cwd: options.cwd,
-    env: { ...process.env },
-    shell: false,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  let proc: ChildProcess;
+  if (isWindows) {
+    // Use PowerShell on Windows for reliable piping with paths
+    const psScript = `Get-Content -Raw "${tempFile}" | claude ${args.join(' ')}`;
+    proc = spawn('powershell.exe', ['-Command', psScript], {
+      cwd: options.cwd,
+      env: { ...process.env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } else {
+    // Use sh on Unix
+    const pipeCmd = `cat "${tempFile}" | claude ${args.join(' ')}`;
+    proc = spawn('sh', ['-c', pipeCmd], {
+      cwd: options.cwd,
+      env: { ...process.env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  }
 
   return {
     process: proc,
