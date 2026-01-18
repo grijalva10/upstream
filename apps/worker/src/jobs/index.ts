@@ -25,10 +25,6 @@ import { createProcessRepliesHandler } from './process-replies.job.js';
 import { createAutoFollowUpHandler } from './auto-follow-up.job.js';
 import { handleGhostDetection } from './ghost-detection.job.js';
 
-// Legacy imports (kept for backwards compatibility, will be deprecated)
-import { createCheckRepliesHandler } from './check-replies.job.js';
-import { handleClassify } from './classify.job.js';
-
 const QUEUES = [
   // Core queues
   'email-sync',
@@ -39,9 +35,6 @@ const QUEUES = [
   // Autonomous operations
   'auto-follow-up',
   'ghost-detection',
-  // Legacy (deprecated - kept for in-flight jobs)
-  'check-replies',
-  'classify-email',
 ];
 
 interface JobCallbacks {
@@ -150,25 +143,6 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
     wrapHandler('ghost-detection', handleGhostDetection)
   );
 
-  // ==========================================================================
-  // LEGACY JOBS (deprecated - kept for in-flight jobs, will be removed)
-  // ==========================================================================
-
-  // Legacy: Check for unclassified replies (DEPRECATED - use process-replies)
-  const checkRepliesHandler = createCheckRepliesHandler(boss);
-  await boss.work(
-    'check-replies',
-    { teamSize: 1, teamConcurrency: 1 },
-    wrapHandler('check-replies', checkRepliesHandler)
-  );
-
-  // Legacy: Classify individual emails (DEPRECATED - use process-replies)
-  await boss.work(
-    'classify-email',
-    { teamSize: 1, teamConcurrency: 1 },
-    wrapHandler('classify-email', handleClassify)
-  );
-
   console.log('[jobs] Registered all job handlers');
 }
 
@@ -212,14 +186,6 @@ export async function scheduleRecurringJobs(boss: PgBoss) {
     tz: config.defaultTimezone,
   });
   console.log('  - ghost-detection: daily at 9:30 AM');
-
-  // ==========================================================================
-  // DEPRECATED SCHEDULES (disabled - jobs still registered for in-flight)
-  // ==========================================================================
-
-  // NOTE: check-replies and classify-email are no longer scheduled.
-  // They are replaced by the unified process-replies job.
-  // The job handlers remain registered to complete any in-flight jobs.
 
   console.log('[jobs] Recurring jobs scheduled');
 }

@@ -66,12 +66,11 @@ const response = await runSimple('What is 2 + 2?');
 | `--allowedTools "Read,Write"` | Restrict tools |
 | `--system-prompt "..."` | Custom system prompt |
 
-## Subagents (6 total)
+## Subagents (5 total)
 
 | Agent | Purpose |
 |-------|---------|
 | `@sourcing-agent` | Analyzes buyer criteria → strategy + CoStar payloads |
-| `@response-classifier` | Classifies email replies into 8 categories with confidence scoring |
 | `@qualify-agent` | Processes classified responses, generates follow-ups, tracks qualification |
 | `@schedule-agent` | Handles call scheduling, time slots, calendar events, call prep |
 | `@drip-campaign-exec` | Executes 3-email sequences via Outlook COM with approval queue |
@@ -81,26 +80,23 @@ const response = await runSimple('What is 2 + 2?');
 ```
 sourcing-agent → drip-campaign-exec → [email sent]
                                           ↓
-                     [reply received] → response-classifier
+                     [reply received] → process-replies job (classifies + acts)
                                           ↓
-                     qualify-agent ← [interested/pricing_given]
+                     qualify-agent ← [hot lead detected]
                            ↓
                      schedule-agent ← [call request detected]
                            ↓
                      deal-packager ← [qualification complete]
 ```
 
-### Classification Categories (response-classifier)
+### Classification Categories (process-replies job)
 | Code | Action |
 |------|--------|
-| `interested` | Continue to qualify |
-| `pricing_given` | Extract data, continue to qualify |
-| `question` | Answer, continue |
-| `referral` | Follow up with new contact |
-| `broker_redirect` | Log broker, do not pursue |
-| `soft_pass` | Add to nurture (re-engage later) |
-| `hard_pass` | Add to DNC forever |
-| `bounce` | Add email to exclusions forever |
+| `hot` | Interested, gave pricing, wants call → create draft reply, update deal |
+| `question` | Asking about deal/buyer → create draft answer |
+| `pass` | Not interested, wrong person, has broker → update status, add to DNC if requested |
+| `bounce` | Delivery failure → add to exclusions |
+| `other` | OOO, newsletters, unclear → no action |
 
 ## CoStar API Reference
 

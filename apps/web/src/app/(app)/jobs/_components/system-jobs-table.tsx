@@ -76,11 +76,12 @@ const stateColors: Record<string, string> = {
 
 const queueColors: Record<string, string> = {
   "email-sync": "bg-blue-100 text-blue-700",
-  "check-replies": "bg-purple-100 text-purple-700",
+  "process-replies": "bg-purple-100 text-purple-700",
   "process-queue": "bg-cyan-100 text-cyan-700",
   "send-email": "bg-green-100 text-green-700",
-  "classify-email": "bg-amber-100 text-amber-700",
-  "costar-query": "bg-rose-100 text-rose-700",
+  "auto-follow-up": "bg-amber-100 text-amber-700",
+  "ghost-detection": "bg-orange-100 text-orange-700",
+  "generate-queries": "bg-rose-100 text-rose-700",
 };
 
 export function SystemJobsTable({ initialJobs = [] }: SystemJobsTableProps) {
