@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const COSTAR_SERVICE_URL = process.env.COSTAR_SERVICE_URL || "http://localhost:8765";
+import { COSTAR_SERVICE_URL } from "@/lib/constants";
 
 export async function POST() {
   try {

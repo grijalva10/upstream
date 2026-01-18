@@ -69,9 +69,11 @@ export interface Campaign {
 
 export interface Exclusion {
   id: string;
-  email: string;
+  email: string | null;
+  phone: string | null;
+  company_name: string | null;
   reason: string | null;
-  bounce_type: string | null;
-  source_email_id: string | null;
-  created_at: string;
+  source: string | null;
+  added_at: string;
+  notes: string | null;
 }

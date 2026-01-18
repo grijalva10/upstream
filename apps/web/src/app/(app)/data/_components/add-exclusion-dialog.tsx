@@ -28,9 +28,9 @@ interface AddExclusionDialogProps {
 
 const REASONS = [
   { value: "manual", label: "Manual" },
-  { value: "hard_pass", label: "Hard Pass" },
-  { value: "unsubscribe", label: "Unsubscribe" },
-  { value: "invalid", label: "Invalid" },
+  { value: "requested", label: "Requested DNC" },
+  { value: "bounced", label: "Bounced" },
+  { value: "complaint", label: "Complaint" },
 ];
 
 export function AddExclusionDialog({ onSuccess }: AddExclusionDialogProps) {

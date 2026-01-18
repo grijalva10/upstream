@@ -553,20 +553,20 @@ export const campaignFilters: Filter[] = [
 ];
 
 // ============================================================================
-// EXCLUSIONS
+// EXCLUSIONS (uses dnc_entries table)
 // ============================================================================
 
 const exclusionReasonColors: Record<string, string> = {
-  bounce: "bg-red-100 text-red-800",
-  hard_pass: "bg-gray-100 text-gray-800",
-  unsubscribe: "bg-yellow-100 text-yellow-800",
+  requested: "bg-red-100 text-red-800",
+  bounced: "bg-orange-100 text-orange-800",
+  complaint: "bg-yellow-100 text-yellow-800",
   manual: "bg-blue-100 text-blue-800",
-  invalid: "bg-orange-100 text-orange-800",
 };
 
-const bounceTypeColors: Record<string, string> = {
-  hard: "bg-red-100 text-red-800",
-  soft: "bg-yellow-100 text-yellow-800",
+const exclusionSourceColors: Record<string, string> = {
+  email_response: "bg-blue-100 text-blue-800",
+  manual: "bg-gray-100 text-gray-800",
+  import: "bg-purple-100 text-purple-800",
 };
 
 export const exclusionColumns: Column<Exclusion>[] = [
@@ -576,6 +576,21 @@ export const exclusionColumns: Column<Exclusion>[] = [
     accessorKey: "email",
     enableSorting: true,
     className: "font-medium",
+    cell: displayValue,
+  },
+  {
+    id: "phone",
+    header: "Phone",
+    accessorKey: "phone",
+    defaultHidden: true,
+    cell: displayValue,
+  },
+  {
+    id: "company_name",
+    header: "Company",
+    accessorKey: "company_name",
+    defaultHidden: true,
+    cell: displayValue,
   },
   {
     id: "reason",
@@ -585,16 +600,23 @@ export const exclusionColumns: Column<Exclusion>[] = [
     cell: (v) => v ? coloredBadge(v as string, exclusionReasonColors) : "-",
   },
   {
-    id: "bounce_type",
-    header: "Bounce Type",
-    accessorKey: "bounce_type",
+    id: "source",
+    header: "Source",
+    accessorKey: "source",
     align: "center",
-    cell: (v) => v ? coloredBadge(v as string, bounceTypeColors) : "-",
+    cell: (v) => v ? coloredBadge(v as string, exclusionSourceColors) : "-",
   },
   {
-    id: "created_at",
+    id: "notes",
+    header: "Notes",
+    accessorKey: "notes",
+    defaultHidden: true,
+    cell: (v) => v ? String(v).slice(0, 50) + (String(v).length > 50 ? "..." : "") : "-",
+  },
+  {
+    id: "added_at",
     header: "Added",
-    accessorKey: "created_at",
+    accessorKey: "added_at",
     align: "right",
     enableSorting: true,
     cell: (v) => new Date(v as string).toLocaleDateString(),
@@ -607,20 +629,20 @@ export const exclusionFilters: Filter[] = [
     label: "Reason",
     options: [
       { value: "all", label: "All" },
-      { value: "bounce", label: "Bounce" },
-      { value: "hard_pass", label: "Hard Pass" },
-      { value: "unsubscribe", label: "Unsubscribe" },
+      { value: "requested", label: "Requested" },
+      { value: "bounced", label: "Bounced" },
+      { value: "complaint", label: "Complaint" },
       { value: "manual", label: "Manual" },
-      { value: "invalid", label: "Invalid" },
     ],
   },
   {
-    id: "bounce_type",
-    label: "Bounce Type",
+    id: "source",
+    label: "Source",
     options: [
       { value: "all", label: "All" },
-      { value: "hard", label: "Hard" },
-      { value: "soft", label: "Soft" },
+      { value: "email_response", label: "Email Response" },
+      { value: "manual", label: "Manual" },
+      { value: "import", label: "Import" },
     ],
   },
 ];

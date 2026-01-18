@@ -10,96 +10,65 @@ tools: Read, Bash
 
 # Response Classifier (DEPRECATED)
 
-> **Note:** This agent has been consolidated into the `process-replies` worker job.
-> Classification + action execution now happens in a single unified pipeline.
-> This file is kept for documentation purposes.
+> **Status:** This agent is NOT invoked as a subagent.
+> Classification logic is implemented inline in `apps/worker/src/jobs/process-replies.job.ts`.
+> This file is kept as documentation for the classification system.
 
-## New Implementation
+## Current Implementation
 
-Email replies are now processed by:
+Email replies are processed by:
 - **Job:** `apps/worker/src/jobs/process-replies.job.ts`
-- **Schedule:** Every 2 minutes
-- **Flow:** Sync → Classify → Execute Action (all in one job)
+- **Schedule:** Every 2 minutes via pg-boss
+- **Flow:** Fetch unclassified → Pre-filter by sender → Classify via Claude → Execute action
 
-## Classification Categories (19 total)
+## Classification Categories (5 simplified)
 
-| Category | Description | Autonomous Action |
-|----------|-------------|-------------------|
-| `hot_interested` | Shows interest, wants to engage | Draft reply |
-| `hot_schedule` | Wants a call, gave phone | Check calendar → propose times |
-| `hot_confirm` | Confirming a proposed time | Create event → send invite |
-| `hot_pricing` | Provided price, NOI, cap rate | Extract data → store → reply |
-| `question` | Asking about deal/terms | Draft answer |
-| `info_request` | Wants documents sent | Attach doc → send |
-| `referral` | Gave another contact | Create contact → enroll |
-| `broker` | Redirected to broker | Log broker → flag for decision |
-| `ooo` | Out of office | Schedule follow-up task |
-| `soft_pass` | Not now, maybe later | Nurture task (90 days) |
-| `hard_pass` | Stop emailing, DNC | Add to DNC → archive |
-| `wrong_contact` | Stale/incorrect contact | Flag for research |
-| `bounce` | Delivery failure | Mark bounced → exclude |
-| `doc_promised` | Said they'll send docs | Track → schedule follow-up |
-| `doc_received` | Sent documents | Parse → check if qualified |
-| `buyer_inquiry` | Wants to BUY, not sell | Start criteria gathering |
-| `buyer_criteria_update` | Adding to buy criteria | Continue gathering → create search |
-| `general_update` | General correspondence | Reply if needed |
-| `unclear` | Cannot determine intent | Flag for human review |
+The production system uses 5 categories (not the 16 in the DB enum):
 
-## Qualification Criteria
+| Category | Description | Action Taken |
+|----------|-------------|--------------|
+| `hot` | Interested, gave pricing, wants to schedule, sent docs | Create draft reply, update deal data |
+| `question` | Asking about deal/buyer/terms | Create draft answer |
+| `pass` | Not interested, wrong person, has broker, DNC | Update company status, add to DNC if requested |
+| `bounce` | Delivery failure | Add to email_exclusions, mark contact bounced |
+| `other` | OOO, newsletters, general, unclear | No action (filtered or logged) |
 
-A deal is qualified when:
-- **2 of 3 pricing fields:** asking_price, NOI, cap_rate
-- **Plus:** rent_roll document received
-- **Plus:** operating_statement/T12 document received
+## Pre-filtering (Before AI Classification)
 
-## Autonomous Actions by Classification
+The job auto-classifies without AI for:
+- **Newsletters/automated:** CoStar alerts, platform notifications → `other`
+- **Internal team:** lee-associates.com → `other`
+- **Bounces:** mailer-daemon, postmaster → `bounce`
 
-### Scheduling Flow
-```
-"Call me" → Check Outlook calendar → Propose 3-4 slots
-     ↓
-"Tuesday works" → Create calendar event → Send invite → Create call prep task
-```
+## Human Review Queue
 
-### Document Collection Flow
-```
-"I'll send the rent roll" → Track as 'promised' → Schedule 3-day follow-up
-     ↓
-(No docs after 3 days) → Auto follow-up email
-     ↓
-(No docs after 10 days + 2 follow-ups) → Mark as 'ghosted' → Nurture task
-```
+- **Confidence < 0.7:** Creates `email_drafts` with `status: pending` for human approval
+- **All hot/question replies:** Draft created for review (never auto-sends)
 
-### Buyer Inquiry Flow
-```
-"We're looking to buy industrial" → Extract criteria → Ask for missing fields
-     ↓
-(Criteria complete) → Create search → Queue sourcing agent → Find properties
-```
+## Why Inline vs Agent?
+
+The inline prompt approach was chosen because:
+1. Classification + action in single job reduces latency
+2. Full context (contact, company, property, loan, deal, thread) available in one query
+3. Simpler error handling and retry logic
+4. No inter-process communication overhead
+
+## Related Files
+
+| File | Purpose |
+|------|---------|
+| `apps/worker/src/jobs/process-replies.job.ts` | Main implementation |
+| `apps/web/src/app/(app)/inbox/` | UI for reviewing classified emails |
+| `apps/web/src/app/(app)/approvals/` | Draft approval queue (coming soon) |
 
 ## Database Tables Used
 
 | Table | Purpose |
 |-------|---------|
-| `synced_emails` | Email storage + classification |
-| `qualification_data` | Deal qualification tracking |
-| `buyer_criteria_tracking` | Buyer inquiry multi-turn gathering |
-| `scheduled_calls` | Calendar event tracking |
-| `tasks` | Follow-ups, reviews, nurture reminders |
+| `synced_emails` | Email storage + classification fields |
+| `deals` | Qualification data (asking_price, noi, cap_rate) |
+| `email_drafts` | Human review queue |
 | `dnc_entries` | Do Not Contact list |
 | `email_exclusions` | Bounce exclusions |
-| `email_drafts` | Human review queue for low-confidence |
-
-## Related Jobs
-
-| Job | Schedule | Purpose |
-|-----|----------|---------|
-| `process-replies` | Every 2 min | Main classification + action |
-| `auto-follow-up` | Daily 9 AM | Follow up on promised docs |
-| `ghost-detection` | Daily 9:30 AM | Mark unresponsive contacts |
-
-## Confidence Thresholds
-
-- **≥ 0.85**: Auto-send reply
-- **0.70 - 0.84**: Auto-send but monitor
-- **< 0.70**: Create draft for human review
+| `contacts` | Contact status updates |
+| `companies` | Company status updates |

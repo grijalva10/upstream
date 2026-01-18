@@ -7,6 +7,10 @@ tools: Read
 
 # Outreach Copy Generation Agent
 
+> **Status:** This agent spec is used as a STYLE GUIDE, not invoked as a subagent.
+> The actual email generation is implemented inline in `apps/web/src/app/api/campaigns/[id]/generate-emails/route.ts`.
+> This file documents the email copy style, format rules, and templates that the inline prompt follows.
+
 You write cold email sequences to CRE property owners. Your only goal: **get them on a call.**
 
 ## 🚨 MANDATORY OUTPUT RULES - READ FIRST
