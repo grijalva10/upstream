@@ -44,10 +44,17 @@ if ($LASTEXITCODE -ne 0) {
         Write-Host "Failed to start Supabase" -ForegroundColor Red
         exit 1
     }
-    Write-Host "Supabase started!" -ForegroundColor Green
 } else {
     Write-Host "Supabase already running" -ForegroundColor Green
 }
+
+# Show Supabase URLs
+Write-Host ""
+Write-Host "Supabase Services:" -ForegroundColor Cyan
+Write-Host "  [studio]  -> http://127.0.0.1:55323" -ForegroundColor Magenta
+Write-Host "  [api]     -> http://127.0.0.1:55321" -ForegroundColor Magenta
+Write-Host "  [db]      -> postgresql://postgres:postgres@127.0.0.1:55322/postgres" -ForegroundColor Magenta
+Write-Host "  [mailpit] -> http://127.0.0.1:55324" -ForegroundColor Magenta
 
 Write-Host ""
 Write-Host "Starting all services in parallel..." -ForegroundColor Cyan
