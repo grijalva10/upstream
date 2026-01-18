@@ -1,6 +1,8 @@
 # Campaign State Machine
 
-Complete flow from campaign creation through deal packaging.
+Complete flow from campaign creation through deal handoff.
+
+> **Note:** The qualification phase (call scheduling, deal packaging) is currently manual. The flow below shows what's automated vs. manual.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -29,75 +31,47 @@ ENROLLMENT (per contact)
                                     │
                                     ▼
                     ┌───────────────────────────────────────────┐
-                    │         RESPONSE CLASSIFIER               │
+                    │  process-replies job (5 categories)       │
                     └───────────────────┬───────────────────────┘
                                         │
-        ┌───────────┬───────────┬───────┼───────┬───────────┬───────────┐
-        ▼           ▼           ▼       ▼       ▼           ▼           ▼
-    interested  pricing_given question  ooo   soft_pass  referral    bounce
-        │           │           │       │       │           │           │
-        │           │           │       │       │           │           ▼
-        │           │           │       │       │           │      ┌─────────┐
-        │           │           │       │       │           │      │EXCLUSION│
-        │           │           │       │       │           │      │ forever │
-        │           │           │       │       │           │      └─────────┘
-        │           │           │       │       │           │
-        │           │           │       │       │           ▼
-        │           │           │       │       │      ┌──────────┐
-        │           │           │       │       │      │ NEW      │
-        │           │           │       │       │      │ CONTACT  │
-        │           │           │       │       │      │ restart  │
-        │           │           │       │       │      └──────────┘
-        │           │           │       │       │
-        │           │           │       │       ▼
-        │           │           │       │   ┌────────┐
-        │           │           │       │   │NURTURE │
-        │           │           │       │   │sequence│
-        │           │           │       │   └────────┘
-        │           │           │       │
-        │           │           │       ▼
-        │           │           │   ┌─────────┐
-        │           │           │   │  WAIT   │
-        │           │           │   │ + task  │
-        │           │           │   │ to call │
-        │           │           │   └─────────┘
-        │           │           │
-        └───────────┴───────────┴───────────┐
-                                            ▼
-                              ┌──────────────────────────┐
-                              │     QUALIFY-AGENT        │
-                              │  (answer Qs, gather info)│
-                              └────────────┬─────────────┘
-                                           │
-                          [call request detected]
-                                           │
-                                           ▼
-                              ┌──────────────────────────┐
-                              │     SCHEDULE-AGENT       │
-                              │  (propose times, book)   │
-                              └────────────┬─────────────┘
-                                           │
-                                   [call happens]
-                                           │
-                                           ▼
-                              ┌──────────────────────────┐
-                              │   QUALIFICATION DATA     │
-                              │ new→engaging→qualified   │
-                              │ →docs_received           │
-                              │ →ready_to_package        │
-                              └────────────┬─────────────┘
-                                           │
-                                           ▼
-                              ┌──────────────────────────┐
-                              │     DEAL-PACKAGER        │
-                              │  (create deal summary)   │
-                              └────────────┬─────────────┘
-                                           │
-                                           ▼
-                              ┌──────────────────────────┐
-                              │      DEAL PACKAGE        │
-                              │ draft→ready→handed_off   │
-                              └──────────────────────────┘
+        ┌─────────────────┬─────────────┼─────────────┬─────────────┐
+        ▼                 ▼             ▼             ▼             ▼
+       hot            question        pass         bounce        other
+        │                 │             │             │             │
+        │                 │             │             ▼             │
+        │                 │             │        ┌─────────┐        │
+        │                 │             │        │EXCLUSION│        │
+        │                 │             │        │ forever │        │
+        │                 │             │        │contact  │        │
+        │                 │             │        │bounced  │        │
+        │                 │             │        └─────────┘        │
+        │                 │             │                           │
+        │                 │             ├──► DNC (if requested)     │
+        │                 │             └──► nurture (soft pass)    │
+        │                 │                                         │
+        │                 │                                  [logged only]
+        │                 │                                   (OOO, etc)
+        │                 │
+        └────────┬────────┘
+                 ▼
+        ┌────────────────────┐
+        │   email_drafts     │
+        │  (for human review)│
+        └────────┬───────────┘
+                 │
+                 ▼
+        ┌────────────────────┐
+        │  HUMAN APPROVES    │
+        │  (/approvals UI)   │
+        └────────┬───────────┘
+                 │
+                 ▼
+        ┌────────────────────┐
+        │   MANUAL PROCESS   │
+        │  (qualification,   │
+        │   call scheduling, │
+        │   deal packaging)  │
+        └────────────────────┘
 
 
 COMPANY STATUS (parallel track)
@@ -137,18 +111,17 @@ ENROLLMENT STATUS
 
 ## Key Flows
 
-| Trigger | Classification | Action | Next State |
-|---------|---------------|--------|------------|
-| Reply received | `interested` | qualify-agent | company→engaged |
-| Reply received | `pricing_given` | extract $, qualify-agent | company→engaged |
-| Reply received | `question` | answer, qualify-agent | company→engaged |
-| Reply received | `ooo` | create task, wait | enrollment paused |
-| Reply received | `soft_pass` | nurture sequence | company stays |
-| Reply received | `referral` | create new contact | restart outreach |
-| Reply received | `bounce` | exclusion forever | contact→bounced |
-| Reply received | `hard_pass` | DNC forever | contact→dnc |
-| Call scheduled | - | schedule-agent | qualification begins |
-| Qualified | - | deal-packager | deal_package created |
+| Trigger | Classification | Automated Action | Manual Follow-up |
+|---------|---------------|------------------|------------------|
+| Reply received | `hot` | Create email_draft for review | Human reviews, qualifies |
+| Reply received | `question` | Create email_draft for review | Human answers |
+| Reply received | `pass` (DNC) | Add to dnc_entries | None |
+| Reply received | `pass` (soft) | Update company→nurture | Re-engage later |
+| Reply received | `bounce` | Add to email_exclusions, contact→bounced | None |
+| Reply received | `other` | Log only | Review if needed |
+| Draft approved | - | process-queue → send-email | - |
+| Hot lead | - | - | Human qualifies, schedules call |
+| Qualified | - | - | Human creates deal package |
 
 ## Status Values Reference
 
@@ -193,13 +166,27 @@ ENROLLMENT STATUS
 - `handed_off` - Delivered to buyer
 - `rejected` - Buyer passed
 
-## Agent Responsibilities
+## Agent & Job Responsibilities
 
+### Active Agents
 | Agent | Trigger | Input | Output |
 |-------|---------|-------|--------|
-| `outreach-copy-gen` | Campaign created | contact + property + buyer | 3 email sequence |
-| `drip-campaign-exec` | Campaign active | email drafts | sends via Outlook |
-| `response-classifier` | Reply received | email content | classification + extracted data |
-| `qualify-agent` | interested/pricing/question | classification | follow-up email, gather info |
-| `schedule-agent` | call request detected | conversation context | calendar invite |
-| `deal-packager` | ready_to_package | qualification data | deal summary PDF |
+| `@sourcing-agent` | New search/criteria | Buyer requirements | CoStar query payloads |
+| `@outreach-copy-gen` | Campaign created | contact + property + buyer | 3-email sequence |
+
+### Worker Jobs
+| Job | Schedule | Input | Output |
+|-----|----------|-------|--------|
+| `email-sync` | Every 5 min | Outlook | synced_emails |
+| `process-replies` | Every 2 min | synced_emails | classification + actions |
+| `process-queue` | Every 1 min | email_queue | send-email jobs |
+| `send-email` | On demand | email data | Outlook send + activity |
+| `auto-follow-up` | Daily 9 AM | pending docs | email_queue |
+| `ghost-detection` | Daily 9:30 AM | unresponsive contacts | status updates |
+
+### Manual Processes (Not Yet Automated)
+| Process | Current State |
+|---------|---------------|
+| Qualification tracking | Human updates deals table |
+| Call scheduling | Human uses calendar directly |
+| Deal packaging | Human creates packages manually |

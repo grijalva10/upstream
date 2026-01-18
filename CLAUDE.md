@@ -8,9 +8,21 @@ Upstream Sourcing Engine - AI agents that help find off-market CRE deals. See `P
 
 ## Current Focus
 
-**Full Pipeline Implementation Complete.**
+**Core Pipeline Operational, Qualification Features Pending.**
 
-The Upstream pipeline is now fully implemented with 6 agents working together. See `docs/pipeline-integration.md` for the full flow.
+The sourcing and outreach pipeline is functional with worker jobs handling most automation. Some originally planned agents are implemented as inline worker job logic instead. See `docs/pipeline-integration.md` for the flow.
+
+**What's working:**
+- Sourcing: `@sourcing-agent` generates CoStar queries from buyer criteria
+- Outreach: `@outreach-copy-gen` creates personalized email sequences
+- Email sync: Worker job pulls replies from Outlook
+- Classification: Inline in `process-replies` job (simplified 5-category system)
+- Auto-operations: Follow-ups and ghost detection run daily
+
+**Not yet implemented:**
+- Qualification tracking agent (manual process currently)
+- Call scheduling agent (manual process currently)
+- Deal packaging agent (manual process currently)
 
 For CoStar API reference, the filter mappings in `reference/costar/` may still need validation against real queries.
 
@@ -18,7 +30,7 @@ For CoStar API reference, the filter mappings in `reference/costar/` may still n
 
 ```
 upstream/
-├── .claude/agents/      # Subagent definitions (6 agents)
+├── .claude/agents/      # Subagent definitions (2 active + templates)
 ├── apps/web/            # Next.js UI
 ├── apps/worker/         # Background job processing (pg-boss)
 ├── packages/claude-cli/ # Shared TypeScript wrapper for Claude CLI
@@ -66,41 +78,64 @@ const response = await runSimple('What is 2 + 2?');
 | `--allowedTools "Read,Write"` | Restrict tools |
 | `--system-prompt "..."` | Custom system prompt |
 
-## Subagents (6 total)
+## Agents & Worker Jobs
+
+### Active Subagents
 
 | Agent | Purpose |
 |-------|---------|
 | `@sourcing-agent` | Analyzes buyer criteria → strategy + CoStar payloads |
-| `@response-classifier` | Classifies email replies into 8 categories with confidence scoring |
-| `@qualify-agent` | Processes classified responses, generates follow-ups, tracks qualification |
-| `@schedule-agent` | Handles call scheduling, time slots, calendar events, call prep |
-| `@drip-campaign-exec` | Executes 3-email sequences via Outlook COM with approval queue |
-| `@deal-packager` | Creates deal packages from qualified leads, notifies matching clients |
+| `@outreach-copy-gen` | Generates personalized 3-email cold outreach sequences |
+
+### Worker Jobs (pg-boss)
+
+Most automation is handled by scheduled worker jobs in `apps/worker/`:
+
+| Job | Schedule | Purpose |
+|-----|----------|---------|
+| `email-sync` | Every 5 min | Pull emails from Outlook |
+| `process-replies` | Every 2 min | Classify + act on inbound emails |
+| `process-queue` | Every 1 min | Dequeue outbound emails |
+| `send-email` | On demand | Send via Outlook COM |
+| `generate-queries` | On demand | Run sourcing agent |
+| `auto-follow-up` | Daily 9 AM | Send follow-ups for pending docs |
+| `ghost-detection` | Daily 9:30 AM | Mark unresponsive contacts |
 
 ### Pipeline Flow
 ```
-sourcing-agent → drip-campaign-exec → [email sent]
+sourcing-agent → outreach-copy-gen → email_queue
                                           ↓
-                     [reply received] → response-classifier
-                                          ↓
-                     qualify-agent ← [interested/pricing_given]
-                           ↓
-                     schedule-agent ← [call request detected]
-                           ↓
-                     deal-packager ← [qualification complete]
+                              process-queue → send-email → [sent]
+                                                             ↓
+email-sync ← [Outlook sync] ←─────────────────── [replies]
+     ↓
+process-replies → [classify + act]
+     ↓
+ ┌───┴───────────────────────────┐
+ │ hot/question → email_drafts   │
+ │ pass → DNC / status update    │
+ │ bounce → email_exclusions     │
+ └───────────────────────────────┘
 ```
 
-### Classification Categories (response-classifier)
-| Code | Action |
-|------|--------|
-| `interested` | Continue to qualify |
-| `pricing_given` | Extract data, continue to qualify |
-| `question` | Answer, continue |
-| `referral` | Follow up with new contact |
-| `broker_redirect` | Log broker, do not pursue |
-| `soft_pass` | Add to nurture (re-engage later) |
-| `hard_pass` | Add to DNC forever |
-| `bounce` | Add email to exclusions forever |
+### Classification Categories (process-replies job)
+
+The production system uses 5 simplified categories:
+
+| Code | Description | Action |
+|------|-------------|--------|
+| `hot` | Interested, gave pricing, wants call | Create draft reply, update deal data |
+| `question` | Asking about deal/buyer/terms | Create draft answer |
+| `pass` | Not interested, wrong person, has broker | Update status, add to DNC if requested |
+| `bounce` | Delivery failure | Add to email_exclusions, mark contact bounced |
+| `other` | OOO, newsletters, unclear | No action (filtered or logged) |
+
+### Not Yet Implemented
+
+These were planned but are currently manual processes:
+- `qualify-agent` - Qualification tracking
+- `schedule-agent` - Call scheduling
+- `deal-packager` - Deal package creation
 
 ## CoStar API Reference
 

@@ -1,150 +1,149 @@
 # Upstream Pipeline Integration Guide
 
-This document describes how the 6 agents work together in the Upstream sourcing pipeline.
+This document describes how agents and worker jobs work together in the Upstream sourcing pipeline.
+
+> **Note:** The architecture evolved from a pure agent-based design to a hybrid approach where most automation runs as scheduled worker jobs (pg-boss) with agents handling complex reasoning tasks.
 
 ## Pipeline Overview
 
 ```
-┌─────────────────┐
-│ sourcing-agent  │ Generate CoStar queries from buyer criteria
-└───────┬─────────┘
-        │ extraction_lists, properties
-        ▼
-┌──────────────────┐
-│drip-campaign-exec│ Enroll contacts, manage 3-email sequences
-└───────┬──────────┘
-        │ sequence_subscriptions (awaiting_approval=true)
-        ▼
-┌─────────────────┐
-│ [Human Approves]│ Review and approve email drafts
-└───────┬─────────┘
-        │ awaiting_approval=false
-        ▼
-┌──────────────────┐
-│ Outlook COM Send │ Emails sent via Outlook
-└───────┬──────────┘
-        │ activities logged
-        ▼
-┌──────────────────┐
-│ Outlook Sync     │ Sync incoming replies
-└───────┬──────────┘
-        │ synced_emails
-        ▼
-┌───────────────────────┐
-│ response-classifier   │ Classify into 8 categories
-└───────┬───────────────┘
-        │ classification, extracted_pricing
-        ▼
-┌─────────────────────┐        ┌─────────────────────┐
-│  interested/        │        │  soft_pass/         │
-│  pricing_given/     │        │  hard_pass/         │
-│  question           │        │  bounce             │
-└───────┬─────────────┘        └───────┬─────────────┘
-        │                              │
-        ▼                              ▼
-┌─────────────────────┐        ┌─────────────────────┐
-│ qualify-agent       │        │ Auto-handle:        │
-│ - Check missing data│        │ - DNC list          │
-│ - Generate follow-up│        │ - Email exclusions  │
-│ - Escalate to call  │        │ - Nurture list      │
-└───────┬─────────────┘        └─────────────────────┘
-        │
-        ├──── call requested ────┐
-        │                        ▼
-        │               ┌─────────────────────┐
-        │               │ schedule-agent      │
-        │               │ - Propose times     │
-        │               │ - Create calendar   │
-        │               │ - Send call prep    │
-        │               └─────────────────────┘
-        │
-        ▼
-┌─────────────────────┐
-│ qualification_data  │ Track: pricing, motivation, decision maker
-└───────┬─────────────┘
-        │ status = 'qualified'
-        ▼
-┌─────────────────────┐
-│ deal-packager       │ Create deal package, notify matching clients
-└───────┬─────────────┘
-        │ deal_packages, email_drafts
-        ▼
-┌─────────────────────┐
-│ [Client Notified]   │ Deal handed off
-└─────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    SOURCING PHASE                           │
+├─────────────────────────────────────────────────────────────┤
+│  @sourcing-agent  │ Generate CoStar queries from criteria   │
+│        ↓                                                    │
+│  [CoStar extraction] → properties, companies, contacts      │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    OUTREACH PHASE                           │
+├─────────────────────────────────────────────────────────────┤
+│  @outreach-copy-gen │ Create personalized 3-email sequence  │
+│        ↓                                                    │
+│  email_queue → process-queue job → send-email job           │
+│        ↓                                                    │
+│  [Outlook COM sends] → activities logged                    │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    REPLY HANDLING                           │
+├─────────────────────────────────────────────────────────────┤
+│  email-sync job (every 5 min) → synced_emails              │
+│        ↓                                                    │
+│  process-replies job (every 2 min)                         │
+│    ├── Pre-filter: newsletters, bounces, internal          │
+│    └── AI classify: hot | question | pass | bounce | other │
+│        ↓                                                    │
+│  ┌────────────────────┬────────────────────┐               │
+│  │ hot/question       │ pass/bounce        │               │
+│  │ → email_drafts     │ → DNC/exclusions   │               │
+│  │ → [Human reviews]  │ → status updates   │               │
+│  └────────────────────┴────────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    AUTONOMOUS OPS                           │
+├─────────────────────────────────────────────────────────────┤
+│  auto-follow-up job (daily 9 AM)                           │
+│    └── Send follow-ups for pending docs, OOO returns       │
+│                                                             │
+│  ghost-detection job (daily 9:30 AM)                       │
+│    └── Mark contacts unresponsive after X days no reply    │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│              QUALIFICATION (Manual Currently)               │
+├─────────────────────────────────────────────────────────────┤
+│  Human reviews email_drafts in /approvals UI               │
+│  Human tracks qualification in deals table                  │
+│  Human schedules calls and creates deal packages           │
+│                                                             │
+│  (Future: qualify-agent, schedule-agent, deal-packager)    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Agent Responsibilities
+## Component Responsibilities
 
-### 1. sourcing-agent
-**Trigger**: Buyer criteria input
+### Active Agents
+
+#### 1. @sourcing-agent
+**Trigger**: Buyer criteria input or new search created
 **Input**: Natural language buyer requirements
-**Output**: CoStar query payloads, extraction_lists
-**Writes to**: client_criteria, extraction_lists
+**Output**: CoStar query payloads, strategy summary
+**Writes to**: searches.payloads_json, searches.strategy_summary
 
-### 2. drip-campaign-exec
-**Trigger**: Extraction list created or "execute campaign"
-**Input**: extraction_list_id
-**Output**: sequence_subscriptions with scheduled emails
-**Writes to**: sequence_subscriptions, email_drafts
+#### 2. @outreach-copy-gen
+**Trigger**: Campaign creation or "generate emails"
+**Input**: Contact + property + buyer context
+**Output**: 3-email sequence with subject lines and body copy
+**Writes to**: email_queue (via API)
 
-### 3. response-classifier
-**Trigger**: New synced_emails from Outlook
-**Input**: Email subject, body, from_email
-**Output**: Classification JSON with confidence and extracted data
-**Writes to**: synced_emails.classification, email_exclusions, dnc_entries
+### Worker Jobs
 
-### 4. qualify-agent
-**Trigger**: response-classifier returns interested/pricing_given/question
-**Input**: Classified email + existing qualification_data
-**Output**: Follow-up email draft, qualification_data updates
-**Writes to**: email_drafts, qualification_data
+#### email-sync
+**Schedule**: Every 5 minutes
+**Purpose**: Pull new emails from Outlook
+**Writes to**: synced_emails
 
-### 5. schedule-agent
-**Trigger**: Call request detected in email
-**Input**: Email with call signals, company/property context
-**Output**: Time slot proposals, calendar events, call prep
-**Writes to**: email_drafts, tasks, (Outlook calendar via COM)
+#### process-replies
+**Schedule**: Every 2 minutes
+**Purpose**: Classify inbound emails + take action
+**Classification**: 5 categories (hot, question, pass, bounce, other)
+**Actions**: Create drafts, update DNC, add exclusions, update statuses
+**Writes to**: synced_emails, email_drafts, dnc_entries, email_exclusions, contacts, companies
 
-### 6. deal-packager
-**Trigger**: qualification_data.status = 'qualified'
-**Input**: Qualified deal data
-**Output**: Deal package JSON, client notifications
-**Writes to**: deal_packages, email_drafts
+#### process-queue
+**Schedule**: Every minute
+**Purpose**: Dequeue emails ready to send
+**Writes to**: Triggers send-email jobs
 
-## Data Flow Between Agents
+#### send-email
+**Trigger**: On demand (from process-queue)
+**Purpose**: Send email via Outlook COM
+**Writes to**: activities
 
-### sourcing-agent → drip-campaign-exec
+#### auto-follow-up
+**Schedule**: Daily at 9 AM
+**Purpose**: Send follow-ups for pending docs and OOO returns
+**Writes to**: email_queue
+
+#### ghost-detection
+**Schedule**: Daily at 9:30 AM
+**Purpose**: Mark unresponsive contacts
+**Writes to**: contacts.status
+
+### Not Yet Implemented
+
+These were in the original design but are currently manual:
+
+- **qualify-agent**: Track pricing, motivation, decision maker
+- **schedule-agent**: Propose time slots, create calendar events, call prep
+- **deal-packager**: Create deal packages, notify matching clients
+
+## Data Flow
+
+### Sourcing → Outreach
 ```
-extraction_lists.id ──────────────────────────► create sequence_subscriptions
-properties.* ─────────────────────────────────► personalize email templates
-companies.*, contacts.* ──────────────────────► recipient info
+searches.payloads_json ───────────────────────► CoStar extraction
+properties, companies, contacts ──────────────► outreach-copy-gen context
+outreach-copy-gen output ─────────────────────► email_queue
 ```
 
-### drip-campaign-exec → response-classifier
+### Outreach → Reply Handling
 ```
-(Outlook sync)
-synced_emails ────────────────────────────────► classify response
-sequence_subscriptions ───────────────────────► stop if reply received
-```
-
-### response-classifier → qualify-agent
-```
-synced_emails.classification ─────────────────► determine response type
-synced_emails.extracted_pricing ──────────────► update qualification_data
+email_queue → process-queue → send-email ─────► activities (email_sent)
+[Outlook receives reply]
+email-sync job ───────────────────────────────► synced_emails
+process-replies job ──────────────────────────► classification + action
 ```
 
-### qualify-agent → schedule-agent
+### Reply Classification → Actions
 ```
-email_drafts (with call request) ─────────────► detect call signals
-qualification_data ───────────────────────────► context for call prep
-```
-
-### qualify-agent → deal-packager
-```
-qualification_data.status = 'qualified' ──────► trigger packaging
-qualification_data.* ─────────────────────────► source for package
-synced_emails.* ──────────────────────────────► conversation summary
+hot/question ─────────────────────────────────► email_drafts (for human review)
+pass (with DNC request) ──────────────────────► dnc_entries
+pass (no DNC) ────────────────────────────────► company.status = dnc/nurture
+bounce ───────────────────────────────────────► email_exclusions
+other ────────────────────────────────────────► logged only
 ```
 
 ## Status Transitions
@@ -172,30 +171,20 @@ active ──► completed (3 emails sent)
 
 ## Approval Queue Flow
 
-All agent-generated emails go through an approval queue before sending.
+AI-generated reply drafts go through human approval before sending.
 
 ### Email Draft Types
 | Type | Generated By | Purpose |
 |------|--------------|---------|
-| `cold_outreach` | drip-campaign-exec | Initial 3-email sequence |
-| `follow_up` | qualify-agent | Response to interested |
-| `qualification` | qualify-agent | Request pricing/motivation |
-| `scheduling` | schedule-agent | Time slot proposals |
-| `escalation` | qualify-agent | Escalate to call |
+| `cold_outreach` | outreach-copy-gen | Initial 3-email sequence |
+| `reply` | process-replies job | Response to hot/question emails |
 
 ### Approval Process
-```sql
--- List pending approvals
-SELECT * FROM approval_queue ORDER BY created_at ASC;
-
--- Approve
-UPDATE email_drafts SET status = 'approved' WHERE id = :id;
-
--- Send (after approval)
--- Outlook COM sends email
--- email_drafts.status = 'sent'
--- activities logged
-```
+1. AI generates draft → `email_drafts` with `status: pending`
+2. Human reviews in `/approvals` UI
+3. Approve → `status: approved`
+4. process-queue picks up → send-email sends → `status: sent`
+5. Activity logged
 
 ## Database Views
 
@@ -210,56 +199,40 @@ Aggregated stats per client: criteria count, extractions, properties, contacts.
 
 ## Integration Test Scenarios
 
-### Scenario 1: Cold Outreach → Reply → Qualification → Deal
-1. sourcing-agent generates queries
-2. drip-campaign-exec creates sequences
-3. Human approves Email 1
-4. Email 1 sent
+### Scenario 1: Cold Outreach → Hot Reply
+1. sourcing-agent generates CoStar queries
+2. CoStar extraction populates properties/companies/contacts
+3. outreach-copy-gen creates email sequence
+4. Emails queued → process-queue → send-email
 5. Owner replies: "Interested, we'd consider $22M"
-6. response-classifier: `pricing_given`, confidence 0.9
-7. qualify-agent: generates follow-up asking for NOI
-8. Human approves
-9. Owner replies with NOI
-10. qualify-agent: updates qualification_data
-11. Owner provides motivation
-12. qualification_data.status = 'qualified'
-13. deal-packager: creates package
-14. Matching clients notified
+6. email-sync pulls reply
+7. process-replies classifies as `hot`, creates email_draft
+8. Human reviews draft in /approvals, edits if needed, approves
+9. Reply sent, human continues qualification manually
 
 ### Scenario 2: Cold Outreach → Bounce
-1. Email 1 sent
+1. Email sent via Outlook
 2. Bounce received
-3. response-classifier: `bounce`, confidence 1.0
-4. Contact added to email_exclusions
-5. Sequence stopped
+3. email-sync pulls bounce notification
+4. process-replies classifies as `bounce`
+5. Contact added to email_exclusions
+6. Contact status updated to `bounced`
 
-### Scenario 3: Interested → Call Escalation
-1. Owner replies: "Let's discuss"
-2. response-classifier: `interested`
-3. qualify-agent: asks for pricing
-4. Owner: "What are you thinking?"
-5. qualify-agent: asks again
-6. Owner: "Make me an offer"
-7. qualify-agent: detects dodging, escalates to call
-8. schedule-agent: proposes 3 time slots
-9. Owner confirms time
-10. Calendar event created
-11. Call prep email sent 30 min before
-
-### Scenario 4: Soft Pass → Nurture
+### Scenario 3: Soft Pass → Nurture
 1. Owner replies: "Not right now, maybe next year"
-2. response-classifier: `soft_pass`
-3. Company status → nurture
-4. Sequence paused
-5. Task created for follow-up in 6 months
+2. email-sync pulls reply
+3. process-replies classifies as `pass` (soft)
+4. Company status → nurture
+5. Sequence stops
+6. ghost-detection job will skip this contact
 
 ## Error Handling
 
 ### Classification Low Confidence
-When confidence < 0.5:
-- `needs_human_review = true`
-- Appears in approval_queue
-- Human manually classifies
+When confidence < 0.7:
+- Draft created with `status: pending` for human review
+- Human reviews in /approvals or /inbox UI
+- Human can edit and approve or reject
 
 ### Outlook COM Failure
 When email send fails:
@@ -288,33 +261,28 @@ If qualification_data incomplete:
 These must run on the operator's Windows machine:
 1. **Supabase local** - PostgreSQL database
 2. **Outlook desktop** - COM automation for email
-3. **Python with pywin32** - For Outlook COM
+3. **Node.js** - Worker jobs run via pg-boss
 
 ## Commands
 
 ```bash
-# Start local Supabase
-npx supabase start
+# Start all services (web + worker + CoStar service)
+npm run dev
 
-# Reset database
-npx supabase db reset
+# Or start individually
+npm run dev:web            # Next.js web app
+npm run dev:worker         # pg-boss worker (runs scheduled jobs)
 
-# Run extraction pipeline
-python scripts/run_extraction.py output/queries/Client_payloads.json
+# Database
+npx supabase start         # Start local Supabase
+npx supabase stop          # Stop (preserves data)
+npx supabase db reset      # Reset and re-seed
 
-# Process approval queue
-python scripts/approval_queue.py list
-python scripts/approval_queue.py approve --id <uuid>
+# Manual job triggers (via API)
+# POST /api/jobs/email-sync      - Sync Outlook
+# POST /api/jobs/process-replies - Classify replies
+# POST /api/jobs/generate-queries - Run sourcing agent
 
-# Execute pending sends
-python scripts/execute_drip_sends.py
-
-# Sync Outlook emails
-python scripts/sync_outlook.py
-
-# Run response classifier
-python scripts/classify_responses.py
-
-# Generate call prep
-python scripts/generate_call_prep.py
+# Direct database access
+psql postgresql://postgres:postgres@127.0.0.1:55322/postgres
 ```
