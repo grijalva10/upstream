@@ -56,8 +56,8 @@ CREATE INDEX idx_properties_costar_id ON properties(costar_property_id);
 CREATE INDEX idx_properties_market ON properties(market_id);
 CREATE INDEX idx_properties_type ON properties(property_type);
 
--- Companies (Owner Organizations = "Leads")
-CREATE TABLE companies (
+-- Leads (Owner Organizations)
+CREATE TABLE leads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     costar_company_id TEXT UNIQUE,
     name TEXT NOT NULL,
@@ -72,14 +72,14 @@ CREATE TABLE companies (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_companies_status ON companies(status);
-CREATE INDEX idx_companies_costar_id ON companies(costar_company_id);
+CREATE INDEX idx_leads_status ON leads(status);
+CREATE INDEX idx_leads_costar_id ON leads(costar_company_id);
 
 -- Contacts (People)
 CREATE TABLE contacts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     costar_person_id TEXT UNIQUE,
-    company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     title TEXT,
     email TEXT UNIQUE,
@@ -94,7 +94,7 @@ CREATE TABLE contacts (
 );
 
 CREATE INDEX idx_contacts_email ON contacts(email);
-CREATE INDEX idx_contacts_company ON contacts(company_id);
+CREATE INDEX idx_contacts_lead ON contacts(lead_id);
 CREATE INDEX idx_contacts_status ON contacts(status);
 
 -- Property Loans (Distress Data)
@@ -135,17 +135,17 @@ CREATE INDEX idx_property_loans_payment_status ON property_loans(payment_status)
 CREATE INDEX idx_property_loans_ltv ON property_loans(ltv_current);
 CREATE INDEX idx_property_loans_dscr ON property_loans(dscr_current);
 
--- Property-Company Junction
-CREATE TABLE property_companies (
+-- Property-Lead Junction
+CREATE TABLE property_leads (
     property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
-    company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
     relationship TEXT NOT NULL DEFAULT 'owner' CHECK (relationship IN ('owner', 'manager', 'lender')),
     ownership_pct DECIMAL(5,2),
     first_seen_at TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (property_id, company_id)
+    PRIMARY KEY (property_id, lead_id)
 );
 
-CREATE INDEX idx_property_companies_company ON property_companies(company_id);
+CREATE INDEX idx_property_leads_lead ON property_leads(lead_id);
 
 -- =============================================================================
 -- CLIENT ENTITIES (Buyers we source deals for)
@@ -316,7 +316,7 @@ CREATE INDEX idx_sequence_subscriptions_next_step ON sequence_subscriptions(next
 -- Activities
 CREATE TABLE activities (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+    lead_id UUID REFERENCES leads(id) ON DELETE CASCADE,
     contact_id UUID REFERENCES contacts(id) ON DELETE SET NULL,
     property_id UUID REFERENCES properties(id) ON DELETE SET NULL,
     activity_type TEXT NOT NULL CHECK (activity_type IN (
@@ -336,7 +336,7 @@ CREATE TABLE activities (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_activities_company ON activities(company_id);
+CREATE INDEX idx_activities_lead ON activities(lead_id);
 CREATE INDEX idx_activities_contact ON activities(contact_id);
 CREATE INDEX idx_activities_type ON activities(activity_type);
 CREATE INDEX idx_activities_activity_at ON activities(activity_at);
@@ -440,7 +440,7 @@ CREATE TABLE agent_execution_context (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     agent_execution_id UUID NOT NULL REFERENCES agent_executions(id) ON DELETE CASCADE,
     context_type TEXT NOT NULL CHECK (context_type IN (
-        'property', 'company', 'contact', 'extraction_list'
+        'property', 'lead', 'contact', 'extraction_list'
     )),
     context_id UUID NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -563,7 +563,7 @@ CREATE TABLE synced_emails (
     is_read BOOLEAN DEFAULT FALSE,
     has_attachments BOOLEAN DEFAULT FALSE,
     matched_contact_id UUID REFERENCES contacts(id),
-    matched_company_id UUID REFERENCES companies(id),
+    matched_lead_id UUID REFERENCES leads(id),
     linked_activity_id UUID REFERENCES activities(id),
     synced_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -617,7 +617,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_properties_updated_at BEFORE UPDATE ON properties
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER update_companies_updated_at BEFORE UPDATE ON companies
+CREATE TRIGGER update_leads_updated_at BEFORE UPDATE ON leads
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER update_contacts_updated_at BEFORE UPDATE ON contacts
@@ -665,7 +665,7 @@ CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients
 CREATE TRIGGER update_client_criteria_updated_at BEFORE UPDATE ON client_criteria
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- Function to update company status_changed_at when status changes
+-- Function to update lead status_changed_at when status changes
 CREATE OR REPLACE FUNCTION update_status_changed_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -676,7 +676,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_companies_status_changed BEFORE UPDATE ON companies
+CREATE TRIGGER update_leads_status_changed BEFORE UPDATE ON leads
     FOR EACH ROW EXECUTE FUNCTION update_status_changed_at();
 
 CREATE TRIGGER update_contacts_status_changed BEFORE UPDATE ON contacts
@@ -687,8 +687,8 @@ CREATE TRIGGER update_contacts_status_changed BEFORE UPDATE ON contacts
 -- =============================================================================
 
 COMMENT ON TABLE properties IS 'CRE assets sourced from CoStar';
-COMMENT ON TABLE companies IS 'Owner organizations - leads in the sourcing pipeline';
-COMMENT ON TABLE contacts IS 'People at companies who receive outreach';
+COMMENT ON TABLE leads IS 'Owner organizations in the sourcing pipeline';
+COMMENT ON TABLE contacts IS 'People at leads who receive outreach';
 COMMENT ON TABLE property_loans IS 'Loan data for distress-based sourcing plays';
 COMMENT ON TABLE sourcing_strategies IS 'Predefined CoStar query strategies (distress, hold period, etc.)';
 COMMENT ON TABLE clients IS 'Buyers/investors we are sourcing deals for';

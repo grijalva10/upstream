@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 interface ResultsSectionProps {
   searchId: string;
   totalProperties: number | null;
-  totalCompanies: number | null;
+  totalLeads: number | null;
   totalContacts: number | null;
 }
 
-export function ResultsSection({ searchId, totalProperties, totalCompanies, totalContacts }: ResultsSectionProps) {
+export function ResultsSection({ searchId, totalProperties, totalLeads, totalContacts }: ResultsSectionProps) {
   const results = [
     {
       label: "Properties",
@@ -18,10 +18,10 @@ export function ResultsSection({ searchId, totalProperties, totalCompanies, tota
       href: `/data/properties?search=${searchId}`,
     },
     {
-      label: "Companies",
-      count: totalCompanies ?? 0,
+      label: "Leads",
+      count: totalLeads ?? 0,
       icon: Users,
-      href: `/data/companies?search=${searchId}`,
+      href: `/data/leads?search=${searchId}`,
     },
     {
       label: "Contacts",

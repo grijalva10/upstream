@@ -6,7 +6,7 @@ export default async function ContactsPage() {
 
   const { data, count } = await supabase
     .from("contacts")
-    .select("*, company:companies(id, name)", { count: "exact" })
+    .select("*, lead:leads(id, name)", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(20);
 

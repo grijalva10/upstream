@@ -128,7 +128,7 @@ interface EmailRecord {
   body_text?: string;
   received_at: string;
   matched_contact_id?: string;
-  matched_company_id?: string;
+  matched_lead_id?: string;
 }
 
 interface ContactRecord {
@@ -136,10 +136,10 @@ interface ContactRecord {
   name: string;
   email: string;
   phone?: string;
-  company_id: string;
+  lead_id: string;
 }
 
-interface CompanyRecord {
+interface LeadRecord {
   id: string;
   name: string;
   status: string;
@@ -310,7 +310,7 @@ async function processEmail(email: EmailRecord): Promise<void> {
 
   // Step 1: Match to contact if not already matched
   let contact: ContactRecord | null = null;
-  let company: CompanyRecord | null = null;
+  let lead: LeadRecord | null = null;
   let property: PropertyRecord | null = null;
   let loan: LoanRecord | null = null;
   let deal: DealRecord | null = null;
@@ -318,7 +318,7 @@ async function processEmail(email: EmailRecord): Promise<void> {
   if (!email.matched_contact_id) {
     const { data: contactMatch } = await supabase
       .from('contacts')
-      .select('id, name, email, phone, company_id')
+      .select('id, name, email, phone, lead_id')
       .eq('email', email.from_email.toLowerCase())
       .single();
 
@@ -328,40 +328,40 @@ async function processEmail(email: EmailRecord): Promise<void> {
         .from('synced_emails')
         .update({
           matched_contact_id: contact.id,
-          matched_company_id: contact.company_id,
+          matched_lead_id: contact.lead_id,
         })
         .eq('id', email.id);
 
       email.matched_contact_id = contact.id;
-      email.matched_company_id = contact.company_id;
+      email.matched_lead_id = contact.lead_id;
     }
   } else {
     const { data: contactData } = await supabase
       .from('contacts')
-      .select('id, name, email, phone, company_id')
+      .select('id, name, email, phone, lead_id')
       .eq('id', email.matched_contact_id)
       .single();
 
     contact = contactData as ContactRecord;
   }
 
-  // Fetch company
-  if (contact?.company_id) {
-    const { data: companyData } = await supabase
-      .from('companies')
+  // Fetch lead
+  if (contact?.lead_id) {
+    const { data: leadData } = await supabase
+      .from('leads')
       .select('id, name, status')
-      .eq('id', contact.company_id)
+      .eq('id', contact.lead_id)
       .single();
 
-    company = companyData as CompanyRecord;
+    lead = leadData as LeadRecord;
   }
 
-  // Fetch property (via property_companies)
-  if (company) {
+  // Fetch property (via property_leads)
+  if (lead) {
     const { data: propertyLink } = await supabase
-      .from('property_companies')
+      .from('property_leads')
       .select('property_id')
-      .eq('company_id', company.id)
+      .eq('lead_id', lead.id)
       .limit(1)
       .single();
 
@@ -389,7 +389,7 @@ async function processEmail(email: EmailRecord): Promise<void> {
         .from('deals')
         .select('id, status, asking_price, noi, cap_rate')
         .eq('property_id', property.id)
-        .eq('company_id', company.id)
+        .eq('lead_id', lead.id)
         .single();
 
       deal = dealData as DealRecord;
@@ -413,7 +413,7 @@ async function processEmail(email: EmailRecord): Promise<void> {
     .join('\n');
 
   // Step 3: Run classification with Claude
-  const result = await classifyEmail(email, contact, company, property, loan, deal, threadSummary);
+  const result = await classifyEmail(email, contact, lead, property, loan, deal, threadSummary);
 
   // Step 4: Update email record
   await supabase
@@ -438,7 +438,7 @@ async function processEmail(email: EmailRecord): Promise<void> {
   );
 
   // Step 5: Execute action based on classification
-  await executeAction(result, email, contact, company, property, deal);
+  await executeAction(result, email, contact, lead, property, deal);
 }
 
 // =============================================================================
@@ -448,7 +448,7 @@ async function processEmail(email: EmailRecord): Promise<void> {
 async function classifyEmail(
   email: EmailRecord,
   contact: ContactRecord | null,
-  company: CompanyRecord | null,
+  lead: LeadRecord | null,
   property: PropertyRecord | null,
   loan: LoanRecord | null,
   deal: DealRecord | null,
@@ -457,7 +457,7 @@ async function classifyEmail(
   const prompt = buildClassificationPrompt(
     email,
     contact,
-    company,
+    lead,
     property,
     loan,
     deal,
@@ -499,7 +499,7 @@ async function classifyEmail(
 function buildClassificationPrompt(
   email: EmailRecord,
   contact: ContactRecord | null,
-  company: CompanyRecord | null,
+  lead: LeadRecord | null,
   property: PropertyRecord | null,
   loan: LoanRecord | null,
   deal: DealRecord | null,
@@ -539,7 +539,7 @@ ${email.body_text?.substring(0, 3000) || '(empty)'}
 
 CONTEXT:
 Contact: ${contact?.name || 'Unknown'}${contact?.phone ? ` (${contact.phone})` : ''}
-Company: ${company?.name || 'Unknown'} (Status: ${company?.status || 'unknown'})
+Lead: ${lead?.name || 'Unknown'} (Status: ${lead?.status || 'unknown'})
 
 ${propertyContext}
 
@@ -568,7 +568,7 @@ CLASSIFICATION OPTIONS (pick exactly one):
 
 3. **pass** - Not interested:
    - Explicitly declining ("not interested", "no thanks")
-   - Wrong person ("I don't own this", "left the company")
+   - Wrong person ("I don't own this", "left the organization")
    - Has a broker ("talk to my broker")
    - Do not contact requests
    - Hostile response
@@ -621,7 +621,7 @@ async function executeAction(
   result: ClassificationResult,
   email: EmailRecord,
   contact: ContactRecord | null,
-  company: CompanyRecord | null,
+  lead: LeadRecord | null,
   property: PropertyRecord | null,
   deal: DealRecord | null
 ): Promise<void> {
@@ -629,7 +629,7 @@ async function executeAction(
 
   switch (classification) {
     case 'hot':
-      await handleHot(result, email, contact, company, property, deal);
+      await handleHot(result, email, contact, lead, property, deal);
       break;
 
     case 'question':
@@ -637,7 +637,7 @@ async function executeAction(
       break;
 
     case 'pass':
-      await handlePass(result, email, contact, company, deal);
+      await handlePass(result, email, contact, lead, deal);
       break;
 
     case 'bounce':
@@ -658,16 +658,16 @@ async function handleHot(
   result: ClassificationResult,
   email: EmailRecord,
   contact: ContactRecord | null,
-  company: CompanyRecord | null,
+  lead: LeadRecord | null,
   property: PropertyRecord | null,
   deal: DealRecord | null
 ): Promise<void> {
-  // Update company status to engaged
-  if (company && company.status === 'contacted') {
+  // Update lead status to engaged
+  if (lead && lead.status === 'contacted') {
     await supabase
-      .from('companies')
+      .from('leads')
       .update({ status: 'engaged', status_changed_at: new Date().toISOString() })
-      .eq('id', company.id);
+      .eq('id', lead.id);
   }
 
   // Update contact phone if extracted
@@ -689,7 +689,7 @@ async function handleHot(
 
   // ALWAYS create draft - never auto-send
   if (result.draft_reply && contact) {
-    await createDraft(email, contact, result.draft_reply, 'hot_response', company, property);
+    await createDraft(email, contact, result.draft_reply, 'hot_response', lead, property);
   }
 }
 
@@ -708,7 +708,7 @@ async function handlePass(
   result: ClassificationResult,
   email: EmailRecord,
   contact: ContactRecord | null,
-  company: CompanyRecord | null,
+  lead: LeadRecord | null,
   deal: DealRecord | null
 ): Promise<void> {
   // Update deal status to lost
@@ -723,12 +723,12 @@ async function handlePass(
       .eq('id', deal.id);
   }
 
-  // Update company status
-  if (company) {
+  // Update lead status
+  if (lead) {
     await supabase
-      .from('companies')
+      .from('leads')
       .update({ status: 'rejected', status_changed_at: new Date().toISOString() })
-      .eq('id', company.id);
+      .eq('id', lead.id);
   }
 
   // Check if this is a hard DNC request
@@ -760,11 +760,11 @@ async function handlePass(
   }
 
   // If referral info extracted, create new contact
-  if (result.extracted.referral_email && company) {
+  if (result.extracted.referral_email && lead) {
     await supabase
       .from('contacts')
       .insert({
-        company_id: company.id,
+        lead_id: lead.id,
         name: result.extracted.referral_name || 'Unknown',
         email: result.extracted.referral_email.toLowerCase(),
         source: 'referral',
@@ -807,7 +807,7 @@ async function createDraft(
   contact: ContactRecord,
   body: string,
   draftType: string,
-  company?: CompanyRecord | null,
+  lead?: LeadRecord | null,
   property?: PropertyRecord | null
 ): Promise<void> {
   const subject = email.subject?.startsWith('Re:')
@@ -820,7 +820,7 @@ async function createDraft(
     subject,
     body,
     contact_id: contact.id,
-    company_id: company?.id,
+    lead_id: lead?.id,
     property_id: property?.id,
     source_email_id: email.id,
     draft_type: draftType,

@@ -24,7 +24,7 @@ async function getCallsData() {
       name,
       email,
       phone,
-      company:companies(id, name)
+      lead:leads(id, name)
     ),
     deal:deals(
       id,

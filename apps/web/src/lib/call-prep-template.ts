@@ -9,7 +9,7 @@ interface Contact {
   title?: string;
 }
 
-interface Company {
+interface Lead {
   id: string;
   name: string;
   status?: string;
@@ -45,7 +45,7 @@ interface Activity {
 
 interface CallPrepData {
   contact: Contact | null;
-  company?: Company | null;
+  lead?: Lead | null;
   property?: Property | null;
   deal?: Deal | null;
   scheduledAt?: string;
@@ -67,7 +67,7 @@ function formatActivityType(type: string): string {
 }
 
 export function generateCallPrep(data: CallPrepData): string {
-  const { contact, company, property, deal, scheduledAt, recentActivity } = data;
+  const { contact, lead, property, deal, scheduledAt, recentActivity } = data;
 
   const sections: string[] = [];
 
@@ -103,13 +103,13 @@ export function generateCallPrep(data: CallPrepData): string {
     sections.push("");
   }
 
-  // Company Information
-  if (company) {
-    sections.push("## Company");
+  // Lead Information
+  if (lead) {
+    sections.push("## Lead");
     sections.push("");
-    sections.push(`- **Name:** ${company.name}`);
-    if (company.status) {
-      sections.push(`- **Status:** ${company.status}`);
+    sections.push(`- **Name:** ${lead.name}`);
+    if (lead.status) {
+      sections.push(`- **Status:** ${lead.status}`);
     }
     sections.push("");
   }

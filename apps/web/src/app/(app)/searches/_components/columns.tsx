@@ -67,9 +67,9 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     cell: (v) => (v as number)?.toLocaleString() ?? "0",
   },
   {
-    id: "companies",
-    header: "Companies",
-    accessorKey: "total_companies",
+    id: "leads",
+    header: "Leads",
+    accessorKey: "total_leads",
     align: "right",
     enableSorting: true,
     cell: (v) => (v as number)?.toLocaleString() ?? "0",

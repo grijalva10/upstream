@@ -11,11 +11,11 @@ export interface Contact {
   is_buyer: boolean | null;
   is_seller: boolean | null;
   is_decision_maker: boolean | null;
-  company: { id: string; name: string } | null;
+  lead: { id: string; name: string } | null;
   created_at: string;
 }
 
-export interface Company {
+export interface Lead {
   id: string;
   costar_company_id: string | null;
   name: string;
@@ -34,6 +34,9 @@ export interface Company {
   created_at: string;
   last_contacted_at: string | null;
 }
+
+// Alias for backwards compatibility
+export type Company = Lead;
 
 export interface Property {
   id: string;

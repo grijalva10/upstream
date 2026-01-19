@@ -31,7 +31,7 @@ interface Contact {
   name: string | null;
   email?: string;
   phone?: string;
-  company?: {
+  lead?: {
     id: string;
     name: string;
   };
@@ -75,7 +75,7 @@ export function ScheduleCallDialog({
 
   // Fetch deals when contact changes
   useEffect(() => {
-    if (!contact?.company?.id) {
+    if (!contact?.lead?.id) {
       setDeals([]);
       return;
     }
@@ -83,7 +83,7 @@ export function ScheduleCallDialog({
     const fetchDeals = async () => {
       try {
         const res = await fetch(
-          `/api/data/deals?company_id=${contact.company!.id}&limit=20`
+          `/api/data/deals?lead_id=${contact.lead!.id}&limit=20`
         );
         const data = await res.json();
         setDeals(data.deals || []);
@@ -94,7 +94,7 @@ export function ScheduleCallDialog({
     };
 
     fetchDeals();
-  }, [contact?.company?.id]);
+  }, [contact?.lead?.id]);
 
   const handleSubmit = async () => {
     setError("");

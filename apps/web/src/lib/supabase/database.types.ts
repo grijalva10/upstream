@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -34,19 +34,342 @@ export type Database = {
   }
   public: {
     Tables: {
+      _deprecated_inbox_messages: {
+        Row: {
+          action_taken: string | null
+          body_html: string | null
+          body_text: string | null
+          classification: string | null
+          classification_confidence: number | null
+          classification_reasoning: string | null
+          contact_id: string | null
+          created_at: string | null
+          enrollment_id: string | null
+          from_email: string
+          from_name: string | null
+          id: string
+          outlook_id: string | null
+          property_id: string | null
+          received_at: string
+          status: string
+          subject: string | null
+          thread_id: string | null
+          to_email: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          classification?: string | null
+          classification_confidence?: number | null
+          classification_reasoning?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          enrollment_id?: string | null
+          from_email: string
+          from_name?: string | null
+          id?: string
+          outlook_id?: string | null
+          property_id?: string | null
+          received_at: string
+          status?: string
+          subject?: string | null
+          thread_id?: string | null
+          to_email?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          body_html?: string | null
+          body_text?: string | null
+          classification?: string | null
+          classification_confidence?: number | null
+          classification_reasoning?: string | null
+          contact_id?: string | null
+          created_at?: string | null
+          enrollment_id?: string | null
+          from_email?: string
+          from_name?: string | null
+          id?: string
+          outlook_id?: string | null
+          property_id?: string | null
+          received_at?: string
+          status?: string
+          subject?: string | null
+          thread_id?: string | null
+          to_email?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_messages_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_messages_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      _deprecated_qualification_data: {
+        Row: {
+          asking_price: number | null
+          cap_rate: number | null
+          company_id: string | null
+          created_at: string | null
+          decision_maker_confirmed: boolean | null
+          decision_maker_name: string | null
+          decision_maker_title: string | null
+          email_count: number | null
+          follow_up_count: number | null
+          ghosted_at: string | null
+          has_operating_statements: boolean | null
+          has_rent_roll: boolean | null
+          id: string
+          last_follow_up_at: string | null
+          last_response_at: string | null
+          motivation: string | null
+          noi: number | null
+          operating_statement_data: Json | null
+          operating_statement_status: string | null
+          packaged_at: string | null
+          price_per_sf: number | null
+          property_id: string | null
+          qualified_at: string | null
+          rent_roll_data: Json | null
+          rent_roll_status: string | null
+          seller_priorities: string | null
+          status: string | null
+          timeline: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asking_price?: number | null
+          cap_rate?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          decision_maker_confirmed?: boolean | null
+          decision_maker_name?: string | null
+          decision_maker_title?: string | null
+          email_count?: number | null
+          follow_up_count?: number | null
+          ghosted_at?: string | null
+          has_operating_statements?: boolean | null
+          has_rent_roll?: boolean | null
+          id?: string
+          last_follow_up_at?: string | null
+          last_response_at?: string | null
+          motivation?: string | null
+          noi?: number | null
+          operating_statement_data?: Json | null
+          operating_statement_status?: string | null
+          packaged_at?: string | null
+          price_per_sf?: number | null
+          property_id?: string | null
+          qualified_at?: string | null
+          rent_roll_data?: Json | null
+          rent_roll_status?: string | null
+          seller_priorities?: string | null
+          status?: string | null
+          timeline?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asking_price?: number | null
+          cap_rate?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          decision_maker_confirmed?: boolean | null
+          decision_maker_name?: string | null
+          decision_maker_title?: string | null
+          email_count?: number | null
+          follow_up_count?: number | null
+          ghosted_at?: string | null
+          has_operating_statements?: boolean | null
+          has_rent_roll?: boolean | null
+          id?: string
+          last_follow_up_at?: string | null
+          last_response_at?: string | null
+          motivation?: string | null
+          noi?: number | null
+          operating_statement_data?: Json | null
+          operating_statement_status?: string | null
+          packaged_at?: string | null
+          price_per_sf?: number | null
+          property_id?: string | null
+          qualified_at?: string | null
+          rent_roll_data?: Json | null
+          rent_roll_status?: string | null
+          seller_priorities?: string | null
+          status?: string | null
+          timeline?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_data_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_data_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "qualification_data_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      _deprecated_scheduled_calls: {
+        Row: {
+          calendar_event_id: string | null
+          company_id: string | null
+          completed_at: string | null
+          contact_id: string
+          created_at: string | null
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          outcome: string | null
+          phone: string | null
+          prep_url: string | null
+          property_id: string | null
+          scheduled_at: string
+          source_email_id: string | null
+          status: string | null
+          subject: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          calendar_event_id?: string | null
+          company_id?: string | null
+          completed_at?: string | null
+          contact_id: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          phone?: string | null
+          prep_url?: string | null
+          property_id?: string | null
+          scheduled_at: string
+          source_email_id?: string | null
+          status?: string | null
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          calendar_event_id?: string | null
+          company_id?: string | null
+          completed_at?: string | null
+          contact_id?: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          phone?: string | null
+          prep_url?: string | null
+          property_id?: string | null
+          scheduled_at?: string
+          source_email_id?: string | null
+          status?: string | null
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_calls_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "synced_emails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activities: {
         Row: {
           activity_at: string | null
           activity_type: string
           body_html: string | null
           body_text: string | null
-          company_id: string | null
           contact_id: string | null
           created_at: string | null
           created_by: string | null
           direction: string | null
           email_template_id: string | null
           id: string
+          lead_id: string | null
           metadata: Json | null
           property_id: string | null
           sequence_subscription_id: string | null
@@ -58,13 +381,13 @@ export type Database = {
           activity_type: string
           body_html?: string | null
           body_text?: string | null
-          company_id?: string | null
           contact_id?: string | null
           created_at?: string | null
           created_by?: string | null
           direction?: string | null
           email_template_id?: string | null
           id?: string
+          lead_id?: string | null
           metadata?: Json | null
           property_id?: string | null
           sequence_subscription_id?: string | null
@@ -76,13 +399,13 @@ export type Database = {
           activity_type?: string
           body_html?: string | null
           body_text?: string | null
-          company_id?: string | null
           contact_id?: string | null
           created_at?: string | null
           created_by?: string | null
           direction?: string | null
           email_template_id?: string | null
           id?: string
+          lead_id?: string | null
           metadata?: Json | null
           property_id?: string | null
           sequence_subscription_id?: string | null
@@ -92,16 +415,30 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "activities_company_id_fkey"
-            columns: ["company_id"]
+            columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "activities_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
             referencedColumns: ["id"]
           },
           {
@@ -378,50 +715,187 @@ export type Database = {
         }
         Relationships: []
       }
+      buyer_criteria_tracking: {
+        Row: {
+          completed_at: string | null
+          contact_id: string
+          created_at: string | null
+          deal_type: string | null
+          exchange_1031: boolean | null
+          id: string
+          lead_id: string | null
+          markets: string[] | null
+          missing_fields: string[] | null
+          other_notes: string | null
+          price_max: number | null
+          price_min: number | null
+          property_types: string[] | null
+          search_id: string | null
+          size_max: number | null
+          size_min: number | null
+          status: string | null
+          submarkets: string[] | null
+          timeline: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          contact_id: string
+          created_at?: string | null
+          deal_type?: string | null
+          exchange_1031?: boolean | null
+          id?: string
+          lead_id?: string | null
+          markets?: string[] | null
+          missing_fields?: string[] | null
+          other_notes?: string | null
+          price_max?: number | null
+          price_min?: number | null
+          property_types?: string[] | null
+          search_id?: string | null
+          size_max?: number | null
+          size_min?: number | null
+          status?: string | null
+          submarkets?: string[] | null
+          timeline?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          contact_id?: string
+          created_at?: string | null
+          deal_type?: string | null
+          exchange_1031?: boolean | null
+          id?: string
+          lead_id?: string | null
+          markets?: string[] | null
+          missing_fields?: string[] | null
+          other_notes?: string | null
+          price_max?: number | null
+          price_min?: number | null
+          property_types?: string[] | null
+          search_id?: string | null
+          size_max?: number | null
+          size_min?: number | null
+          status?: string | null
+          submarkets?: string[] | null
+          timeline?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_criteria_tracking_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buyer_criteria_tracking_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "buyer_criteria_tracking_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buyer_criteria_tracking_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: true
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buyer_criteria_tracking_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calls: {
         Row: {
           action_items: Json | null
+          calendar_event_id: string | null
           call_prep_md: string | null
           contact_id: string
           created_at: string | null
           deal_id: string | null
           duration_minutes: number | null
           id: string
+          lead_id: string | null
           notes_md: string | null
           outcome: string | null
+          phone: string | null
+          prep_url: string | null
+          property_id: string | null
           scheduled_at: string
+          source_email_id: string | null
           status: string
           updated_at: string | null
         }
         Insert: {
           action_items?: Json | null
+          calendar_event_id?: string | null
           call_prep_md?: string | null
           contact_id: string
           created_at?: string | null
           deal_id?: string | null
           duration_minutes?: number | null
           id?: string
+          lead_id?: string | null
           notes_md?: string | null
           outcome?: string | null
+          phone?: string | null
+          prep_url?: string | null
+          property_id?: string | null
           scheduled_at: string
+          source_email_id?: string | null
           status?: string
           updated_at?: string | null
         }
         Update: {
           action_items?: Json | null
+          calendar_event_id?: string | null
           call_prep_md?: string | null
           contact_id?: string
           created_at?: string | null
           deal_id?: string | null
           duration_minutes?: number | null
           id?: string
+          lead_id?: string | null
           notes_md?: string | null
           outcome?: string | null
+          phone?: string | null
+          prep_url?: string | null
+          property_id?: string | null
           scheduled_at?: string
+          source_email_id?: string | null
           status?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "calls_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calls_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
           {
             foreignKeyName: "calls_contact_id_fkey"
             columns: ["contact_id"]
@@ -430,10 +904,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "calls_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calls_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deal_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "calls_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calls_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "calls_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "pending_doc_follow_ups"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "calls_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "potential_ghosts"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "calls_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calls_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calls_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "synced_emails"
             referencedColumns: ["id"]
           },
         ]
@@ -598,80 +1128,9 @@ export type Database = {
         }
         Relationships: []
       }
-      companies: {
-        Row: {
-          assigned_user_id: string | null
-          broker_contact: string | null
-          company_type: number | null
-          costar_company_id: string | null
-          costar_key: string | null
-          created_at: string | null
-          has_broker: boolean | null
-          id: string
-          is_buyer: boolean | null
-          is_seller: boolean | null
-          lead_score: number | null
-          name: string
-          notes: string | null
-          qualification_status: string | null
-          source: string | null
-          status: string
-          status_changed_at: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          assigned_user_id?: string | null
-          broker_contact?: string | null
-          company_type?: number | null
-          costar_company_id?: string | null
-          costar_key?: string | null
-          created_at?: string | null
-          has_broker?: boolean | null
-          id?: string
-          is_buyer?: boolean | null
-          is_seller?: boolean | null
-          lead_score?: number | null
-          name: string
-          notes?: string | null
-          qualification_status?: string | null
-          source?: string | null
-          status?: string
-          status_changed_at?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          assigned_user_id?: string | null
-          broker_contact?: string | null
-          company_type?: number | null
-          costar_company_id?: string | null
-          costar_key?: string | null
-          created_at?: string | null
-          has_broker?: boolean | null
-          id?: string
-          is_buyer?: boolean | null
-          is_seller?: boolean | null
-          lead_score?: number | null
-          name?: string
-          notes?: string | null
-          qualification_status?: string | null
-          source?: string | null
-          status?: string
-          status_changed_at?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "companies_assigned_user_id_fkey"
-            columns: ["assigned_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       contacts: {
         Row: {
-          company_id: string | null
+          contact_type: string | null
           costar_person_id: string | null
           created_at: string | null
           email: string | null
@@ -680,15 +1139,17 @@ export type Database = {
           is_decision_maker: boolean | null
           is_seller: boolean | null
           last_contacted_at: string | null
+          lead_id: string | null
           name: string
           phone: string | null
+          source: string | null
           status: string
           status_changed_at: string | null
           title: string | null
           updated_at: string | null
         }
         Insert: {
-          company_id?: string | null
+          contact_type?: string | null
           costar_person_id?: string | null
           created_at?: string | null
           email?: string | null
@@ -697,15 +1158,17 @@ export type Database = {
           is_decision_maker?: boolean | null
           is_seller?: boolean | null
           last_contacted_at?: string | null
+          lead_id?: string | null
           name: string
           phone?: string | null
+          source?: string | null
           status?: string
           status_changed_at?: string | null
           title?: string | null
           updated_at?: string | null
         }
         Update: {
-          company_id?: string | null
+          contact_type?: string | null
           costar_person_id?: string | null
           created_at?: string | null
           email?: string | null
@@ -714,8 +1177,10 @@ export type Database = {
           is_decision_maker?: boolean | null
           is_seller?: boolean | null
           last_contacted_at?: string | null
+          lead_id?: string | null
           name?: string
           phone?: string | null
+          source?: string | null
           status?: string
           status_changed_at?: string | null
           title?: string | null
@@ -724,10 +1189,17 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "contacts_company_id_fkey"
-            columns: ["company_id"]
+            columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
         ]
       }
@@ -791,8 +1263,36 @@ export type Database = {
             foreignKeyName: "deal_activity_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
+            referencedRelation: "deal_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_activity_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
             referencedRelation: "deals"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_activity_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "deal_activity_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "pending_doc_follow_ups"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "deal_activity_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "potential_ghosts"
+            referencedColumns: ["deal_id"]
           },
         ]
       }
@@ -838,8 +1338,15 @@ export type Database = {
             foreignKeyName: "deal_packages_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_packages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "deal_packages_property_id_fkey"
@@ -852,14 +1359,7 @@ export type Database = {
             foreignKeyName: "deal_packages_qualification_data_id_fkey"
             columns: ["qualification_data_id"]
             isOneToOne: false
-            referencedRelation: "qualification_data"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deal_packages_qualification_data_id_fkey"
-            columns: ["qualification_data_id"]
-            isOneToOne: false
-            referencedRelation: "qualification_pipeline"
+            referencedRelation: "_deprecated_qualification_data"
             referencedColumns: ["id"]
           },
         ]
@@ -869,17 +1369,22 @@ export type Database = {
           admin_notes: string | null
           asking_price: number | null
           cap_rate: number | null
-          company_id: string | null
           contact_id: string | null
           created_at: string | null
           decision_maker_confirmed: boolean | null
           display_id: string | null
+          email_count: number | null
           enrollment_id: string | null
+          follow_up_count: number | null
+          ghosted_at: string | null
           handed_off_at: string | null
           handed_off_to: string | null
           id: string
           investment_highlights: Json | null
           investment_summary: string | null
+          last_follow_up_at: string | null
+          last_response_at: string | null
+          lead_id: string | null
           lee_1031_x_deal_id: string | null
           lender_name: string | null
           loan_amount: number | null
@@ -887,12 +1392,20 @@ export type Database = {
           loan_rate: number | null
           motivation: string | null
           noi: number | null
+          operating_statement_data: Json | null
+          operating_statement_status: string | null
           operating_statement_url: string | null
           other_docs: Json | null
+          packaged_at: string | null
+          price_per_sf: number | null
           price_realistic: boolean | null
           property_id: string
+          qualified_at: string | null
+          rent_roll_data: Json | null
+          rent_roll_status: string | null
           rent_roll_url: string | null
           search_id: string | null
+          seller_priorities: string | null
           status: string
           timeline: string | null
           updated_at: string | null
@@ -901,17 +1414,22 @@ export type Database = {
           admin_notes?: string | null
           asking_price?: number | null
           cap_rate?: number | null
-          company_id?: string | null
           contact_id?: string | null
           created_at?: string | null
           decision_maker_confirmed?: boolean | null
           display_id?: string | null
+          email_count?: number | null
           enrollment_id?: string | null
+          follow_up_count?: number | null
+          ghosted_at?: string | null
           handed_off_at?: string | null
           handed_off_to?: string | null
           id?: string
           investment_highlights?: Json | null
           investment_summary?: string | null
+          last_follow_up_at?: string | null
+          last_response_at?: string | null
+          lead_id?: string | null
           lee_1031_x_deal_id?: string | null
           lender_name?: string | null
           loan_amount?: number | null
@@ -919,12 +1437,20 @@ export type Database = {
           loan_rate?: number | null
           motivation?: string | null
           noi?: number | null
+          operating_statement_data?: Json | null
+          operating_statement_status?: string | null
           operating_statement_url?: string | null
           other_docs?: Json | null
+          packaged_at?: string | null
+          price_per_sf?: number | null
           price_realistic?: boolean | null
           property_id: string
+          qualified_at?: string | null
+          rent_roll_data?: Json | null
+          rent_roll_status?: string | null
           rent_roll_url?: string | null
           search_id?: string | null
+          seller_priorities?: string | null
           status?: string
           timeline?: string | null
           updated_at?: string | null
@@ -933,17 +1459,22 @@ export type Database = {
           admin_notes?: string | null
           asking_price?: number | null
           cap_rate?: number | null
-          company_id?: string | null
           contact_id?: string | null
           created_at?: string | null
           decision_maker_confirmed?: boolean | null
           display_id?: string | null
+          email_count?: number | null
           enrollment_id?: string | null
+          follow_up_count?: number | null
+          ghosted_at?: string | null
           handed_off_at?: string | null
           handed_off_to?: string | null
           id?: string
           investment_highlights?: Json | null
           investment_summary?: string | null
+          last_follow_up_at?: string | null
+          last_response_at?: string | null
+          lead_id?: string | null
           lee_1031_x_deal_id?: string | null
           lender_name?: string | null
           loan_amount?: number | null
@@ -951,12 +1482,20 @@ export type Database = {
           loan_rate?: number | null
           motivation?: string | null
           noi?: number | null
+          operating_statement_data?: Json | null
+          operating_statement_status?: string | null
           operating_statement_url?: string | null
           other_docs?: Json | null
+          packaged_at?: string | null
+          price_per_sf?: number | null
           price_realistic?: boolean | null
           property_id?: string
+          qualified_at?: string | null
+          rent_roll_data?: Json | null
+          rent_roll_status?: string | null
           rent_roll_url?: string | null
           search_id?: string | null
+          seller_priorities?: string | null
           status?: string
           timeline?: string | null
           updated_at?: string | null
@@ -964,16 +1503,30 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deals_company_id_fkey"
-            columns: ["company_id"]
+            columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "deals_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
             referencedColumns: ["id"]
           },
           {
@@ -1048,6 +1601,13 @@ export type Database = {
             foreignKeyName: "dnc_entries_source_email_id_fkey"
             columns: ["source_email_id"]
             isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dnc_entries_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
             referencedRelation: "synced_emails"
             referencedColumns: ["id"]
           },
@@ -1056,18 +1616,19 @@ export type Database = {
       email_drafts: {
         Row: {
           body: string
-          company_id: string | null
           contact_id: string | null
           created_at: string | null
           draft_type: string
           generated_by: string | null
           id: string
           in_reply_to_email_id: string | null
+          lead_id: string | null
           property_id: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           sent_activity_id: string | null
           sent_at: string | null
+          source_email_id: string | null
           status: string | null
           subject: string
           to_email: string
@@ -1076,18 +1637,19 @@ export type Database = {
         }
         Insert: {
           body: string
-          company_id?: string | null
           contact_id?: string | null
           created_at?: string | null
           draft_type: string
           generated_by?: string | null
           id?: string
           in_reply_to_email_id?: string | null
+          lead_id?: string | null
           property_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sent_activity_id?: string | null
           sent_at?: string | null
+          source_email_id?: string | null
           status?: string | null
           subject: string
           to_email: string
@@ -1096,18 +1658,19 @@ export type Database = {
         }
         Update: {
           body?: string
-          company_id?: string | null
           contact_id?: string | null
           created_at?: string | null
           draft_type?: string
           generated_by?: string | null
           id?: string
           in_reply_to_email_id?: string | null
+          lead_id?: string | null
           property_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sent_activity_id?: string | null
           sent_at?: string | null
+          source_email_id?: string | null
           status?: string | null
           subject?: string
           to_email?: string
@@ -1117,16 +1680,30 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "email_drafts_company_id_fkey"
-            columns: ["company_id"]
+            columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_drafts_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "email_drafts_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
             referencedColumns: ["id"]
           },
           {
@@ -1148,6 +1725,20 @@ export type Database = {
             columns: ["sent_activity_id"]
             isOneToOne: false
             referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_drafts_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_drafts_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "synced_emails"
             referencedColumns: ["id"]
           },
         ]
@@ -1296,8 +1887,15 @@ export type Database = {
             foreignKeyName: "email_queue_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "email_queue_contact_id_fkey"
@@ -1307,10 +1905,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "email_queue_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "email_queue_enrollment_id_fkey"
             columns: ["enrollment_id"]
             isOneToOne: false
             referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_in_reply_to_email_id_fkey"
+            columns: ["in_reply_to_email_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
             referencedColumns: ["id"]
           },
           {
@@ -1553,6 +2165,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "enrollments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "enrollments_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -1591,95 +2210,78 @@ export type Database = {
             foreignKeyName: "exclusions_source_message_id_fkey"
             columns: ["source_message_id"]
             isOneToOne: false
-            referencedRelation: "inbox_messages"
+            referencedRelation: "_deprecated_inbox_messages"
             referencedColumns: ["id"]
           },
         ]
       }
-      inbox_messages: {
+      leads: {
         Row: {
-          action_taken: string | null
-          body_html: string | null
-          body_text: string | null
-          classification: string | null
-          classification_confidence: number | null
-          classification_reasoning: string | null
-          contact_id: string | null
+          assigned_user_id: string | null
+          broker_contact: string | null
+          company_type: string | null
+          costar_company_id: string | null
+          costar_key: string | null
           created_at: string | null
-          enrollment_id: string | null
-          from_email: string
-          from_name: string | null
+          has_broker: boolean | null
           id: string
-          outlook_id: string | null
-          property_id: string | null
-          received_at: string
+          is_buyer: boolean | null
+          is_seller: boolean | null
+          lead_score: number | null
+          name: string
+          notes: string | null
+          qualification_status: string | null
+          source: string | null
           status: string
-          subject: string | null
-          thread_id: string | null
-          to_email: string | null
+          status_changed_at: string | null
+          updated_at: string | null
         }
         Insert: {
-          action_taken?: string | null
-          body_html?: string | null
-          body_text?: string | null
-          classification?: string | null
-          classification_confidence?: number | null
-          classification_reasoning?: string | null
-          contact_id?: string | null
+          assigned_user_id?: string | null
+          broker_contact?: string | null
+          company_type?: string | null
+          costar_company_id?: string | null
+          costar_key?: string | null
           created_at?: string | null
-          enrollment_id?: string | null
-          from_email: string
-          from_name?: string | null
+          has_broker?: boolean | null
           id?: string
-          outlook_id?: string | null
-          property_id?: string | null
-          received_at: string
+          is_buyer?: boolean | null
+          is_seller?: boolean | null
+          lead_score?: number | null
+          name: string
+          notes?: string | null
+          qualification_status?: string | null
+          source?: string | null
           status?: string
-          subject?: string | null
-          thread_id?: string | null
-          to_email?: string | null
+          status_changed_at?: string | null
+          updated_at?: string | null
         }
         Update: {
-          action_taken?: string | null
-          body_html?: string | null
-          body_text?: string | null
-          classification?: string | null
-          classification_confidence?: number | null
-          classification_reasoning?: string | null
-          contact_id?: string | null
+          assigned_user_id?: string | null
+          broker_contact?: string | null
+          company_type?: string | null
+          costar_company_id?: string | null
+          costar_key?: string | null
           created_at?: string | null
-          enrollment_id?: string | null
-          from_email?: string
-          from_name?: string | null
+          has_broker?: boolean | null
           id?: string
-          outlook_id?: string | null
-          property_id?: string | null
-          received_at?: string
+          is_buyer?: boolean | null
+          is_seller?: boolean | null
+          lead_score?: number | null
+          name?: string
+          notes?: string | null
+          qualification_status?: string | null
+          source?: string | null
           status?: string
-          subject?: string | null
-          thread_id?: string | null
-          to_email?: string | null
+          status_changed_at?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "inbox_messages_contact_id_fkey"
-            columns: ["contact_id"]
+            foreignKeyName: "companies_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
             isOneToOne: false
-            referencedRelation: "contacts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inbox_messages_enrollment_id_fkey"
-            columns: ["enrollment_id"]
-            isOneToOne: false
-            referencedRelation: "enrollments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inbox_messages_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1905,24 +2507,24 @@ export type Database = {
           },
         ]
       }
-      property_companies: {
+      property_leads: {
         Row: {
-          company_id: string
           first_seen_at: string | null
+          lead_id: string
           ownership_pct: number | null
           property_id: string
           relationship: string
         }
         Insert: {
-          company_id: string
           first_seen_at?: string | null
+          lead_id: string
           ownership_pct?: number | null
           property_id: string
           relationship?: string
         }
         Update: {
-          company_id?: string
           first_seen_at?: string | null
+          lead_id?: string
           ownership_pct?: number | null
           property_id?: string
           relationship?: string
@@ -1930,10 +2532,17 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_companies_company_id_fkey"
-            columns: ["company_id"]
+            columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_companies_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "property_companies_property_id_fkey"
@@ -2030,96 +2639,6 @@ export type Database = {
           },
         ]
       }
-      qualification_data: {
-        Row: {
-          asking_price: number | null
-          cap_rate: number | null
-          company_id: string | null
-          created_at: string | null
-          decision_maker_confirmed: boolean | null
-          decision_maker_name: string | null
-          decision_maker_title: string | null
-          email_count: number | null
-          has_operating_statements: boolean | null
-          has_rent_roll: boolean | null
-          id: string
-          last_response_at: string | null
-          motivation: string | null
-          noi: number | null
-          packaged_at: string | null
-          price_per_sf: number | null
-          property_id: string | null
-          qualified_at: string | null
-          seller_priorities: string | null
-          status: string | null
-          timeline: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          asking_price?: number | null
-          cap_rate?: number | null
-          company_id?: string | null
-          created_at?: string | null
-          decision_maker_confirmed?: boolean | null
-          decision_maker_name?: string | null
-          decision_maker_title?: string | null
-          email_count?: number | null
-          has_operating_statements?: boolean | null
-          has_rent_roll?: boolean | null
-          id?: string
-          last_response_at?: string | null
-          motivation?: string | null
-          noi?: number | null
-          packaged_at?: string | null
-          price_per_sf?: number | null
-          property_id?: string | null
-          qualified_at?: string | null
-          seller_priorities?: string | null
-          status?: string | null
-          timeline?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          asking_price?: number | null
-          cap_rate?: number | null
-          company_id?: string | null
-          created_at?: string | null
-          decision_maker_confirmed?: boolean | null
-          decision_maker_name?: string | null
-          decision_maker_title?: string | null
-          email_count?: number | null
-          has_operating_statements?: boolean | null
-          has_rent_roll?: boolean | null
-          id?: string
-          last_response_at?: string | null
-          motivation?: string | null
-          noi?: number | null
-          packaged_at?: string | null
-          price_per_sf?: number | null
-          property_id?: string | null
-          qualified_at?: string | null
-          seller_priorities?: string | null
-          status?: string | null
-          timeline?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "qualification_data_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "qualification_data_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       search_properties: {
         Row: {
           created_at: string | null
@@ -2164,8 +2683,8 @@ export type Database = {
           source_contact_id: string | null
           status: string
           strategy_summary: string | null
-          total_companies: number | null
           total_contacts: number | null
+          total_leads: number | null
           total_properties: number | null
           updated_at: string | null
         }
@@ -2179,8 +2698,8 @@ export type Database = {
           source_contact_id?: string | null
           status?: string
           strategy_summary?: string | null
-          total_companies?: number | null
           total_contacts?: number | null
+          total_leads?: number | null
           total_properties?: number | null
           updated_at?: string | null
         }
@@ -2194,8 +2713,8 @@ export type Database = {
           source_contact_id?: string | null
           status?: string
           strategy_summary?: string | null
-          total_companies?: number | null
           total_contacts?: number | null
+          total_leads?: number | null
           total_properties?: number | null
           updated_at?: string | null
         }
@@ -2205,6 +2724,13 @@ export type Database = {
             columns: ["source_contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "searches_source_contact_id_fkey"
+            columns: ["source_contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
             referencedColumns: ["id"]
           },
         ]
@@ -2370,6 +2896,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "sequence_subscriptions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sequence_subscriptions_current_step_id_fkey"
             columns: ["current_step_id"]
             isOneToOne: false
@@ -2519,99 +3052,156 @@ export type Database = {
       }
       synced_emails: {
         Row: {
+          action_taken: string | null
+          action_taken_at: string | null
+          auto_handled: boolean | null
           body_html: string | null
           body_text: string | null
           cc_emails: string[] | null
           classification: string | null
           classification_confidence: number | null
+          classification_reasoning: string | null
           classified_at: string | null
           classified_by: string | null
           created_at: string | null
           direction: string
+          enrollment_id: string | null
           extracted_pricing: Json | null
           from_email: string | null
           from_name: string | null
           has_attachments: boolean | null
           id: string
+          in_reply_to_id: string | null
           is_read: boolean | null
           linked_activity_id: string | null
-          matched_company_id: string | null
           matched_contact_id: string | null
+          matched_lead_id: string | null
+          matched_property_id: string | null
           needs_human_review: boolean | null
           needs_manual_review: boolean | null
+          needs_review: boolean | null
           outlook_conversation_id: string | null
           outlook_entry_id: string
           received_at: string | null
           review_reason: string | null
+          reviewed_at: string | null
+          scheduling_state: Json | null
           sent_at: string | null
           source_folder: string | null
+          status: string | null
           subject: string | null
           synced_at: string | null
+          thread_id: string | null
           to_emails: string[] | null
         }
         Insert: {
+          action_taken?: string | null
+          action_taken_at?: string | null
+          auto_handled?: boolean | null
           body_html?: string | null
           body_text?: string | null
           cc_emails?: string[] | null
           classification?: string | null
           classification_confidence?: number | null
+          classification_reasoning?: string | null
           classified_at?: string | null
           classified_by?: string | null
           created_at?: string | null
           direction: string
+          enrollment_id?: string | null
           extracted_pricing?: Json | null
           from_email?: string | null
           from_name?: string | null
           has_attachments?: boolean | null
           id?: string
+          in_reply_to_id?: string | null
           is_read?: boolean | null
           linked_activity_id?: string | null
-          matched_company_id?: string | null
           matched_contact_id?: string | null
+          matched_lead_id?: string | null
+          matched_property_id?: string | null
           needs_human_review?: boolean | null
           needs_manual_review?: boolean | null
+          needs_review?: boolean | null
           outlook_conversation_id?: string | null
           outlook_entry_id: string
           received_at?: string | null
           review_reason?: string | null
+          reviewed_at?: string | null
+          scheduling_state?: Json | null
           sent_at?: string | null
           source_folder?: string | null
+          status?: string | null
           subject?: string | null
           synced_at?: string | null
+          thread_id?: string | null
           to_emails?: string[] | null
         }
         Update: {
+          action_taken?: string | null
+          action_taken_at?: string | null
+          auto_handled?: boolean | null
           body_html?: string | null
           body_text?: string | null
           cc_emails?: string[] | null
           classification?: string | null
           classification_confidence?: number | null
+          classification_reasoning?: string | null
           classified_at?: string | null
           classified_by?: string | null
           created_at?: string | null
           direction?: string
+          enrollment_id?: string | null
           extracted_pricing?: Json | null
           from_email?: string | null
           from_name?: string | null
           has_attachments?: boolean | null
           id?: string
+          in_reply_to_id?: string | null
           is_read?: boolean | null
           linked_activity_id?: string | null
-          matched_company_id?: string | null
           matched_contact_id?: string | null
+          matched_lead_id?: string | null
+          matched_property_id?: string | null
           needs_human_review?: boolean | null
           needs_manual_review?: boolean | null
+          needs_review?: boolean | null
           outlook_conversation_id?: string | null
           outlook_entry_id?: string
           received_at?: string | null
           review_reason?: string | null
+          reviewed_at?: string | null
+          scheduling_state?: Json | null
           sent_at?: string | null
           source_folder?: string | null
+          status?: string | null
           subject?: string | null
           synced_at?: string | null
+          thread_id?: string | null
           to_emails?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "synced_emails_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_in_reply_to_id_fkey"
+            columns: ["in_reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_in_reply_to_id_fkey"
+            columns: ["in_reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "synced_emails"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "synced_emails_linked_activity_id_fkey"
             columns: ["linked_activity_id"]
@@ -2621,10 +3211,17 @@ export type Database = {
           },
           {
             foreignKeyName: "synced_emails_matched_company_id_fkey"
-            columns: ["matched_company_id"]
+            columns: ["matched_lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_company_id_fkey"
+            columns: ["matched_lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "synced_emails_matched_contact_id_fkey"
@@ -2633,56 +3230,79 @@ export type Database = {
             referencedRelation: "contacts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "synced_emails_matched_contact_id_fkey"
+            columns: ["matched_contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_property_id_fkey"
+            columns: ["matched_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tasks: {
         Row: {
-          company_id: string | null
+          auto_generated: boolean | null
           completed_at: string | null
           contact_id: string | null
           created_at: string | null
           data: Json | null
+          deal_id: string | null
           description: string | null
           due_date: string
           due_time: string | null
           email_id: string | null
           id: string
+          lead_id: string | null
           priority: string | null
           property_id: string | null
+          source_email_id: string | null
           status: string | null
           title: string
           type: string
         }
         Insert: {
-          company_id?: string | null
+          auto_generated?: boolean | null
           completed_at?: string | null
           contact_id?: string | null
           created_at?: string | null
           data?: Json | null
+          deal_id?: string | null
           description?: string | null
           due_date: string
           due_time?: string | null
           email_id?: string | null
           id?: string
+          lead_id?: string | null
           priority?: string | null
           property_id?: string | null
+          source_email_id?: string | null
           status?: string | null
           title: string
           type: string
         }
         Update: {
-          company_id?: string | null
+          auto_generated?: boolean | null
           completed_at?: string | null
           contact_id?: string | null
           created_at?: string | null
           data?: Json | null
+          deal_id?: string | null
           description?: string | null
           due_date?: string
           due_time?: string | null
           email_id?: string | null
           id?: string
+          lead_id?: string | null
           priority?: string | null
           property_id?: string | null
+          source_email_id?: string | null
           status?: string | null
           title?: string
           type?: string
@@ -2690,16 +3310,72 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tasks_company_id_fkey"
-            columns: ["company_id"]
+            columns: ["lead_id"]
             isOneToOne: false
-            referencedRelation: "companies"
+            referencedRelation: "leads"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "tasks_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deal_pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "pending_doc_follow_ups"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "potential_ghosts"
+            referencedColumns: ["deal_id"]
+          },
+          {
+            foreignKeyName: "tasks_email_id_fkey"
+            columns: ["email_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
             referencedColumns: ["id"]
           },
           {
@@ -2714,6 +3390,20 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_source_email_id_fkey"
+            columns: ["source_email_id"]
+            isOneToOne: false
+            referencedRelation: "synced_emails"
             referencedColumns: ["id"]
           },
         ]
@@ -2810,39 +3500,338 @@ export type Database = {
       }
       approval_queue: {
         Row: {
-          company_name: string | null
+          confidence: number | null
+          contact_name: string | null
+          content: string | null
           context: string | null
           created_at: string | null
           generated_by: string | null
           item_id: string | null
           item_type: string | null
+          lead_name: string | null
           property_address: string | null
           summary: string | null
           target: string | null
         }
         Relationships: []
       }
-      qualification_pipeline: {
+      deal_pipeline: {
         Row: {
           asking_price: number | null
           building_size_sqft: number | null
           cap_rate: number | null
-          company_name: string | null
-          company_status: string | null
+          contact_email: string | null
+          contact_id: string | null
+          contact_name: string | null
+          contact_phone: string | null
           created_at: string | null
           decision_maker_confirmed: boolean | null
+          display_id: string | null
           email_count: number | null
+          follow_up_count: number | null
+          ghosted_at: string | null
           id: string | null
           last_response_at: string | null
+          lead_id: string | null
+          lead_name: string | null
+          lead_status: string | null
           motivation: string | null
           noi: number | null
+          operating_statement_status: string | null
+          packaged_at: string | null
           pipeline_status: string | null
           pricing_fields_filled: number | null
           property_address: string | null
+          property_id: string | null
+          property_name: string | null
           property_type: string | null
           qualified_at: string | null
+          rent_roll_status: string | null
           status: string | null
           timeline: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_view: {
+        Row: {
+          action_taken: string | null
+          action_taken_at: string | null
+          auto_handled: boolean | null
+          body_html: string | null
+          body_text: string | null
+          campaign_id: string | null
+          classification: string | null
+          classification_confidence: number | null
+          classification_reasoning: string | null
+          classified_at: string | null
+          classified_by: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          contact_title: string | null
+          contact_type: string | null
+          deal_display_id: string | null
+          deal_id: string | null
+          deal_status: string | null
+          direction: string | null
+          draft_body: string | null
+          draft_id: string | null
+          draft_status: string | null
+          draft_subject: string | null
+          enrollment_id: string | null
+          enrollment_step: number | null
+          extracted_pricing: Json | null
+          from_email: string | null
+          from_name: string | null
+          has_attachments: boolean | null
+          id: string | null
+          in_reply_to_id: string | null
+          is_read: boolean | null
+          lead_name: string | null
+          lead_status: string | null
+          matched_contact_id: string | null
+          matched_lead_id: string | null
+          matched_property_id: string | null
+          needs_review: boolean | null
+          outlook_conversation_id: string | null
+          outlook_entry_id: string | null
+          property_address: string | null
+          property_name: string | null
+          property_type: string | null
+          received_at: string | null
+          scheduling_state: Json | null
+          sent_at: string | null
+          status: string | null
+          subject: string | null
+          thread_id: string | null
+          to_emails: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_in_reply_to_id_fkey"
+            columns: ["in_reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_in_reply_to_id_fkey"
+            columns: ["in_reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "synced_emails"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_company_id_fkey"
+            columns: ["matched_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_company_id_fkey"
+            columns: ["matched_lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_contact_id_fkey"
+            columns: ["matched_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_contact_id_fkey"
+            columns: ["matched_contact_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_emails_matched_property_id_fkey"
+            columns: ["matched_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pending_doc_follow_ups: {
+        Row: {
+          asking_price: number | null
+          cap_rate: number | null
+          contact_email: string | null
+          contact_name: string | null
+          deal_id: string | null
+          display_id: string | null
+          follow_up_count: number | null
+          last_follow_up_at: string | null
+          last_response_at: string | null
+          lead_id: string | null
+          lead_name: string | null
+          noi: number | null
+          operating_statement_status: string | null
+          pending_op_statement: string | null
+          pending_rent_roll: string | null
+          property_address: string | null
+          property_id: string | null
+          rent_roll_status: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      people_view: {
+        Row: {
+          buyer_criteria_id: string | null
+          buyer_criteria_status: string | null
+          buyer_markets: string[] | null
+          buyer_price_max: number | null
+          buyer_price_min: number | null
+          buyer_property_types: string[] | null
+          call_count: number | null
+          contact_type: string | null
+          created_at: string | null
+          deal_count: number | null
+          email: string | null
+          email_count: number | null
+          id: string | null
+          is_buyer: boolean | null
+          is_decision_maker: boolean | null
+          is_seller: boolean | null
+          last_contacted_at: string | null
+          lead_id: string | null
+          lead_name: string | null
+          lead_status: string | null
+          lead_type: string | null
+          name: string | null
+          phone: string | null
+          source: string | null
+          status: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
+      potential_ghosts: {
+        Row: {
+          asking_price: number | null
+          contact_email: string | null
+          contact_name: string | null
+          deal_id: string | null
+          display_id: string | null
+          follow_up_count: number | null
+          last_response_at: string | null
+          lead_id: string | null
+          lead_name: string | null
+          noi: number | null
+          property_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "people_view"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      today_view: {
+        Row: {
+          contact_name: string | null
+          deal_id: string | null
+          description: string | null
+          due_at: string | null
+          item_id: string | null
+          item_type: string | null
+          lead_name: string | null
+          priority: number | null
+          title: string | null
         }
         Relationships: []
       }
@@ -2862,6 +3851,10 @@ export type Database = {
           hourly_remaining: number
           reason: string
         }[]
+      }
+      get_classification_group: {
+        Args: { classification: string }
+        Returns: string
       }
       get_email_classification_counts: {
         Args: never
@@ -2939,7 +3932,29 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      contact_type_enum: "seller" | "buyer" | "broker" | "team" | "other"
+      email_classification_enum:
+        | "hot_interested"
+        | "hot_pricing"
+        | "hot_schedule"
+        | "hot_confirm"
+        | "question"
+        | "info_request"
+        | "doc_promised"
+        | "doc_received"
+        | "buyer_inquiry"
+        | "buyer_criteria_update"
+        | "referral"
+        | "broker"
+        | "wrong_contact"
+        | "ooo"
+        | "soft_pass"
+        | "hard_pass"
+        | "bounce"
+        | "general_update"
+        | "unclear"
+      email_status_enum: "new" | "reviewed" | "actioned"
+      lead_type_enum: "owner" | "buyer" | "broker" | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3069,7 +4084,32 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      contact_type_enum: ["seller", "buyer", "broker", "team", "other"],
+      email_classification_enum: [
+        "hot_interested",
+        "hot_pricing",
+        "hot_schedule",
+        "hot_confirm",
+        "question",
+        "info_request",
+        "doc_promised",
+        "doc_received",
+        "buyer_inquiry",
+        "buyer_criteria_update",
+        "referral",
+        "broker",
+        "wrong_contact",
+        "ooo",
+        "soft_pass",
+        "hard_pass",
+        "bounce",
+        "general_update",
+        "unclear",
+      ],
+      email_status_enum: ["new", "reviewed", "actioned"],
+      lead_type_enum: ["owner", "buyer", "broker", "other"],
+    },
   },
 } as const
 

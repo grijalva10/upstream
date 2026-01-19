@@ -32,15 +32,15 @@ export async function POST(
       );
     }
 
-    // Get company_id from contact if available
-    let companyId: string | null = null;
+    // Get lead_id from contact if available
+    let leadId: string | null = null;
     if (message.matched_contact_id) {
       const { data: contact } = await supabase
         .from("contacts")
-        .select("company_id")
+        .select("lead_id")
         .eq("id", message.matched_contact_id)
         .single();
-      companyId = contact?.company_id || null;
+      leadId = contact?.lead_id || null;
     }
 
     // Create email draft for approval
@@ -49,7 +49,7 @@ export async function POST(
       to_name: message.from_name,
       subject: subject || "Re:",
       body: body.trim(),
-      company_id: companyId,
+      lead_id: leadId,
       contact_id: message.matched_contact_id,
       in_reply_to_email_id: id,
       draft_type: "qualification",

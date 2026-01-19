@@ -35,7 +35,7 @@ async function getCall(id: string) {
         email,
         phone,
         title,
-        company:companies(id, name, status)
+        lead:leads(id, name, status)
       ),
       deal:deals(
         id,

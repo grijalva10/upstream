@@ -6,7 +6,7 @@
  *
  * Actions:
  * 1. Mark qualification_data as ghosted
- * 2. Update company status to nurture
+ * 2. Update lead status to nurture
  * 3. Create nurture task for 90 days out
  *
  * Runs daily.
@@ -67,15 +67,15 @@ export async function handleGhostDetection(
           })
           .eq('id', ghost.id);
 
-        // Update company status to nurture (if not already further along)
-        if (ghost.company_id) {
+        // Update lead status to nurture (if not already further along)
+        if (ghost.lead_id) {
           await supabase
-            .from('companies')
+            .from('leads')
             .update({
               status: 'rejected',
               status_changed_at: new Date().toISOString(),
             })
-            .eq('id', ghost.company_id)
+            .eq('id', ghost.lead_id)
             .in('status', ['new', 'contacted', 'engaged']);
         }
 
@@ -90,7 +90,7 @@ export async function handleGhostDetection(
         await supabase.from('tasks').insert({
           type: 'nurture',
           contact_id: null, // Will need to look up
-          company_id: ghost.company_id,
+          lead_id: ghost.lead_id,
           property_id: ghost.property_id,
           title: `Nurture (ghosted): ${ghost.contact_name}`,
           description: `Contact ghosted after ${ghost.follow_up_count} follow-ups. Last response: ${

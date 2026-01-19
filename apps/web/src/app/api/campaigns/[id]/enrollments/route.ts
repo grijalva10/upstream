@@ -24,7 +24,7 @@ export async function GET(
       .from("enrollments")
       .select(`
         *,
-        contact:contacts(id, name, email, company_id),
+        contact:contacts(id, name, email, lead_id),
         property:properties(id, address, city, state_code)
       `, { count: "exact" })
       .eq("campaign_id", id)

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         email,
         phone,
         title,
-        company:companies(id, name, status)
+        lead:leads(id, name, status)
       ),
       deal:deals(
         id,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           building_class,
           year_built
         ),
-        company:companies(id, name)
+        lead:leads(id, name)
       )
     `
     )

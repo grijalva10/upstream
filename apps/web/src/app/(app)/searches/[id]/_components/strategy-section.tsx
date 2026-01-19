@@ -95,7 +95,7 @@ export function StrategySection({ searchId, strategySummary, payloadsJson, statu
       } else {
         setExtractResult({
           success: true,
-          message: `Extracted ${data.properties} properties, ${data.companies} companies, ${data.contacts} contacts`,
+          message: `Extracted ${data.properties} properties, ${data.leads} leads, ${data.contacts} contacts`,
         });
         router.refresh();
       }

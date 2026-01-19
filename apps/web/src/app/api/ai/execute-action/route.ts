@@ -30,22 +30,22 @@ export async function POST(request: Request) {
       case "create_contact": {
         const data = action.data;
 
-        // First, check if we need to create or find a company
-        let companyId: string | null = null;
+        // First, check if we need to create or find a lead
+        let leadId: string | null = null;
         if (data.company_name) {
-          // Check if company exists
-          const { data: existingCompany } = await supabase
-            .from("companies")
+          // Check if lead exists
+          const { data: existingLead } = await supabase
+            .from("leads")
             .select("id")
             .eq("name", data.company_name)
             .maybeSingle();
 
-          if (existingCompany) {
-            companyId = existingCompany.id;
+          if (existingLead) {
+            leadId = existingLead.id;
           } else {
-            // Create the company
-            const { data: newCompany, error: companyError } = await supabase
-              .from("companies")
+            // Create the lead
+            const { data: newLead, error: leadError } = await supabase
+              .from("leads")
               .insert({
                 name: data.company_name as string,
                 status: "new",
@@ -53,10 +53,10 @@ export async function POST(request: Request) {
               .select("id")
               .single();
 
-            if (companyError) {
-              console.error("Error creating company:", companyError);
+            if (leadError) {
+              console.error("Error creating lead:", leadError);
             } else {
-              companyId = newCompany.id;
+              leadId = newLead.id;
             }
           }
         }
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
             phone: data.phone as string || null,
             role: data.role as string || null,
             type: data.type as string || "seller",
-            company_id: companyId,
+            lead_id: leadId,
             status: "active",
           })
           .select("*")

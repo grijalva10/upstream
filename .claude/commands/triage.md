@@ -16,22 +16,22 @@ SELECT
   ed.created_at,
   c.name AS contact_name,
   c.phone AS contact_phone,
-  co.name AS company_name,
+  l.name AS lead_name,
   p.address AS property_address,
   p.property_type,
   p.building_size_sqft,
-  pl.maturity_date,
-  pl.ltv_current,
-  pl.dscr_current,
-  pl.special_servicing_status,
+  pln.maturity_date,
+  pln.ltv_current,
+  pln.dscr_current,
+  pln.special_servicing_status,
   se.subject AS original_subject,
   se.body_text AS original_body,
   se.classification
 FROM email_drafts ed
 LEFT JOIN contacts c ON ed.contact_id = c.id
-LEFT JOIN companies co ON ed.company_id = co.id
+LEFT JOIN leads l ON ed.lead_id = l.id
 LEFT JOIN properties p ON ed.property_id = p.id
-LEFT JOIN property_loans pl ON p.id = pl.property_id
+LEFT JOIN property_loans pln ON p.id = pln.property_id
 LEFT JOIN synced_emails se ON ed.source_email_id = se.id
 WHERE ed.status = 'pending'
 ORDER BY ed.created_at ASC;
@@ -51,18 +51,18 @@ SELECT
   se.received_at,
   c.name AS contact_name,
   c.phone AS contact_phone,
-  co.name AS company_name,
-  co.status AS company_status,
+  l.name AS lead_name,
+  l.status AS lead_status,
   p.address AS property_address,
   p.property_type,
   p.building_size_sqft,
-  pl.maturity_date,
-  pl.ltv_current
+  pln.maturity_date,
+  pln.ltv_current
 FROM synced_emails se
 LEFT JOIN contacts c ON se.matched_contact_id = c.id
-LEFT JOIN companies co ON se.matched_company_id = co.id
+LEFT JOIN leads l ON se.matched_lead_id = l.id
 LEFT JOIN properties p ON se.matched_property_id = p.id
-LEFT JOIN property_loans pl ON p.id = pl.property_id
+LEFT JOIN property_loans pln ON p.id = pln.property_id
 WHERE se.classification IN ('hot_interested', 'hot_pricing', 'hot_schedule', 'hot_confirm', 'hot')
   AND se.received_at > NOW() - INTERVAL '24 hours'
   AND se.status != 'actioned'

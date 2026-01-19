@@ -71,11 +71,11 @@ export function createAutoFollowUpHandler(boss: PgBoss) {
         .select(`
           id,
           contact_id,
-          company_id,
+          lead_id,
           property_id,
           title,
           description,
-          contacts!inner(id, name, email, company_id)
+          contacts!inner(id, name, email, lead_id)
         `)
         .eq('type', 'ooo_follow_up')
         .eq('status', 'pending')
@@ -119,11 +119,11 @@ export function createAutoFollowUpHandler(boss: PgBoss) {
 async function sendDocFollowUp(
   pending: {
     id: string;
-    company_id: string;
+    lead_id: string;
     property_id: string;
     contact_name: string;
     contact_email: string;
-    company_name: string;
+    lead_name: string;
     property_address: string;
     pending_rent_roll: string | null;
     pending_op_statement: string | null;
@@ -142,7 +142,7 @@ async function sendDocFollowUp(
 
 Context:
 - Contact: ${pending.contact_name}
-- Company: ${pending.company_name}
+- Lead: ${pending.lead_name}
 - Property: ${pending.property_address || 'the property'}
 - Waiting on: ${pendingDocs.join(' and ')}
 - This is follow-up #${pending.follow_up_count + 1}
@@ -163,7 +163,7 @@ Output ONLY the email body text, nothing else.`;
     queueId: crypto.randomUUID(),
     toEmail: pending.contact_email,
     toName: pending.contact_name,
-    subject: `Re: ${pending.property_address || pending.company_name}`,
+    subject: `Re: ${pending.property_address || pending.lead_name}`,
     bodyText: draft.trim(),
     priority: 2,
     jobType: 'follow_up',
@@ -185,11 +185,11 @@ async function sendOOOFollowUp(
   task: {
     id: string;
     contact_id: string;
-    company_id: string;
+    lead_id: string;
     property_id: string | null;
     title: string;
     description: string;
-    contacts: { id: string; name: string; email: string; company_id: string };
+    contacts: { id: string; name: string; email: string; lead_id: string };
   },
   boss: PgBoss
 ): Promise<void> {

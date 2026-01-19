@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         status: "new",
       })
       .eq("direction", "inbound")
-      .select("*", { count: "exact", head: true });
+      .select();
 
     if (resetError) {
       console.error("[reprocess-all] Failed to reset emails:", resetError);

@@ -79,7 +79,7 @@ export function DealCard({ deal, isDragOverlay }: DealCardProps) {
         </p>
 
         <p className="text-xs text-muted-foreground truncate">
-          {deal.companies?.name ?? "No company"}
+          {deal.leads?.name ?? "No lead"}
         </p>
 
         {deal.asking_price && (

@@ -98,18 +98,18 @@ SELECT
   p.address,
   p.property_type,
   p.building_size_sqft,
-  co.name AS owner_name,
+  l.name AS owner_name,
   c.name AS contact_name,
   c.email,
   c.phone,
-  pl.maturity_date,
-  pl.ltv_current
+  pln.maturity_date,
+  pln.ltv_current
 FROM search_properties sp
 JOIN properties p ON sp.property_id = p.id
-LEFT JOIN property_companies pc ON p.id = pc.property_id
-LEFT JOIN companies co ON pc.company_id = co.id
-LEFT JOIN contacts c ON c.company_id = co.id
-LEFT JOIN property_loans pl ON p.id = pl.property_id
+LEFT JOIN property_leads pl ON p.id = pl.property_id
+LEFT JOIN leads l ON pl.lead_id = l.id
+LEFT JOIN contacts c ON c.lead_id = l.id
+LEFT JOIN property_loans pln ON p.id = pln.property_id
 WHERE sp.search_id = '{search_id}'
 LIMIT 10;
 ```
@@ -149,9 +149,9 @@ SELECT
   c.id,
   'pending'
 FROM contacts c
-JOIN companies co ON c.company_id = co.id
-JOIN property_companies pc ON co.id = pc.company_id
-JOIN search_properties sp ON pc.property_id = sp.property_id
+JOIN leads l ON c.lead_id = l.id
+JOIN property_leads pl ON l.id = pl.lead_id
+JOIN search_properties sp ON pl.property_id = sp.property_id
 WHERE sp.search_id = '{search_id}'
   AND c.status = 'active'
   AND c.email IS NOT NULL

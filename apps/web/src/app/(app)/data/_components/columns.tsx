@@ -2,10 +2,13 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Column, Filter } from "./data-table";
-import type { Contact, Company, Property, Campaign, Exclusion } from "./types";
+import type { Contact, Lead, Property, Campaign, Exclusion } from "./types";
 
 // Re-export types for convenience
-export type { Contact, Company, Property, Campaign, Exclusion };
+export type { Contact, Lead, Property, Campaign, Exclusion };
+
+// Alias for backwards compatibility
+export type Company = Lead;
 
 // ============================================================================
 // SHARED HELPERS
@@ -54,9 +57,9 @@ export const contactColumns: Column<Contact>[] = [
     cell: displayValue,
   },
   {
-    id: "company",
-    header: "Company",
-    accessorFn: (row) => row.company?.name || "-",
+    id: "lead",
+    header: "Lead",
+    accessorFn: (row) => row.lead?.name || "-",
     className: "text-muted-foreground",
   },
   {
@@ -134,10 +137,10 @@ export const contactFilters: Filter[] = [
 ];
 
 // ============================================================================
-// COMPANIES
+// LEADS
 // ============================================================================
 
-const companyStatusColors: Record<string, string> = {
+const leadStatusColors: Record<string, string> = {
   new: "bg-gray-100 text-gray-800",
   contacted: "bg-blue-100 text-blue-800",
   engaged: "bg-yellow-100 text-yellow-800",
@@ -160,7 +163,7 @@ const sourceColors: Record<string, string> = {
   referral: "bg-purple-100 text-purple-800",
 };
 
-export const companyColumns: Column<Company>[] = [
+export const leadColumns: Column<Lead>[] = [
   {
     id: "name",
     header: "Name",
@@ -173,7 +176,7 @@ export const companyColumns: Column<Company>[] = [
     header: "Status",
     accessorKey: "status",
     align: "center",
-    cell: (v) => coloredBadge(v as string, companyStatusColors),
+    cell: (v) => coloredBadge(v as string, leadStatusColors),
   },
   {
     id: "qualification_status",
@@ -242,7 +245,7 @@ export const companyColumns: Column<Company>[] = [
   },
 ];
 
-export const companyFilters: Filter[] = [
+export const leadFilters: Filter[] = [
   {
     id: "status",
     label: "Status",

@@ -9,7 +9,7 @@ import { DealStatus, parseDeal, parseActivity, type DealActivity } from "./schem
 const DEAL_SELECT = `
   *,
   properties (id, address, property_type, building_size_sqft, building_class, year_built),
-  companies (id, name),
+  leads (id, name),
   contacts (id, name, email, phone),
   searches (id, name)
 `;
@@ -122,14 +122,14 @@ export async function addNote(dealId: string, note: string) {
   return { success: true };
 }
 
-export async function createDeal(propertyId: string, companyId?: string, contactId?: string) {
+export async function createDeal(propertyId: string, leadId?: string, contactId?: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("deals")
     .insert({
       property_id: propertyId,
-      company_id: companyId || null,
+      lead_id: leadId || null,
       contact_id: contactId || null,
       status: "qualifying",
     })
@@ -156,7 +156,7 @@ export async function generatePackage(dealId: string) {
 
   const { data, error } = await supabase
     .from("deals")
-    .select(`*, properties (*), companies (*), contacts (*)`)
+    .select(`*, properties (*), leads (*), contacts (*)`)
     .eq("id", dealId)
     .single();
 
@@ -173,7 +173,7 @@ export async function generatePackage(dealId: string) {
       year_built: data.properties?.year_built,
     },
     seller: {
-      company: data.companies?.name,
+      company: data.leads?.name,
       contact: data.contacts?.name,
       email: data.contacts?.email,
       phone: data.contacts?.phone,
@@ -244,7 +244,7 @@ export async function getDeals(filters?: { search?: string; searchId?: string })
       (d) =>
         d.display_id?.toLowerCase().includes(q) ||
         d.properties?.address?.toLowerCase().includes(q) ||
-        d.companies?.name?.toLowerCase().includes(q)
+        d.leads?.name?.toLowerCase().includes(q)
     );
   }
 
@@ -256,7 +256,7 @@ export async function getDeal(id: string) {
 
   const { data, error } = await supabase
     .from("deals")
-    .select(`*, properties (*), companies (*), contacts (*), searches (id, name)`)
+    .select(`*, properties (*), leads (*), contacts (*), searches (id, name)`)
     .eq("id", id)
     .single();
 

@@ -7,7 +7,7 @@
 // ENUMS
 // =============================================================================
 
-export type CompanyStatus =
+export type LeadStatus =
   | 'new'
   | 'contacted'
   | 'engaged'
@@ -16,16 +16,22 @@ export type CompanyStatus =
   | 'dnc'
   | 'rejected';
 
+// Alias for backwards compatibility
+export type CompanyStatus = LeadStatus;
+
 export type ContactStatus =
   | 'active'
   | 'dnc'
   | 'bounced'
   | 'unsubscribed';
 
-export type CompanySource =
+export type LeadSource =
   | 'costar'
   | 'manual'
   | 'referral';
+
+// Alias for backwards compatibility
+export type CompanySource = LeadSource;
 
 export type PropertyRelationship =
   | 'owner'
@@ -228,23 +234,26 @@ export interface Property {
   updated_at: string;
 }
 
-export interface Company {
+export interface Lead {
   id: string;
   costar_company_id: string | null;
   name: string;
-  status: CompanyStatus;
+  status: LeadStatus;
   status_changed_at: string;
-  source: CompanySource;
+  source: LeadSource;
   assigned_user_id: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
 }
 
+// Alias for backwards compatibility
+export type Company = Lead;
+
 export interface Contact {
   id: string;
   costar_person_id: string | null;
-  company_id: string | null;
+  lead_id: string | null;
   name: string;
   title: string | null;
   email: string | null;
@@ -282,13 +291,16 @@ export interface PropertyLoan {
   updated_at: string;
 }
 
-export interface PropertyCompany {
+export interface PropertyLead {
   property_id: string;
-  company_id: string;
+  lead_id: string;
   relationship: PropertyRelationship;
   ownership_pct: number | null;
   first_seen_at: string;
 }
+
+// Alias for backwards compatibility
+export type PropertyCompany = PropertyLead;
 
 export interface SourcingStrategy {
   id: string;
@@ -385,7 +397,7 @@ export interface SequenceSubscription {
 
 export interface Activity {
   id: string;
-  company_id: string | null;
+  lead_id: string | null;
   contact_id: string | null;
   property_id: string | null;
   activity_type: ActivityType;
@@ -557,7 +569,7 @@ export interface SyncedEmail {
   is_read: boolean;
   has_attachments: boolean;
   matched_contact_id: string | null;
-  matched_company_id: string | null;
+  matched_lead_id: string | null;
   linked_activity_id: string | null;
   synced_at: string;
   created_at: string;
@@ -586,8 +598,11 @@ export interface EmailEvent {
 // =============================================================================
 
 export type PropertyInsert = Omit<Property, 'id' | 'created_at' | 'updated_at' | 'first_seen_at' | 'last_seen_at'>;
-export type CompanyInsert = Omit<Company, 'id' | 'created_at' | 'updated_at' | 'status_changed_at'>;
+export type LeadInsert = Omit<Lead, 'id' | 'created_at' | 'updated_at' | 'status_changed_at'>;
 export type ContactInsert = Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'status_changed_at'>;
+
+// Alias for backwards compatibility
+export type CompanyInsert = LeadInsert;
 export type PropertyLoanInsert = Omit<PropertyLoan, 'id' | 'created_at' | 'updated_at' | 'first_seen_at' | 'last_seen_at'>;
 export type ExtractionListInsert = Omit<ExtractionList, 'id' | 'created_at'>;
 export type ActivityInsert = Omit<Activity, 'id' | 'created_at' | 'updated_at'>;
@@ -605,10 +620,10 @@ export interface Database {
       markets: { Row: Market; Insert: Omit<Market, 'created_at'>; Update: Partial<Market> };
       users: { Row: User; Insert: Omit<User, 'id' | 'created_at' | 'updated_at'>; Update: Partial<User> };
       properties: { Row: Property; Insert: PropertyInsert; Update: Partial<Property> };
-      companies: { Row: Company; Insert: CompanyInsert; Update: Partial<Company> };
+      leads: { Row: Lead; Insert: LeadInsert; Update: Partial<Lead> };
       contacts: { Row: Contact; Insert: ContactInsert; Update: Partial<Contact> };
       property_loans: { Row: PropertyLoan; Insert: PropertyLoanInsert; Update: Partial<PropertyLoan> };
-      property_companies: { Row: PropertyCompany; Insert: PropertyCompany; Update: Partial<PropertyCompany> };
+      property_leads: { Row: PropertyLead; Insert: PropertyLead; Update: Partial<PropertyLead> };
       sourcing_strategies: { Row: SourcingStrategy; Insert: Omit<SourcingStrategy, 'id' | 'created_at'>; Update: Partial<SourcingStrategy> };
       extraction_lists: { Row: ExtractionList; Insert: ExtractionListInsert; Update: Partial<ExtractionList> };
       list_properties: { Row: ListProperty; Insert: ListProperty; Update: Partial<ListProperty> };

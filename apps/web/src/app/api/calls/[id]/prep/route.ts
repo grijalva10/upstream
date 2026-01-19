@@ -44,7 +44,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         email,
         phone,
         title,
-        company:companies(id, name, status)
+        lead:leads(id, name, status)
       ),
       deal:deals(
         id,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   // Generate the prep document
   const prepMd = generateCallPrep({
     contact: call.contact,
-    company: call.contact?.company,
+    lead: call.contact?.lead,
     property: call.deal?.property,
     deal: call.deal,
     scheduledAt: call.scheduled_at,

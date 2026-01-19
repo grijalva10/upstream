@@ -155,10 +155,10 @@ npx supabase db diff        # Generate migration from changes
 | Table | Purpose |
 |-------|---------|
 | `properties` | CRE assets from CoStar (address, type, size, class) |
-| `companies` | Owner organizations = leads (status: new→contacted→qualified→handed_off) |
-| `contacts` | People at companies who receive outreach |
+| `leads` | Owner organizations (status: new→contacted→qualified→handed_off) |
+| `contacts` | People at leads who receive outreach |
 | `property_loans` | Loan/distress data (maturity, LTV, DSCR, payment status) |
-| `property_companies` | Junction: property ↔ company (owner/manager/lender) |
+| `property_leads` | Junction: property ↔ lead (owner/manager/lender) |
 
 **Searches & Sourcing:**
 | Table | Purpose |
@@ -216,16 +216,16 @@ npx supabase db diff        # Generate migration from changes
 ### Key Relationships
 ```
 searches → search_properties → properties (via search_properties junction)
-properties ←→ companies (via property_companies)
-companies → contacts (1:many)
+properties ←→ leads (via property_leads)
+leads → contacts (1:many)
 properties → property_loans (1:many)
 contacts → sequence_subscriptions → sequences
-activities → contacts, companies, properties
+activities → contacts, leads, properties
 searches → campaigns (1:many)
 ```
 
 ### Key Status Flows
-- **Company**: `new` → `contacted` → `engaged` → `qualified` → `handed_off` | `dnc` | `rejected`
+- **Lead**: `new` → `contacted` → `engaged` → `qualified` → `handed_off` | `dnc` | `rejected`
 - **Contact**: `active` → `dnc` | `bounced` | `unsubscribed`
 - **Sequence Subscription**: `active` → `completed` | `replied` | `unsubscribed`
 
@@ -252,11 +252,11 @@ Full pipeline from buyer criteria to DB (uses web UI):
 3. Run Extraction (requires local CoStar service)
    - POST /api/searches/[id]/run-extraction
    - Calls CoStar service (requires 2FA)
-   - Saves properties, companies, contacts
+   - Saves properties, leads, contacts
    - Links via search_properties junction
 
 4. Properties linked via:
-   searches → search_properties → properties → companies → contacts
+   searches → search_properties → properties → leads → contacts
 ```
 
 ### Running via Web UI

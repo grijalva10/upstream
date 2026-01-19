@@ -88,14 +88,14 @@ SELECT
   se.extracted_pricing,
   se.received_at,
   c.name AS contact_name,
-  co.name AS company_name,
+  l.name AS lead_name,
   p.address AS property_address
 FROM synced_emails se
 JOIN enrollments e ON se.enrollment_id = e.id
 JOIN contacts c ON e.contact_id = c.id
-LEFT JOIN companies co ON c.company_id = co.id
-LEFT JOIN property_companies pc ON co.id = pc.company_id
-LEFT JOIN properties p ON pc.property_id = p.id
+LEFT JOIN leads l ON c.lead_id = l.id
+LEFT JOIN property_leads pl ON l.id = pl.lead_id
+LEFT JOIN properties p ON pl.property_id = p.id
 WHERE e.campaign_id = '{campaign_id}'
   AND se.classification IN ('hot_interested', 'hot_pricing', 'hot_schedule', 'hot_confirm', 'hot', 'question')
   AND se.direction = 'inbound'
@@ -145,7 +145,7 @@ Hot Leads   ████ 23 (7%)
 
 ### 4. Hot Leads List
 Cards showing:
-- Contact name, company, property
+- Contact name, lead, property
 - Their reply and classification
 - Extracted pricing if any
 - Quick action: Open /prep

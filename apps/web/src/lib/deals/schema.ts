@@ -34,7 +34,7 @@ const PropertySchema = z.object({
   year_built: z.number().nullable(),
 });
 
-const CompanySchema = z.object({
+const LeadSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
 });
@@ -63,7 +63,7 @@ export const DealSchema = z.object({
   display_id: z.string(),
   status: DealStatus,
   property_id: z.string().uuid(),
-  company_id: z.string().uuid().nullable(),
+  lead_id: z.string().uuid().nullable(),
   contact_id: z.string().uuid().nullable(),
   search_id: z.string().uuid().nullable(),
   enrollment_id: z.string().uuid().nullable(),
@@ -102,7 +102,7 @@ export const DealSchema = z.object({
 
   // Relations
   properties: PropertySchema.nullable(),
-  companies: CompanySchema.nullable(),
+  leads: LeadSchema.nullable(),
   contacts: ContactSchema.nullable(),
   searches: SearchSchema.nullable(),
 });

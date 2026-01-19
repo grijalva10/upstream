@@ -62,7 +62,7 @@ export default async function DealDetailPage({ params }: PageProps) {
               ` - Class ${deal.properties.building_class}`}
           </p>
           <p className="text-muted-foreground mt-1">
-            {deal.companies?.name ?? "No company"}
+            {deal.leads?.name ?? "No lead"}
             {deal.contacts?.name && ` - ${deal.contacts.name}`}
           </p>
         </div>

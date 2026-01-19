@@ -38,7 +38,7 @@ SELECT
   p.address AS property_address,
   p.property_type,
   p.building_size_sqft,
-  co.name AS company_name,
+  l.name AS lead_name,
   c.name AS contact_name,
   c.phone AS contact_phone,
   -- Calculate days since last response
@@ -49,7 +49,7 @@ SELECT
    CASE WHEN d.cap_rate IS NOT NULL THEN 1 ELSE 0 END) AS pricing_fields
 FROM deals d
 LEFT JOIN properties p ON d.property_id = p.id
-LEFT JOIN companies co ON d.company_id = co.id
+LEFT JOIN leads l ON d.lead_id = l.id
 LEFT JOIN contacts c ON d.contact_id = c.id
 WHERE d.status NOT IN ('handed_off', 'lost')
 ORDER BY d.last_response_at DESC NULLS LAST;
@@ -66,7 +66,7 @@ SELECT
   d.id,
   d.display_id,
   p.address,
-  co.name AS company_name,
+  l.name AS lead_name,
   d.asking_price,
   d.noi,
   d.cap_rate,
@@ -74,7 +74,7 @@ SELECT
   d.operating_statement_status
 FROM deals d
 LEFT JOIN properties p ON d.property_id = p.id
-LEFT JOIN companies co ON d.company_id = co.id
+LEFT JOIN leads l ON d.lead_id = l.id
 WHERE d.status IN ('engaging', 'qualifying')
   AND (
     -- Has 2 of 3 pricing fields
@@ -107,8 +107,8 @@ Packaged   ██ 4
 - Close to qualified: N (highlight in green)
 
 ### 3. Active Deals Table
-| Deal ID | Property | Company | Status | Days Idle | Pricing | Docs |
-|---------|----------|---------|--------|-----------|---------|------|
+| Deal ID | Property | Lead | Status | Days Idle | Pricing | Docs |
+|---------|----------|------|--------|-----------|---------|------|
 | UP-123 | 123 Main St | ABC LLC | Engaging | 3 | 2/3 | RR pending |
 
 Features:

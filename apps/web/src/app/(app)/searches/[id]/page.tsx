@@ -72,10 +72,10 @@ export default async function SearchDetailPage({ params }: PageProps) {
                 <span className="font-medium">{search.total_properties?.toLocaleString()}</span>
                 <span className="hidden sm:inline">properties</span>
               </Link>
-              <Link href={`/data/companies?search=${id}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <Link href={`/data/leads?search=${id}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
                 <Users className="h-3.5 w-3.5" />
-                <span className="font-medium">{search.total_companies?.toLocaleString()}</span>
-                <span className="hidden sm:inline">companies</span>
+                <span className="font-medium">{search.total_leads?.toLocaleString()}</span>
+                <span className="hidden sm:inline">leads</span>
               </Link>
               <Link href={`/data/contacts?search=${id}`} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
                 <Mail className="h-3.5 w-3.5" />
@@ -120,7 +120,7 @@ export default async function SearchDetailPage({ params }: PageProps) {
                 <ResultsSection
                   searchId={search.id}
                   totalProperties={search.total_properties}
-                  totalCompanies={search.total_companies}
+                  totalLeads={search.total_leads}
                   totalContacts={search.total_contacts}
                 />
               )}

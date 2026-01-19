@@ -30,7 +30,7 @@ interface DealQuickViewProps {
   contact: {
     id: string;
     name: string | null;
-    company?: {
+    lead?: {
       name: string;
     };
   };

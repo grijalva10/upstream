@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status");
-  const companyId = searchParams.get("company_id");
+  const leadId = searchParams.get("lead_id");
   const limit = parseInt(searchParams.get("limit") || "20");
   const page = parseInt(searchParams.get("page") || "1");
   const offset = (page - 1) * limit;
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       status,
       created_at,
       property:properties(id, address, city, state, property_type),
-      company:companies(id, name),
+      lead:leads(id, name),
       contact:contacts(id, name, email)
     `,
       { count: "exact" }
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
     query = query.eq("status", status);
   }
 
-  if (companyId) {
-    query = query.eq("company_id", companyId);
+  if (leadId) {
+    query = query.eq("lead_id", leadId);
   }
 
   const { data, error, count } = await query;

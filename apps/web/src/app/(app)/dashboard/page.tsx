@@ -75,7 +75,7 @@ async function getDashboardData() {
         `
         deal_id,
         display_id,
-        company_name,
+        lead_name,
         contact_name,
         last_response_at,
         follow_up_count
@@ -98,7 +98,7 @@ async function getDashboardData() {
         noi,
         motivation,
         timeline,
-        company:companies (
+        lead:leads (
           name
         ),
         property:properties (
@@ -145,7 +145,7 @@ async function getDashboardData() {
     stalledResult.data?.map((deal: any) => ({
       id: deal.deal_id,
       displayId: deal.display_id,
-      companyName: deal.company_name || "Unknown",
+      companyName: deal.lead_name || "Unknown",
       daysSinceResponse: deal.last_response_at
         ? Math.floor(
             (Date.now() - new Date(deal.last_response_at).getTime()) /
@@ -153,6 +153,7 @@ async function getDashboardData() {
           )
         : 0,
       followUpCount: deal.follow_up_count || 0,
+      status: "stalled",
     })) || [];
 
   // Process pipeline counts by status
@@ -183,7 +184,7 @@ async function getDashboardData() {
       displayId: deal.display_id,
       propertyType: deal.property?.property_type || "Unknown",
       address: deal.property?.address || "No address",
-      companyName: deal.company?.name || "Unknown",
+      companyName: deal.lead?.name || "Unknown",
       price: deal.asking_price
         ? `$${(deal.asking_price / 1000000).toFixed(1)}M`
         : "TBD",

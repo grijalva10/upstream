@@ -16,7 +16,7 @@ interface TodaysCall {
     id: string;
     name: string | null;
     phone?: string;
-    company?: {
+    lead?: {
       id: string;
       name: string;
     };
@@ -55,7 +55,7 @@ export function TodaysCalls({ calls }: TodaysCallsProps) {
       {calls.map((call) => {
         const time = format(new Date(call.scheduled_at), "h:mm a");
         const contactName = call.contact.name || "Unknown";
-        const companyName = call.contact.company?.name;
+        const companyName = call.contact.lead?.name;
         const property = call.deal?.property;
         const isUpcoming = new Date(call.scheduled_at) > new Date();
 

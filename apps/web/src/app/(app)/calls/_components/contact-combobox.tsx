@@ -16,7 +16,7 @@ interface Contact {
   name: string | null;
   email?: string;
   phone?: string;
-  company?: {
+  lead?: {
     id: string;
     name: string;
   };
@@ -64,7 +64,7 @@ export function ContactCombobox({
   }, [open, search]);
 
   const displayValue = value
-    ? `${value.name || "Unknown"}${value.company ? ` - ${value.company.name}` : ""}`
+    ? `${value.name || "Unknown"}${value.lead ? ` - ${value.lead.name}` : ""}`
     : "Select contact...";
 
   return (
@@ -125,9 +125,9 @@ export function ContactCombobox({
                         <Check className="h-4 w-4 text-primary" />
                       )}
                     </div>
-                    {contact.company && (
+                    {contact.lead && (
                       <div className="text-xs text-muted-foreground truncate">
-                        {contact.company.name}
+                        {contact.lead.name}
                       </div>
                     )}
                     {contact.email && (

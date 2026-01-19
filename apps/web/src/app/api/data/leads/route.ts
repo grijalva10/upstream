@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
   const desc = searchParams.get("desc") === "true";
 
   let query = supabase
-    .from("companies")
-    .select("*, contacts(id), property_companies(property_id)", { count: "exact" })
+    .from("leads")
+    .select("*, contacts(id), property_leads(property_id)", { count: "exact" })
     .order(sort, { ascending: !desc })
     .range(offset, offset + limit - 1);
 
@@ -65,26 +65,26 @@ export async function GET(request: NextRequest) {
   }
 
   // Transform data to include counts and filter by has_properties if needed
-  let companies = data?.map((company) => ({
-    ...company,
-    contact_count: company.contacts?.length || 0,
-    property_count: company.property_companies?.length || 0,
+  let leads = data?.map((lead) => ({
+    ...lead,
+    contact_count: lead.contacts?.length || 0,
+    property_count: lead.property_leads?.length || 0,
     contacts: undefined,
-    property_companies: undefined,
+    property_leads: undefined,
   })) || [];
 
   // Filter by has_properties (done client-side since it's a computed field)
   let filteredTotal = count || 0;
   if (hasProperties === "yes") {
-    companies = companies.filter((c) => c.property_count > 0);
-    filteredTotal = companies.length;
+    leads = leads.filter((l) => l.property_count > 0);
+    filteredTotal = leads.length;
   } else if (hasProperties === "no") {
-    companies = companies.filter((c) => c.property_count === 0);
-    filteredTotal = companies.length;
+    leads = leads.filter((l) => l.property_count === 0);
+    filteredTotal = leads.length;
   }
 
   return NextResponse.json({
-    companies,
+    leads,
     total: filteredTotal,
     page,
     limit,

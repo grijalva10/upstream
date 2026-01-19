@@ -23,7 +23,7 @@ export async function GET() {
         id,
         name,
         phone,
-        company:companies(id, name)
+        lead:leads(id, name)
       ),
       deal:deals(
         id,

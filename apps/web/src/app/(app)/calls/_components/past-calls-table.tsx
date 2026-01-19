@@ -32,7 +32,7 @@ interface PastCall {
   contact: {
     id: string;
     name: string | null;
-    company?: {
+    lead?: {
       id: string;
       name: string;
     };
@@ -127,7 +127,7 @@ export function PastCallsTable({ calls }: PastCallsTableProps) {
                   {call.contact.name || "Unknown"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {call.contact.company?.name || "-"}
+                  {call.contact.lead?.name || "-"}
                 </TableCell>
                 <TableCell>
                   <CallStatusBadge status={call.status} />

@@ -33,16 +33,16 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     // Get all contacts from the search's properties
-    // Join: search_properties → property_companies (owners) → contacts
+    // Join: search_properties → property_leads (owners) → contacts
     const { data: contactsData, error: contactsError } = await supabase
       .from("search_properties")
       .select(`
         property_id,
         properties!inner (
-          property_companies!inner (
-            company_id,
+          property_leads!inner (
+            lead_id,
             relationship,
-            companies!inner (
+            leads!inner (
               contacts!inner (
                 id,
                 email,
@@ -66,13 +66,13 @@ export async function POST(request: Request, { params }: RouteParams) {
       const propertyId = sp.property_id;
       const properties = sp.properties as any;
 
-      if (!properties?.property_companies) continue;
+      if (!properties?.property_leads) continue;
 
-      for (const pc of properties.property_companies) {
+      for (const pl of properties.property_leads) {
         // Only include owners
-        if (pc.relationship !== "owner") continue;
+        if (pl.relationship !== "owner") continue;
 
-        const contacts = pc.companies?.contacts || [];
+        const contacts = pl.leads?.contacts || [];
         for (const contact of contacts) {
           // Only active contacts with email
           if (contact.status !== "active" || !contact.email) continue;

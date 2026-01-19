@@ -313,15 +313,15 @@ export async function queueReply(
     return { success: false, error: "Message not found" };
   }
 
-  // Get company from contact
-  let companyId: string | null = null;
+  // Get lead from contact
+  let leadId: string | null = null;
   if (message.matched_contact_id) {
     const { data: contact } = await supabase
       .from("contacts")
-      .select("company_id")
+      .select("lead_id")
       .eq("id", message.matched_contact_id)
       .single();
-    companyId = contact?.company_id || null;
+    leadId = contact?.lead_id || null;
   }
 
   const { error } = await supabase.from("email_drafts").insert({
@@ -329,7 +329,7 @@ export async function queueReply(
     to_name: message.from_name,
     subject: parsed.data.subject,
     body: parsed.data.body,
-    company_id: companyId,
+    lead_id: leadId,
     contact_id: message.matched_contact_id,
     in_reply_to_email_id: messageId,
     draft_type: "qualification",

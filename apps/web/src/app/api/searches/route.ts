@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       .from("searches")
       .select(`
         id, name, source, status, criteria_json, strategy_summary,
-        payloads_json, total_properties, total_companies, total_contacts,
+        payloads_json, total_properties, total_leads, total_contacts,
         source_contact_id, created_at, updated_at,
         campaigns (id, name, status, total_enrolled, total_sent, total_opened, total_replied)
       `)

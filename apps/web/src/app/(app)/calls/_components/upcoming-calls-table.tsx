@@ -23,7 +23,7 @@ interface UpcomingCall {
     id: string;
     name: string | null;
     phone?: string;
-    company?: {
+    lead?: {
       id: string;
       name: string;
     };
@@ -100,7 +100,7 @@ export function UpcomingCallsTable({ calls }: UpcomingCallsTableProps) {
                       {call.contact.name || "Unknown"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {call.contact.company?.name || "-"}
+                      {call.contact.lead?.name || "-"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {call.deal?.property ? (

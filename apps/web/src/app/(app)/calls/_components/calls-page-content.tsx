@@ -18,7 +18,7 @@ interface Call {
     name: string | null;
     phone?: string;
     email?: string;
-    company?: {
+    lead?: {
       id: string;
       name: string;
     };

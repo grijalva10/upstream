@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         email,
         phone,
         title,
-        company:companies(id, name)
+        lead:leads(id, name)
       ),
       deal:deals(
         id,

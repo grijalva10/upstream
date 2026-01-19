@@ -204,7 +204,7 @@ export async function POST(
       .update({
         status: "extraction_complete",
         total_properties: stats.properties,
-        total_companies: stats.companies,
+        total_leads: stats.leads,
         total_contacts: stats.contacts,
       })
       .eq("id", id);
@@ -212,7 +212,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       properties: stats.properties,
-      companies: stats.companies,
+      leads: stats.leads,
       contacts: stats.contacts,
       loans: stats.loans,
     });
@@ -232,19 +232,19 @@ async function upsertExtractedData(
   contacts: ExtractedContact[]
 ) {
   const propertyMap = new Map<number, string>(); // costar_id -> uuid
-  const companyMap = new Map<number, string>(); // costar_id -> uuid
+  const leadMap = new Map<number, string>(); // costar_id -> uuid
   let contactsUpserted = 0;
 
-  // Group contacts by property and company for deduplication
+  // Group contacts by property and lead for deduplication
   const uniqueProperties = new Map<number, ExtractedContact>();
-  const uniqueCompanies = new Map<number, ExtractedContact>();
+  const uniqueLeads = new Map<number, ExtractedContact>();
 
   for (const contact of contacts) {
     if (contact.property_id && !uniqueProperties.has(contact.property_id)) {
       uniqueProperties.set(contact.property_id, contact);
     }
-    if (contact.company_id && !uniqueCompanies.has(contact.company_id)) {
-      uniqueCompanies.set(contact.company_id, contact);
+    if (contact.company_id && !uniqueLeads.has(contact.company_id)) {
+      uniqueLeads.set(contact.company_id, contact);
     }
   }
 
@@ -323,10 +323,10 @@ async function upsertExtractedData(
     }
   }
 
-  // 2. Upsert companies with TrueOwner data
-  for (const [costarId, contact] of uniqueCompanies) {
-    const { data: company, error } = await supabase
-      .from("companies")
+  // 2. Upsert leads with TrueOwner data
+  for (const [costarId, contact] of uniqueLeads) {
+    const { data: lead, error } = await supabase
+      .from("leads")
       .upsert({
         costar_company_id: String(costarId),
         costar_key: contact.company_costar_key || null,
@@ -341,9 +341,9 @@ async function upsertExtractedData(
       .single();
 
     if (error) {
-      console.error(`Failed to upsert company ${costarId}:`, error.message);
-    } else if (company) {
-      companyMap.set(costarId, company.id);
+      console.error(`Failed to upsert lead ${costarId}:`, error.message);
+    } else if (lead) {
+      leadMap.set(costarId, lead.id);
     }
   }
 
@@ -351,13 +351,13 @@ async function upsertExtractedData(
   for (const contact of contacts) {
     if (!contact.email) continue;
 
-    const companyUuid = contact.company_id ? companyMap.get(contact.company_id) : null;
+    const leadUuid = contact.company_id ? leadMap.get(contact.company_id) : null;
 
     const { error } = await supabase
       .from("contacts")
       .upsert({
         costar_person_id: contact.contact_id ? String(contact.contact_id) : null,
-        company_id: companyUuid,
+        lead_id: leadUuid,
         name: contact.contact_name || "Unknown",
         title: contact.contact_title,
         email: contact.email.toLowerCase(),
@@ -373,22 +373,22 @@ async function upsertExtractedData(
     }
   }
 
-  // 4. Create property_companies junctions
+  // 4. Create property_leads junctions
   for (const contact of contacts) {
     if (!contact.property_id || !contact.company_id) continue;
 
     const propertyUuid = propertyMap.get(contact.property_id);
-    const companyUuid = companyMap.get(contact.company_id);
+    const leadUuid = leadMap.get(contact.company_id);
 
-    if (propertyUuid && companyUuid) {
+    if (propertyUuid && leadUuid) {
       await supabase
-        .from("property_companies")
+        .from("property_leads")
         .upsert({
           property_id: propertyUuid,
-          company_id: companyUuid,
+          lead_id: leadUuid,
           relationship: "owner",
         }, {
-          onConflict: "property_id,company_id",
+          onConflict: "property_id,lead_id",
           ignoreDuplicates: true,
         });
     }
@@ -440,7 +440,7 @@ async function upsertExtractedData(
 
   return {
     properties: propertyMap.size,
-    companies: companyMap.size,
+    leads: leadMap.size,
     contacts: contactsUpserted,
     loans: loansCreated,
   };
