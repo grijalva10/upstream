@@ -12,7 +12,7 @@ export interface SendEmailPayload {
   subject: string;
   bodyText: string;
   bodyHtml?: string;
-  sequenceId?: string;
+  campaignId?: string;
   priority: number;
   jobType: string;
 }
@@ -37,11 +37,11 @@ export async function handleSendEmail(
     throw new Error('Job data is undefined');
   }
 
-  const { queueId, toEmail, subject, bodyText, priority, jobType, sequenceId } = actualJob.data;
+  const { queueId, toEmail, subject, bodyText, priority, jobType, campaignId } = actualJob.data;
   console.log(`[send-email] Processing ${queueId} -> ${toEmail} (type: ${jobType})`);
 
   // Determine email category based on job type
-  const emailCategory = getEmailCategory(jobType, sequenceId);
+  const emailCategory = getEmailCategory(jobType, campaignId);
   const sendingEnabled = config.emailSending[emailCategory];
 
   if (!sendingEnabled) {
@@ -63,7 +63,7 @@ export async function handleSendEmail(
     };
   }
 
-  // Get sequence settings if this is a campaign email
+  // Get campaign settings if this is a campaign email
   let sendWindowStart = '09:00';
   let sendWindowEnd = '17:00';
   let timezone = config.defaultTimezone;
@@ -73,22 +73,22 @@ export async function handleSendEmail(
   let humanize = true;
   let simulateBreaks = true;
 
-  if (sequenceId && (jobType === 'cold_outreach' || jobType === 'follow_up')) {
-    const { data: sequence } = await supabase
-      .from('sequences')
+  if (campaignId && (jobType === 'cold_outreach' || jobType === 'follow_up')) {
+    const { data: campaign } = await supabase
+      .from('campaigns')
       .select('*')
-      .eq('id', sequenceId)
+      .eq('id', campaignId)
       .single();
 
-    if (sequence) {
-      sendWindowStart = sequence.send_window_start || '09:00';
-      sendWindowEnd = sequence.send_window_end || '17:00';
-      timezone = sequence.timezone || config.defaultTimezone;
-      weekdaysOnly = sequence.weekdays_only ?? true;
-      spacingMin = sequence.spacing_min_sec ?? 30;
-      spacingMax = sequence.spacing_max_sec ?? 90;
-      humanize = sequence.humanize_timing ?? true;
-      simulateBreaks = sequence.simulate_breaks ?? true;
+    if (campaign) {
+      sendWindowStart = campaign.send_window_start || '09:00';
+      sendWindowEnd = campaign.send_window_end || '17:00';
+      timezone = campaign.timezone || config.defaultTimezone;
+      weekdaysOnly = campaign.weekdays_only ?? true;
+      spacingMin = campaign.spacing_min_sec ?? 30;
+      spacingMax = campaign.spacing_max_sec ?? 90;
+      humanize = campaign.humanize_timing ?? true;
+      simulateBreaks = campaign.simulate_breaks ?? true;
     }
   }
 
@@ -249,13 +249,13 @@ export async function handleSendEmail(
 // Categorize email by job type for sending controls
 type EmailCategory = 'campaign' | 'manual' | 'ai';
 
-function getEmailCategory(jobType: string, sequenceId?: string): EmailCategory {
-  // Campaign emails: cold outreach or sequence-based follow-ups
-  if (jobType === 'cold_outreach' || (jobType === 'follow_up' && sequenceId)) {
+function getEmailCategory(jobType: string, campaignId?: string): EmailCategory {
+  // Campaign emails: cold outreach or campaign-based follow-ups
+  if (jobType === 'cold_outreach' || (jobType === 'follow_up' && campaignId)) {
     return 'campaign';
   }
-  // AI emails: automated replies and non-sequence follow-ups
-  if (jobType === 'manual_reply' || jobType === 'ai_response' || (jobType === 'follow_up' && !sequenceId)) {
+  // AI emails: automated replies and non-campaign follow-ups
+  if (jobType === 'manual_reply' || jobType === 'ai_response' || (jobType === 'follow_up' && !campaignId)) {
     return 'ai';
   }
   // Default to manual for explicit manual type or unknown types

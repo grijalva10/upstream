@@ -259,60 +259,6 @@ CREATE TABLE email_templates (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Sequences (Drip Campaigns)
-CREATE TABLE sequences (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    description TEXT,
-    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'paused', 'archived')),
-    schedule JSONB,  -- {"ranges": [{"weekday": 1, "start": "09:00", "end": "17:00"}, ...]}
-    timezone TEXT DEFAULT 'America/Los_Angeles',
-    stop_on_reply BOOLEAN DEFAULT TRUE,
-    created_by UUID REFERENCES users(id),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Sequence Steps
-CREATE TABLE sequence_steps (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    sequence_id UUID NOT NULL REFERENCES sequences(id) ON DELETE CASCADE,
-    step_order INTEGER NOT NULL,
-    step_type TEXT NOT NULL CHECK (step_type IN ('email', 'call', 'task')),
-    delay_seconds INTEGER NOT NULL DEFAULT 0,
-    email_template_id UUID REFERENCES email_templates(id),
-    threading TEXT CHECK (threading IN ('new_thread', 'old_thread')),
-    required BOOLEAN DEFAULT FALSE,
-    task_description TEXT,
-    created_by UUID REFERENCES users(id),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE (sequence_id, step_order)
-);
-
-CREATE INDEX idx_sequence_steps_sequence ON sequence_steps(sequence_id);
-
--- Sequence Subscriptions
-CREATE TABLE sequence_subscriptions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    sequence_id UUID NOT NULL REFERENCES sequences(id) ON DELETE CASCADE,
-    contact_id UUID NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-    property_id UUID REFERENCES properties(id),  -- context for merge tags
-    current_step_id UUID REFERENCES sequence_steps(id),
-    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN (
-        'active', 'paused', 'completed', 'unsubscribed', 'replied'
-    )),
-    started_at TIMESTAMPTZ DEFAULT NOW(),
-    completed_at TIMESTAMPTZ,
-    next_step_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_sequence_subscriptions_contact ON sequence_subscriptions(contact_id);
-CREATE INDEX idx_sequence_subscriptions_status ON sequence_subscriptions(status);
-CREATE INDEX idx_sequence_subscriptions_next_step ON sequence_subscriptions(next_step_at) WHERE status = 'active';
-
 -- Activities
 CREATE TABLE activities (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -328,7 +274,6 @@ CREATE TABLE activities (
     body_html TEXT,
     direction TEXT CHECK (direction IN ('outbound', 'inbound')),
     email_template_id UUID REFERENCES email_templates(id),
-    sequence_subscription_id UUID REFERENCES sequence_subscriptions(id),
     metadata JSONB,  -- opens, clicks, bounce info, conversation_id
     activity_at TIMESTAMPTZ DEFAULT NOW(),
     created_by UUID REFERENCES users(id),
@@ -629,14 +574,6 @@ CREATE TRIGGER update_property_loans_updated_at BEFORE UPDATE ON property_loans
 CREATE TRIGGER update_email_templates_updated_at BEFORE UPDATE ON email_templates
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER update_sequences_updated_at BEFORE UPDATE ON sequences
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-CREATE TRIGGER update_sequence_steps_updated_at BEFORE UPDATE ON sequence_steps
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-CREATE TRIGGER update_sequence_subscriptions_updated_at BEFORE UPDATE ON sequence_subscriptions
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE TRIGGER update_activities_updated_at BEFORE UPDATE ON activities
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -694,7 +631,6 @@ COMMENT ON TABLE sourcing_strategies IS 'Predefined CoStar query strategies (dis
 COMMENT ON TABLE clients IS 'Buyers/investors we are sourcing deals for';
 COMMENT ON TABLE client_criteria IS 'Search criteria profiles - stores input criteria and generated CoStar queries';
 COMMENT ON TABLE extraction_lists IS 'Results of CoStar queries - batches of properties linked to criteria';
-COMMENT ON TABLE sequences IS 'Automated drip campaigns for outreach';
 COMMENT ON TABLE activities IS 'All touchpoints with contacts/companies';
 COMMENT ON TABLE agent_definitions IS 'Registry of Claude Code agents';
 COMMENT ON TABLE agent_executions IS 'Logs of agent runs with prompts and responses';

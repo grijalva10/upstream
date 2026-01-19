@@ -173,9 +173,7 @@ npx supabase db diff        # Generate migration from changes
 | Table | Purpose |
 |-------|---------|
 | `email_templates` | Reusable email templates with merge tags |
-| `sequences` | Drip campaigns (schedule, timezone, stop_on_reply) |
-| `sequence_steps` | Steps in a sequence (email/call/task, delay) |
-| `sequence_subscriptions` | Contact enrolled in a sequence |
+| `enrollments` | Contact enrolled in a campaign with per-email tracking |
 | `activities` | All touchpoints (email_sent, email_received, call, note) |
 | `dnc_entries` | Do Not Contact list |
 
@@ -219,7 +217,7 @@ searches → search_properties → properties (via search_properties junction)
 properties ←→ leads (via property_leads)
 leads → contacts (1:many)
 properties → property_loans (1:many)
-contacts → sequence_subscriptions → sequences
+campaigns → enrollments → contacts
 activities → contacts, leads, properties
 searches → campaigns (1:many)
 ```
@@ -227,7 +225,7 @@ searches → campaigns (1:many)
 ### Key Status Flows
 - **Lead**: `new` → `contacted` → `engaged` → `qualified` → `handed_off` | `dnc` | `rejected`
 - **Contact**: `active` → `dnc` | `bounced` | `unsubscribed`
-- **Sequence Subscription**: `active` → `completed` | `replied` | `unsubscribed`
+- **Enrollment**: `pending` → `active` → `replied` | `completed` | `stopped`
 
 ## Local Requirements
 

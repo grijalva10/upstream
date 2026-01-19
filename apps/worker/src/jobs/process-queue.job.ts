@@ -89,7 +89,7 @@ export function createProcessQueueHandler(boss: PgBoss) {
           subject: email.subject,
           bodyText: email.body_text,
           bodyHtml: email.body_html,
-          sequenceId: email.sequence_id,
+          campaignId: email.campaign_id,
           priority: email.priority,
           jobType: email.job_type,
         });

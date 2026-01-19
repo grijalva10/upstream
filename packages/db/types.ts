@@ -79,27 +79,6 @@ export type EmailTemplateCategory =
   | 'nurture'
   | 'closing';
 
-export type SequenceStatus =
-  | 'draft'
-  | 'active'
-  | 'paused'
-  | 'archived';
-
-export type SequenceStepType =
-  | 'email'
-  | 'call'
-  | 'task';
-
-export type ThreadingType =
-  | 'new_thread'
-  | 'old_thread';
-
-export type SubscriptionStatus =
-  | 'active'
-  | 'paused'
-  | 'completed'
-  | 'unsubscribed'
-  | 'replied';
 
 export type ActivityType =
   | 'email_sent'
@@ -345,55 +324,6 @@ export interface EmailTemplate {
   updated_at: string;
 }
 
-export interface Sequence {
-  id: string;
-  name: string;
-  description: string | null;
-  status: SequenceStatus;
-  schedule: SequenceSchedule | null;
-  timezone: string;
-  stop_on_reply: boolean;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SequenceSchedule {
-  ranges: Array<{
-    weekday: number;
-    start: string;
-    end: string;
-  }>;
-}
-
-export interface SequenceStep {
-  id: string;
-  sequence_id: string;
-  step_order: number;
-  step_type: SequenceStepType;
-  delay_seconds: number;
-  email_template_id: string | null;
-  threading: ThreadingType | null;
-  required: boolean;
-  task_description: string | null;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SequenceSubscription {
-  id: string;
-  sequence_id: string;
-  contact_id: string;
-  property_id: string | null;
-  current_step_id: string | null;
-  status: SubscriptionStatus;
-  started_at: string;
-  completed_at: string | null;
-  next_step_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface Activity {
   id: string;
@@ -406,7 +336,6 @@ export interface Activity {
   body_html: string | null;
   direction: Direction | null;
   email_template_id: string | null;
-  sequence_subscription_id: string | null;
   metadata: Record<string, unknown> | null;
   activity_at: string;
   created_by: string | null;
@@ -628,9 +557,6 @@ export interface Database {
       extraction_lists: { Row: ExtractionList; Insert: ExtractionListInsert; Update: Partial<ExtractionList> };
       list_properties: { Row: ListProperty; Insert: ListProperty; Update: Partial<ListProperty> };
       email_templates: { Row: EmailTemplate; Insert: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>; Update: Partial<EmailTemplate> };
-      sequences: { Row: Sequence; Insert: Omit<Sequence, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Sequence> };
-      sequence_steps: { Row: SequenceStep; Insert: Omit<SequenceStep, 'id' | 'created_at' | 'updated_at'>; Update: Partial<SequenceStep> };
-      sequence_subscriptions: { Row: SequenceSubscription; Insert: Omit<SequenceSubscription, 'id' | 'created_at' | 'updated_at'>; Update: Partial<SequenceSubscription> };
       activities: { Row: Activity; Insert: ActivityInsert; Update: Partial<Activity> };
       dnc_entries: { Row: DncEntry; Insert: Omit<DncEntry, 'id' | 'added_at'>; Update: Partial<DncEntry> };
       agent_definitions: { Row: AgentDefinition; Insert: Omit<AgentDefinition, 'id' | 'created_at' | 'updated_at'>; Update: Partial<AgentDefinition> };

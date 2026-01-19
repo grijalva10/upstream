@@ -25,7 +25,7 @@ Two parallel systems exist for drip campaigns:
 
 ### 1. Schema: Add Columns to Campaigns
 
-**Migration:** `00026_campaigns_send_settings.sql`
+**Migration:** `00031_campaigns_send_settings.sql`
 
 ```sql
 -- Add send settings to campaigns (migrating from sequences)
@@ -117,7 +117,7 @@ Update email queue types to use `campaign_id` instead of `sequence_id`.
 
 ### 6. Schema: Drop Legacy Tables
 
-**Migration:** `00027_remove_legacy_sequences.sql`
+**Migration:** `00032_remove_legacy_sequences.sql`
 
 ```sql
 -- Remove legacy sequence system (replaced by campaigns/enrollments)
@@ -160,8 +160,8 @@ npx supabase gen types typescript --local > apps/web/src/lib/supabase/database.t
 
 | File | Change |
 |------|--------|
-| `supabase/migrations/00026_campaigns_send_settings.sql` | Add 7 columns to campaigns |
-| `supabase/migrations/00027_remove_legacy_sequences.sql` | Drop legacy tables/columns |
+| `supabase/migrations/00031_campaigns_send_settings.sql` | Add 7 columns to campaigns |
+| `supabase/migrations/00032_remove_legacy_sequences.sql` | Drop legacy tables/columns |
 | `apps/worker/src/jobs/send-email.job.ts` | Query campaigns, rename param |
 | `apps/worker/src/jobs/process-queue.job.ts` | Pass campaignId |
 | `apps/web/src/app/api/queue/route.ts` | Accept campaignId/enrollmentId |
