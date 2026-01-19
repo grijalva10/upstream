@@ -49,6 +49,7 @@ import {
   type InboxMessage,
   type Classification,
   CLASSIFICATIONS,
+  getClassificationConfig,
 } from "@/lib/inbox/schemas";
 import { ConfidenceIndicator } from "./confidence-indicator";
 import { MessageActions } from "./message-actions";
@@ -194,7 +195,7 @@ function ClassificationHeader({
   isPending: boolean;
 }) {
   const [showReasoning, setShowReasoning] = useState(false);
-  const config = classification ? CLASSIFICATIONS[classification] : CLASSIFICATIONS.unclear;
+  const config = getClassificationConfig(classification);
   const color = config.color;
 
   const classificationGroups = {
