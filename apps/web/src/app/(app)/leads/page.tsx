@@ -1,6 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageSetup } from "./_components/page-setup";
+import { QuickCreateLead } from "./_components/quick-create-lead";
+import { Pagination } from "./_components/pagination";
 import {
   Table,
   TableBody,
@@ -22,8 +25,14 @@ interface Lead {
   property_count: number;
 }
 
-async function getLeads(): Promise<{ data: Lead[]; count: number }> {
+const PAGE_SIZE = 25;
+
+async function getLeads(
+  page: number
+): Promise<{ data: Lead[]; count: number }> {
   const supabase = createAdminClient();
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   const { data, count, error } = await supabase
     .from("leads")
@@ -41,7 +50,7 @@ async function getLeads(): Promise<{ data: Lead[]; count: number }> {
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
-    .limit(50);
+    .range(from, to);
 
   if (error) {
     console.error("Failed to fetch leads:", error);
@@ -84,8 +93,15 @@ function getStatusColor(status: string): string {
   }
 }
 
-export default async function LeadsPage() {
-  const { data: leads, count } = await getLeads();
+interface PageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function LeadsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const currentPage = Math.max(1, parseInt(params.page || "1", 10));
+  const { data: leads, count } = await getLeads(currentPage);
+  const totalPages = Math.ceil(count / PAGE_SIZE);
 
   return (
     <PageSetup>
@@ -94,6 +110,7 @@ export default async function LeadsPage() {
           <p className="text-sm text-muted-foreground">
             {count} {count === 1 ? "lead" : "leads"} total
           </p>
+          <QuickCreateLead />
         </div>
 
         <div className="border rounded-lg">
@@ -122,9 +139,19 @@ export default async function LeadsPage() {
               ) : (
                 leads.map((lead) => (
                   <TableRow key={lead.id}>
-                    <TableCell className="font-medium">{lead.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="hover:underline"
+                      >
+                        {lead.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className={getStatusColor(lead.status)}>
+                      <Badge
+                        variant="secondary"
+                        className={getStatusColor(lead.status)}
+                      >
                         {lead.status}
                       </Badge>
                     </TableCell>
@@ -145,6 +172,15 @@ export default async function LeadsPage() {
             </TableBody>
           </Table>
         </div>
+
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={count}
+            pageSize={PAGE_SIZE}
+          />
+        )}
       </PageContainer>
     </PageSetup>
   );
