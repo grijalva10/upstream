@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageContainer } from "@/components/layout";
 import { PageSetup } from "./_components/page-setup";
-import { ApprovalsCard } from "./_components/approvals-card";
 import { CallsTodayCard } from "./_components/calls-today-card";
 import { NewRepliesCard } from "./_components/new-replies-card";
 import { StalledDealsCard } from "./_components/stalled-deals-card";
@@ -241,11 +240,7 @@ export default async function DashboardPage() {
     <PageSetup>
       <PageContainer>
         {/* Top row: Action cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <ApprovalsCard
-            emailDrafts={data.emailDrafts}
-            lowConfidence={data.lowConfidence}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <CallsTodayCard calls={data.calls} />
           <NewRepliesCard replies={data.replies} total={data.totalReplies} />
           <StalledDealsCard deals={data.stalledDeals} />

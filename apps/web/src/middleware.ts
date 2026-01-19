@@ -34,7 +34,6 @@ export async function middleware(request: NextRequest) {
     "/dashboard",
     "/criteria",
     "/settings",
-    "/approvals",
     "/pipeline",
     "/tasks",
     "/inbox",
