@@ -25,7 +25,7 @@ export async function handleEmailSync(
     };
   }
 
-  const scriptPath = path.join(config.python.scriptsDir, 'sync_all_emails.py');
+  const scriptPath = path.join(config.python.scriptsDir, 'sync/sync_emails.py');
 
   return new Promise((resolve, reject) => {
     const proc = spawn(config.python.executable, [scriptPath], {
