@@ -5,7 +5,6 @@ import { useState, useTransition } from "react";
 import { Check, Clock, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,21 +27,6 @@ export interface Task {
 
 interface TaskItemProps {
   task: Task;
-}
-
-function getTypeColor(type: string): string {
-  switch (type) {
-    case "call_reminder":
-      return "bg-blue-100 text-blue-800";
-    case "follow_up":
-      return "bg-amber-100 text-amber-800";
-    case "review_deal":
-      return "bg-purple-100 text-purple-800";
-    case "call_prep":
-      return "bg-green-100 text-green-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
 }
 
 function formatDueDate(dateStr: string, timeStr: string | null): string {
@@ -78,14 +62,10 @@ function formatDueDate(dateStr: string, timeStr: string | null): string {
       hour: "numeric",
       minute: "2-digit",
     });
-    return `${dateLabel} at ${timeLabel}`;
+    return `${dateLabel}, ${timeLabel}`;
   }
 
   return dateLabel;
-}
-
-function formatType(type: string): string {
-  return type.replace(/_/g, " ");
 }
 
 export function TaskItem({ task }: TaskItemProps) {
@@ -124,76 +104,65 @@ export function TaskItem({ task }: TaskItemProps) {
     <div
       onClick={handleRowClick}
       className={cn(
-        "flex items-center gap-3 p-3 border rounded-lg transition-colors",
+        "flex items-center gap-3 px-3 py-2 transition-colors",
         task.lead_id && "cursor-pointer hover:bg-muted/50",
         isPending && "opacity-50",
-        isOverdue && "border-red-200 bg-red-50/50"
+        isOverdue && "bg-red-50/50"
       )}
     >
       <Button
         variant="ghost"
         size="icon"
         className={cn(
-          "h-6 w-6 rounded-full border-2 flex-shrink-0",
+          "h-4 w-4 rounded-full border flex-shrink-0",
           isCompleting
             ? "border-green-500 bg-green-500 text-white"
-            : "border-muted-foreground/30 hover:border-green-500"
+            : "border-muted-foreground/40 hover:border-green-500"
         )}
         onClick={handleComplete}
         disabled={isPending}
       >
-        {isCompleting && <Check className="h-3 w-3" />}
+        {isCompleting && <Check className="h-2.5 w-2.5" />}
       </Button>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium truncate">{task.title}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {task.lead_name && (
-            <>
-              <span className="truncate">{task.lead_name}</span>
-              <span>·</span>
-            </>
-          )}
-          <Badge variant="secondary" className={cn("text-xs", getTypeColor(task.type))}>
-            {formatType(task.type)}
-          </Badge>
-        </div>
-      </div>
+      <span className="flex-1 text-sm truncate">{task.title}</span>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span
-          className={cn(
-            "text-sm",
-            isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"
-          )}
-        >
-          {formatDueDate(task.due_date, task.due_time)}
+      {task.lead_name && (
+        <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+          {task.lead_name}
         </span>
+      )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleSnooze(1)}>
-              <Clock className="h-4 w-4 mr-2" />
-              Snooze 1 day
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleSnooze(3)}>
-              <Clock className="h-4 w-4 mr-2" />
-              Snooze 3 days
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleSnooze(7)}>
-              <Clock className="h-4 w-4 mr-2" />
-              Snooze 1 week
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <span
+        className={cn(
+          "text-xs flex-shrink-0",
+          isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"
+        )}
+      >
+        {formatDueDate(task.due_date, task.due_time)}
+      </span>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+          <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0">
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleSnooze(1)}>
+            <Clock className="h-4 w-4 mr-2" />
+            Snooze 1 day
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleSnooze(3)}>
+            <Clock className="h-4 w-4 mr-2" />
+            Snooze 3 days
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleSnooze(7)}>
+            <Clock className="h-4 w-4 mr-2" />
+            Snooze 1 week
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

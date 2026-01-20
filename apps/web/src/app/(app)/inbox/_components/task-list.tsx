@@ -15,7 +15,7 @@ export function TaskList({ tasks, emptyMessage }: TaskListProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="border rounded-lg divide-y">
       {tasks.map((task) => (
         <TaskItem key={task.id} task={task} />
       ))}
