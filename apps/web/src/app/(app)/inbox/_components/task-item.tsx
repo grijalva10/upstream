@@ -185,24 +185,23 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
         <TypeIcon className={cn("h-3.5 w-3.5", typeStyle.iconColor)} />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0" onClick={handleRowClick}>
-        <span className="text-sm truncate block">{task.title}</span>
+      {/* Lead name - fixed width for alignment */}
+      <span
+        className="text-sm font-medium truncate w-[140px] flex-shrink-0"
+        onClick={handleRowClick}
+      >
+        {task.lead_name || ""}
+      </span>
+
+      {/* Content - in the middle */}
+      <div className="flex-1 min-w-0 overflow-hidden px-8" onClick={handleRowClick}>
+        <span className="text-sm text-muted-foreground truncate block">{task.title}</span>
         {task.type === "incoming_email" && task.subject && (
-          <span className="text-xs text-muted-foreground truncate block">
+          <span className="text-xs text-muted-foreground/70 truncate block">
             {task.subject}
           </span>
         )}
       </div>
-
-      {task.lead_name && (
-        <span
-          className="text-xs text-muted-foreground truncate max-w-[120px] flex-shrink-0"
-          onClick={handleRowClick}
-        >
-          {task.lead_name}
-        </span>
-      )}
 
       <span
         className={cn(
