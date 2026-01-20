@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Clock, Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -37,24 +36,6 @@ interface TasksCardProps {
   leadId: string;
 }
 
-function getTypeColor(type: string): string {
-  switch (type) {
-    case "call_reminder":
-      return "bg-blue-100 text-blue-800";
-    case "follow_up":
-      return "bg-amber-100 text-amber-800";
-    case "review_deal":
-      return "bg-purple-100 text-purple-800";
-    case "call_prep":
-      return "bg-green-100 text-green-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-}
-
-function formatType(type: string): string {
-  return type.replace(/_/g, " ");
-}
 
 function formatDueDate(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
@@ -77,7 +58,7 @@ export function TasksCard({ tasks, leadId }: TasksCardProps) {
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
-    type: "follow_up",
+    type: "lead",
     due_date: new Date().toISOString().split("T")[0],
   });
 
@@ -96,7 +77,7 @@ export function TasksCard({ tasks, leadId }: TasksCardProps) {
         setDialogOpen(false);
         setFormData({
           title: "",
-          type: "follow_up",
+          type: "lead",
           due_date: new Date().toISOString().split("T")[0],
         });
         router.refresh();
@@ -229,10 +210,10 @@ export function TasksCard({ tasks, leadId }: TasksCardProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="follow_up">Follow Up</SelectItem>
-                    <SelectItem value="call_reminder">Call Reminder</SelectItem>
-                    <SelectItem value="call_prep">Call Prep</SelectItem>
-                    <SelectItem value="review_deal">Review Deal</SelectItem>
+                    <SelectItem value="lead">Task</SelectItem>
+                    <SelectItem value="outgoing_call">Call</SelectItem>
+                    <SelectItem value="email_followup">Email Follow-up</SelectItem>
+                    <SelectItem value="deal">Deal Reminder</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
