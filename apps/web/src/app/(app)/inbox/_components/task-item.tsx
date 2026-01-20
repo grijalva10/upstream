@@ -1,14 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { Check, Clock, MoreHorizontal } from "lucide-react";
+import { useTransition } from "react";
+import {
+  Check,
+  Clock,
+  MoreHorizontal,
+  Mail,
+  Phone,
+  FileText,
+  Briefcase,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { completeTask, snoozeTask } from "../actions";
@@ -28,6 +41,44 @@ export interface Task {
 
 interface TaskItemProps {
   task: Task;
+  selected?: boolean;
+  onSelect?: (id: string, checked: boolean) => void;
+}
+
+// Task type to icon and color mapping
+function getTaskTypeStyle(type: string): {
+  icon: typeof Mail;
+  bgColor: string;
+  iconColor: string;
+} {
+  switch (type) {
+    case "incoming_email":
+    case "email_followup":
+      return {
+        icon: Mail,
+        bgColor: "bg-blue-100",
+        iconColor: "text-blue-600",
+      };
+    case "outgoing_call":
+      return {
+        icon: Phone,
+        bgColor: "bg-green-100",
+        iconColor: "text-green-600",
+      };
+    case "deal":
+      return {
+        icon: Briefcase,
+        bgColor: "bg-purple-100",
+        iconColor: "text-purple-600",
+      };
+    case "lead":
+    default:
+      return {
+        icon: FileText,
+        bgColor: "bg-orange-100",
+        iconColor: "text-orange-600",
+      };
+  }
 }
 
 function formatDueDate(dateStr: string, timeStr: string | null): string {
@@ -69,14 +120,11 @@ function formatDueDate(dateStr: string, timeStr: string | null): string {
   return dateLabel;
 }
 
-export function TaskItem({ task }: TaskItemProps) {
+export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isCompleting, setIsCompleting] = useState(false);
 
-  const handleComplete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsCompleting(true);
+  const handleComplete = async () => {
     startTransition(async () => {
       await completeTask(task.id);
       router.refresh();
@@ -96,37 +144,49 @@ export function TaskItem({ task }: TaskItemProps) {
     }
   };
 
+  const handleCheckboxChange = (checked: boolean) => {
+    onSelect?.(task.id, checked);
+  };
+
   const isOverdue =
     new Date(task.due_date + "T23:59:59") < new Date() &&
     task.status !== "completed" &&
     task.status !== "cancelled";
 
+  const typeStyle = getTaskTypeStyle(task.type);
+  const TypeIcon = typeStyle.icon;
+
   return (
     <div
-      onClick={handleRowClick}
       className={cn(
         "flex items-center gap-3 px-3 py-2 transition-colors",
         task.lead_id && "cursor-pointer hover:bg-muted/50",
         isPending && "opacity-50",
-        isOverdue && "bg-red-50/50"
+        isOverdue && "bg-red-50/50",
+        selected && "bg-muted/30"
       )}
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        className={cn(
-          "h-4 w-4 rounded-full border flex-shrink-0",
-          isCompleting
-            ? "border-green-500 bg-green-500 text-white"
-            : "border-muted-foreground/40 hover:border-green-500"
-        )}
-        onClick={handleComplete}
-        disabled={isPending}
-      >
-        {isCompleting && <Check className="h-2.5 w-2.5" />}
-      </Button>
+      {/* Checkbox */}
+      <Checkbox
+        checked={selected}
+        onCheckedChange={handleCheckboxChange}
+        onClick={(e) => e.stopPropagation()}
+        className="flex-shrink-0"
+      />
 
-      <div className="flex-1 min-w-0">
+      {/* Type icon */}
+      <div
+        className={cn(
+          "h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0",
+          typeStyle.bgColor
+        )}
+        onClick={handleRowClick}
+      >
+        <TypeIcon className={cn("h-3.5 w-3.5", typeStyle.iconColor)} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0" onClick={handleRowClick}>
         <span className="text-sm truncate block">{task.title}</span>
         {task.type === "incoming_email" && task.subject && (
           <span className="text-xs text-muted-foreground truncate block">
@@ -136,7 +196,10 @@ export function TaskItem({ task }: TaskItemProps) {
       </div>
 
       {task.lead_name && (
-        <span className="text-xs text-muted-foreground truncate max-w-[120px] flex-shrink-0">
+        <span
+          className="text-xs text-muted-foreground truncate max-w-[120px] flex-shrink-0"
+          onClick={handleRowClick}
+        >
           {task.lead_name}
         </span>
       )}
@@ -146,6 +209,7 @@ export function TaskItem({ task }: TaskItemProps) {
           "text-xs flex-shrink-0",
           isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"
         )}
+        onClick={handleRowClick}
       >
         {formatDueDate(task.due_date, task.due_time)}
       </span>
@@ -157,18 +221,28 @@ export function TaskItem({ task }: TaskItemProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => handleSnooze(1)}>
-            <Clock className="h-4 w-4 mr-2" />
-            Snooze 1 day
+          <DropdownMenuItem onClick={handleComplete}>
+            <Check className="h-4 w-4 mr-2" />
+            Mark as done
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSnooze(3)}>
-            <Clock className="h-4 w-4 mr-2" />
-            Snooze 3 days
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleSnooze(7)}>
-            <Clock className="h-4 w-4 mr-2" />
-            Snooze 1 week
-          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Clock className="h-4 w-4 mr-2" />
+              Snooze
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => handleSnooze(1)}>
+                1 day
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSnooze(3)}>
+                3 days
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSnooze(7)}>
+                1 week
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

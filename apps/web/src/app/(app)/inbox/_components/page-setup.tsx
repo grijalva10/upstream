@@ -2,16 +2,21 @@
 
 import type { ReactNode } from "react";
 import { PageProvider } from "@/components/layout";
+import { InboxHeader } from "./inbox-header";
 
 interface PageSetupProps {
   children: ReactNode;
+  counts: {
+    inbox: number;
+    future: number;
+    archive: number;
+  };
 }
 
-export function PageSetup({ children }: PageSetupProps): ReactNode {
+export function PageSetup({ children, counts }: PageSetupProps): ReactNode {
   return (
     <PageProvider
-      title="Inbox"
-      description="Tasks that need your attention"
+      title={<InboxHeader counts={counts} />}
       breadcrumbs={[{ label: "Inbox" }]}
     >
       {children}

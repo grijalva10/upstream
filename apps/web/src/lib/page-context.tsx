@@ -15,7 +15,7 @@ export interface BreadcrumbItem {
 }
 
 export interface PageContextValue {
-  title: string;
+  title: string | ReactNode;
   description?: string;
   breadcrumbs?: BreadcrumbItem[];
   actions?: ReactNode;
