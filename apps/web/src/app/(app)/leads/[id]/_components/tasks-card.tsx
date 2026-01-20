@@ -151,7 +151,7 @@ export function TasksCard({ tasks, leadId }: TasksCardProps) {
         {incompleteTasks.length === 0 ? (
           <p className="text-sm text-muted-foreground p-4">No tasks</p>
         ) : (
-          <div className="p-3 space-y-2">
+          <div className="divide-y">
             {incompleteTasks.map((task) => {
               const isOverdue =
                 new Date(task.due_date + "T23:59:59") < new Date();
@@ -161,45 +161,35 @@ export function TasksCard({ tasks, leadId }: TasksCardProps) {
                 <div
                   key={task.id}
                   className={cn(
-                    "flex items-start gap-2 p-2 rounded-md",
-                    isOverdue && "bg-red-50"
+                    "flex items-center gap-2 px-3 py-2",
+                    isOverdue && "bg-red-50/50"
                   )}
                 >
                   <Button
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "h-5 w-5 rounded-full border-2 flex-shrink-0 mt-0.5",
+                      "h-4 w-4 rounded-full border flex-shrink-0",
                       isCompleting
                         ? "border-green-500 bg-green-500 text-white"
-                        : "border-muted-foreground/30 hover:border-green-500"
+                        : "border-muted-foreground/40 hover:border-green-500"
                     )}
                     onClick={() => handleComplete(task.id)}
                     disabled={isCompleting}
                   >
-                    {isCompleting && <Check className="h-3 w-3" />}
+                    {isCompleting && <Check className="h-2.5 w-2.5" />}
                   </Button>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{task.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Badge
-                        variant="secondary"
-                        className={cn("text-xs", getTypeColor(task.type))}
-                      >
-                        {formatType(task.type)}
-                      </Badge>
-                      <span
-                        className={cn(
-                          "text-xs",
-                          isOverdue
-                            ? "text-red-600 font-medium"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {formatDueDate(task.due_date)}
-                      </span>
-                    </div>
-                  </div>
+                  <span className="flex-1 text-sm truncate">{task.title}</span>
+                  <span
+                    className={cn(
+                      "text-xs flex-shrink-0",
+                      isOverdue
+                        ? "text-red-600 font-medium"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {formatDueDate(task.due_date)}
+                  </span>
                 </div>
               );
             })}
