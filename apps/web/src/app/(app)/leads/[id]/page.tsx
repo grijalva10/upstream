@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ContactsCard } from "./_components/contacts-card";
 import { PropertiesCard } from "./_components/properties-card";
 import { DealsCard } from "./_components/deals-card";
+import { TasksCard, type Task } from "./_components/tasks-card";
 import { ActivityTimeline, type Activity } from "./_components/activity-timeline";
 import { ActivityActions } from "./_components/activity-actions";
 
@@ -215,6 +216,34 @@ async function getDeals(leadId: string): Promise<Deal[]> {
   return (data ?? []) as Deal[];
 }
 
+async function getTasks(leadId: string): Promise<Task[]> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select(
+      `
+      id,
+      type,
+      title,
+      due_date,
+      due_time,
+      status
+    `
+    )
+    .eq("lead_id", leadId)
+    .in("status", ["pending", "snoozed"])
+    .order("due_date")
+    .order("due_time", { ascending: true, nullsFirst: false });
+
+  if (error) {
+    console.error("Error fetching tasks:", error);
+    return [];
+  }
+
+  return (data ?? []) as Task[];
+}
+
 async function getActivities(leadId: string, contactIds: string[]): Promise<Activity[]> {
   const supabase = createAdminClient();
   const activities: Activity[] = [];
@@ -376,11 +405,12 @@ async function getActivities(leadId: string, contactIds: string[]): Promise<Acti
 
 export default async function LeadDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [lead, contacts, properties, deals] = await Promise.all([
+  const [lead, contacts, properties, deals, tasks] = await Promise.all([
     getLead(id),
     getContacts(id),
     getProperties(id),
     getDeals(id),
+    getTasks(id),
   ]);
 
   // Fetch activities after we have contact IDs
@@ -417,9 +447,10 @@ export default async function LeadDetailPage({ params }: PageProps) {
 
       {/* Two column layout - 1/3 sidebar, 2/3 activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left column - Contacts, Properties, Deals */}
+        {/* Left column - Contacts, Tasks, Properties, Deals */}
         <div className="space-y-6 lg:col-span-1">
           <ContactsCard contacts={contacts} leadId={id} />
+          <TasksCard tasks={tasks} leadId={id} />
           <PropertiesCard properties={properties} />
           <DealsCard deals={deals} />
         </div>
