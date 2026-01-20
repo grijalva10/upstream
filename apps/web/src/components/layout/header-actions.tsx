@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, LogOut, Settings, Sparkles } from "lucide-react";
+import { Bell, LogOut, Settings, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -54,23 +54,6 @@ export function HeaderActions(): ReactNode {
       <Button variant="ghost" size="icon-sm" onClick={toggle} className="sm:hidden">
         <Sparkles className="h-4 w-4" />
         <span className="sr-only">AI Assistant</span>
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground"
-      >
-        <Search className="h-4 w-4" />
-        <span className="text-sm">Search...</span>
-        <kbd className="hidden lg:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-          <span className="text-xs">Ctrl</span>K
-        </kbd>
-      </Button>
-
-      <Button variant="ghost" size="icon-sm" className="sm:hidden">
-        <Search className="h-4 w-4" />
-        <span className="sr-only">Search</span>
       </Button>
 
       <Button variant="ghost" size="icon-sm" className="relative">

@@ -1,41 +1,27 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { usePageContext } from "@/lib/page-context";
-import { Breadcrumbs } from "./breadcrumbs";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { HeaderActions } from "./header-actions";
 
 export function AppHeader(): ReactNode {
-  const pageContext = usePageContext();
-
-  const showBreadcrumbs =
-    pageContext?.breadcrumbs && pageContext.breadcrumbs.length > 1;
-
   return (
     <header className="h-14 border-b bg-background flex-shrink-0">
-      <div className="h-full px-4 sm:px-6 flex items-center justify-between">
-        <div className="flex flex-col justify-center min-w-0">
-          {pageContext?.title && (
-            <h1 className="text-lg font-semibold tracking-tight truncate">
-              {pageContext.title}
-            </h1>
-          )}
-          {showBreadcrumbs && (
-            <Breadcrumbs
-              items={pageContext.breadcrumbs!}
-              className="hidden sm:flex mt-0.5"
-            />
-          )}
+      <div className="h-full px-4 sm:px-6 flex items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="pl-9 pr-12 h-9"
+          />
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <span className="text-xs">Ctrl</span>K
+          </kbd>
         </div>
 
-        <div className="flex items-center gap-4">
-          {pageContext?.actions && (
-            <div className="hidden sm:flex items-center">
-              {pageContext.actions}
-            </div>
-          )}
-          <HeaderActions />
-        </div>
+        <HeaderActions />
       </div>
     </header>
   );

@@ -5,14 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Search,
-  Send,
   Inbox,
-  Mail,
-  Kanban,
-  Phone,
-  Database,
-  Layers,
   Settings,
 } from "lucide-react";
 import {
@@ -23,17 +16,13 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
+// Core navigation: Dashboard, Inbox, Leads, Settings
+// AI Sheet handles campaign creation, search queries, and monitoring
+// See docs/VISION.md for UI/UX philosophy
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/inbox", icon: Inbox, label: "Inbox" },
   { href: "/leads", icon: Users, label: "Leads" },
-  { href: "/searches", icon: Search, label: "Searches" },
-  { href: "/campaigns", icon: Send, label: "Campaigns" },
-  { href: "/mail", icon: Mail, label: "Mail" },
-  { href: "/pipeline", icon: Kanban, label: "Pipeline" },
-  { href: "/calls", icon: Phone, label: "Calls" },
-  { href: "/data", icon: Database, label: "Data" },
-  { href: "/jobs", icon: Layers, label: "Jobs" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 

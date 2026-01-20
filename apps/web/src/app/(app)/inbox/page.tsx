@@ -78,7 +78,10 @@ async function getTasks(
       due_time,
       status,
       lead_id,
-      leads (name)
+      contact_id,
+      object_id,
+      leads (name),
+      contacts (email)
     `
     )
     .order("due_date", { ascending: view !== "archive" })
@@ -113,19 +116,119 @@ async function getTasks(
     return [];
   }
 
+  // Get contact IDs for incoming_email tasks to fetch drafts
+  const incomingEmailTasks = data?.filter(
+    (t: any) => t.type === "incoming_email" && t.contact_id
+  ) || [];
+  const contactIds = incomingEmailTasks.map((t: any) => t.contact_id);
+  const threadIds = incomingEmailTasks
+    .filter((t: any) => t.object_id)
+    .map((t: any) => t.object_id);
+
+  // Fetch pending drafts for these contacts
+  let draftsMap = new Map<string, any>();
+  if (contactIds.length > 0) {
+    const { data: drafts } = await supabase
+      .from("email_drafts")
+      .select("id, subject, body, to_email, to_name, status, contact_id, source_email_id")
+      .in("contact_id", contactIds)
+      .eq("status", "pending");
+
+    drafts?.forEach((d: any) => {
+      // Map by contact_id - take most recent if multiple
+      if (!draftsMap.has(d.contact_id)) {
+        draftsMap.set(d.contact_id, d);
+      }
+    });
+  }
+
+  // Fetch thread context and classification for incoming_email tasks
+  let threadMap = new Map<string, any[]>();
+  let classificationMap = new Map<string, string>();
+  let propertyMap = new Map<string, string>();
+
+  if (threadIds.length > 0) {
+    // Get emails in these threads
+    const { data: threadEmails } = await supabase
+      .from("synced_emails")
+      .select("id, outlook_conversation_id, from_email, from_name, body_text, direction, received_at, classification, matched_lead_id")
+      .in("outlook_conversation_id", threadIds)
+      .order("received_at", { ascending: false })
+      .limit(100);
+
+    threadEmails?.forEach((e: any) => {
+      const threadId = e.outlook_conversation_id;
+      if (!threadMap.has(threadId)) {
+        threadMap.set(threadId, []);
+      }
+      threadMap.get(threadId)!.push({
+        id: e.id,
+        from_email: e.from_email,
+        from_name: e.from_name,
+        body_text: e.body_text,
+        direction: e.direction,
+        received_at: e.received_at,
+      });
+
+      // Get latest inbound classification
+      if (e.direction === "inbound" && e.classification && !classificationMap.has(threadId)) {
+        classificationMap.set(threadId, e.classification);
+      }
+    });
+
+    // Sort each thread chronologically
+    threadMap.forEach((emails, threadId) => {
+      emails.sort((a, b) => new Date(a.received_at).getTime() - new Date(b.received_at).getTime());
+    });
+  }
+
+  // Fetch property addresses for leads
+  const leadIds = data?.filter((t: any) => t.lead_id).map((t: any) => t.lead_id) || [];
+  if (leadIds.length > 0) {
+    const { data: propertyLinks } = await supabase
+      .from("property_leads")
+      .select("lead_id, properties (address)")
+      .in("lead_id", leadIds);
+
+    propertyLinks?.forEach((pl: any) => {
+      if (pl.properties?.address && !propertyMap.has(pl.lead_id)) {
+        propertyMap.set(pl.lead_id, pl.properties.address);
+      }
+    });
+  }
+
   return (
-    data?.map((task: any) => ({
-      id: task.id,
-      type: task.type,
-      title: task.title,
-      description: task.description,
-      subject: task.subject,
-      due_date: task.due_date,
-      due_time: task.due_time,
-      status: task.status,
-      lead_id: task.lead_id,
-      lead_name: task.leads?.name ?? null,
-    })) ?? []
+    data?.map((task: any) => {
+      const draft = task.contact_id ? draftsMap.get(task.contact_id) : null;
+      const thread = task.object_id ? threadMap.get(task.object_id) || [] : [];
+      const classification = task.object_id ? classificationMap.get(task.object_id) : null;
+      const propertyAddress = task.lead_id ? propertyMap.get(task.lead_id) : null;
+
+      return {
+        id: task.id,
+        type: task.type,
+        title: task.title,
+        description: task.description,
+        subject: task.subject,
+        due_date: task.due_date,
+        due_time: task.due_time,
+        status: task.status,
+        lead_id: task.lead_id,
+        lead_name: task.leads?.name ?? null,
+        contact_id: task.contact_id,
+        draft: draft ? {
+          id: draft.id,
+          subject: draft.subject,
+          body: draft.body,
+          to_email: draft.to_email,
+          to_name: draft.to_name,
+          status: draft.status,
+        } : null,
+        thread,
+        property_address: propertyAddress,
+        classification: classification ?? null,
+      };
+    }) ?? []
   );
 }
 

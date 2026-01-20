@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { PageProvider } from "@/components/layout";
+import { PageHeader, PageHeaderLeft } from "@/components/layout";
 import { InboxHeader } from "./inbox-header";
 
 interface PageSetupProps {
@@ -15,11 +15,13 @@ interface PageSetupProps {
 
 export function PageSetup({ children, counts }: PageSetupProps): ReactNode {
   return (
-    <PageProvider
-      title={<InboxHeader counts={counts} />}
-      breadcrumbs={[{ label: "Inbox" }]}
-    >
+    <>
+      <PageHeader>
+        <PageHeaderLeft>
+          <InboxHeader counts={counts} />
+        </PageHeaderLeft>
+      </PageHeader>
       {children}
-    </PageProvider>
+    </>
   );
 }

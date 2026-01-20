@@ -2,7 +2,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageSetup } from "./_components/page-setup";
-import { QuickCreateLead } from "./_components/quick-create-lead";
 import { Pagination } from "./_components/pagination";
 import {
   Table,
@@ -13,6 +12,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type SortField = "name" | "status" | "company_type" | "created_at" | "last_activity";
+type SortDir = "asc" | "desc";
 
 interface Lead {
   id: string;
@@ -23,16 +27,43 @@ interface Lead {
   created_at: string;
   contacts: { id: string; name: string; email: string | null }[];
   property_count: number;
+  last_activity_at: string | null;
 }
 
 const PAGE_SIZE = 25;
 
+function formatRelativeDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHours === 0) {
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      return diffMins <= 1 ? "just now" : `${diffMins}m ago`;
+    }
+    return `${diffHours}h ago`;
+  }
+  if (diffDays === 1) return "yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
+}
+
 async function getLeads(
-  page: number
+  page: number,
+  sortField: SortField = "created_at",
+  sortDir: SortDir = "desc"
 ): Promise<{ data: Lead[]; count: number }> {
   const supabase = createAdminClient();
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+
+  // Map sort field to actual column (last_activity handled separately)
+  const dbSortField = sortField === "last_activity" ? "created_at" : sortField;
 
   const { data, count, error } = await supabase
     .from("leads")
@@ -49,7 +80,7 @@ async function getLeads(
     `,
       { count: "exact" }
     )
-    .order("created_at", { ascending: false })
+    .order(dbSortField, { ascending: sortDir === "asc" })
     .range(from, to);
 
   if (error) {
@@ -57,7 +88,46 @@ async function getLeads(
     return { data: [], count: 0 };
   }
 
-  const leads =
+  // Get last activity for these leads (most recent email or activity)
+  const leadIds = data?.map((l: any) => l.id) || [];
+  const lastActivityMap = new Map<string, string>();
+
+  if (leadIds.length > 0) {
+    // Get latest email per lead
+    const { data: emails } = await supabase
+      .from("synced_emails")
+      .select("matched_lead_id, received_at")
+      .in("matched_lead_id", leadIds)
+      .order("received_at", { ascending: false });
+
+    // Get latest activity per lead
+    const { data: activities } = await supabase
+      .from("activities")
+      .select("lead_id, activity_at")
+      .in("lead_id", leadIds)
+      .order("activity_at", { ascending: false });
+
+    // Build map of lead_id -> latest timestamp
+    emails?.forEach((e: any) => {
+      if (e.matched_lead_id && e.received_at) {
+        const existing = lastActivityMap.get(e.matched_lead_id);
+        if (!existing || new Date(e.received_at) > new Date(existing)) {
+          lastActivityMap.set(e.matched_lead_id, e.received_at);
+        }
+      }
+    });
+
+    activities?.forEach((a: any) => {
+      if (a.lead_id && a.activity_at) {
+        const existing = lastActivityMap.get(a.lead_id);
+        if (!existing || new Date(a.activity_at) > new Date(existing)) {
+          lastActivityMap.set(a.lead_id, a.activity_at);
+        }
+      }
+    });
+  }
+
+  let leads =
     data?.map((lead: any) => ({
       id: lead.id,
       name: lead.name,
@@ -67,7 +137,17 @@ async function getLeads(
       created_at: lead.created_at,
       contacts: lead.contacts || [],
       property_count: lead.property_leads?.length || 0,
+      last_activity_at: lastActivityMap.get(lead.id) || null,
     })) || [];
+
+  // Sort by last_activity if requested (can't do in DB query)
+  if (sortField === "last_activity") {
+    leads = leads.sort((a, b) => {
+      const aTime = a.last_activity_at ? new Date(a.last_activity_at).getTime() : 0;
+      const bTime = b.last_activity_at ? new Date(b.last_activity_at).getTime() : 0;
+      return sortDir === "asc" ? aTime - bTime : bTime - aTime;
+    });
+  }
 
   return { data: leads, count: count ?? 0 };
 }
@@ -93,37 +173,87 @@ function getStatusColor(status: string): string {
   }
 }
 
-interface PageProps {
-  searchParams: Promise<{ page?: string }>;
+interface SortableHeaderProps {
+  field: SortField;
+  currentSort: SortField;
+  currentDir: SortDir;
+  children: React.ReactNode;
 }
+
+function SortableHeader({ field, currentSort, currentDir, children }: SortableHeaderProps) {
+  const isActive = currentSort === field;
+  const nextDir = isActive && currentDir === "desc" ? "asc" : "desc";
+  const href = `?sort=${field}&dir=${nextDir}`;
+
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "inline-flex items-center gap-1 hover:text-foreground transition-colors",
+        isActive ? "text-foreground" : "text-muted-foreground"
+      )}
+    >
+      {children}
+      {isActive ? (
+        currentDir === "asc" ? (
+          <ArrowUp className="h-3.5 w-3.5" />
+        ) : (
+          <ArrowDown className="h-3.5 w-3.5" />
+        )
+      ) : (
+        <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+      )}
+    </Link>
+  );
+}
+
+interface PageProps {
+  searchParams: Promise<{ page?: string; sort?: string; dir?: string }>;
+}
+
+const VALID_SORT_FIELDS: SortField[] = ["name", "status", "company_type", "created_at", "last_activity"];
 
 export default async function LeadsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const currentPage = Math.max(1, parseInt(params.page || "1", 10));
-  const { data: leads, count } = await getLeads(currentPage);
+  const sortField: SortField = VALID_SORT_FIELDS.includes(params.sort as SortField)
+    ? (params.sort as SortField)
+    : "last_activity";
+  const sortDir: SortDir = params.dir === "asc" ? "asc" : "desc";
+
+  const { data: leads, count } = await getLeads(currentPage, sortField, sortDir);
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
   return (
-    <PageSetup>
+    <PageSetup count={count}>
       <PageContainer>
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">
-            {count} {count === 1 ? "lead" : "leads"} total
-          </p>
-          <QuickCreateLead />
-        </div>
-
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>
+                  <SortableHeader field="name" currentSort={sortField} currentDir={sortDir}>
+                    Name
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="status" currentSort={sortField} currentDir={sortDir}>
+                    Status
+                  </SortableHeader>
+                </TableHead>
+                <TableHead>
+                  <SortableHeader field="company_type" currentSort={sortField} currentDir={sortDir}>
+                    Type
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>Contacts</TableHead>
                 <TableHead>Properties</TableHead>
+                <TableHead>
+                  <SortableHeader field="last_activity" currentSort={sortField} currentDir={sortDir}>
+                    Last Activity
+                  </SortableHeader>
+                </TableHead>
                 <TableHead>Source</TableHead>
-                <TableHead>Created</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -161,10 +291,12 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                     <TableCell>{lead.contacts.length}</TableCell>
                     <TableCell>{lead.property_count}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {lead.source || "-"}
+                      {lead.last_activity_at
+                        ? formatRelativeDate(lead.last_activity_at)
+                        : "-"}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(lead.created_at).toLocaleDateString()}
+                      {lead.source || "-"}
                     </TableCell>
                   </TableRow>
                 ))
