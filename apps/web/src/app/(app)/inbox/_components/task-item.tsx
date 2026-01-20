@@ -18,6 +18,7 @@ export interface Task {
   type: string;
   title: string;
   description: string | null;
+  subject: string | null;
   due_date: string;
   due_time: string | null;
   status: string;
@@ -125,10 +126,17 @@ export function TaskItem({ task }: TaskItemProps) {
         {isCompleting && <Check className="h-2.5 w-2.5" />}
       </Button>
 
-      <span className="flex-1 text-sm truncate">{task.title}</span>
+      <div className="flex-1 min-w-0">
+        <span className="text-sm truncate block">{task.title}</span>
+        {task.type === "incoming_email" && task.subject && (
+          <span className="text-xs text-muted-foreground truncate block">
+            {task.subject}
+          </span>
+        )}
+      </div>
 
       {task.lead_name && (
-        <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+        <span className="text-xs text-muted-foreground truncate max-w-[120px] flex-shrink-0">
           {task.lead_name}
         </span>
       )}

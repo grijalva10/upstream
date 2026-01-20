@@ -176,6 +176,7 @@ export async function handleSendEmail(
     await incrementSendCount();
 
     // Update lead status to 'contacted' if this is first outreach
+    // and auto-complete any incoming_email tasks for this contact
     try {
       const { data: queueRecord } = await supabase
         .from('email_queue')
@@ -201,11 +202,27 @@ export async function handleSendEmail(
           if (!updateError) {
             console.log(`[send-email] Updated lead ${contact.lead_id} status to 'contacted'`);
           }
+
+          // Auto-complete incoming_email tasks for this contact
+          const { data: completedTasks, error: taskError } = await supabase
+            .from('tasks')
+            .update({
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+            })
+            .eq('type', 'incoming_email')
+            .eq('contact_id', queueRecord.contact_id)
+            .in('status', ['pending', 'snoozed'])
+            .select('id');
+
+          if (!taskError && completedTasks && completedTasks.length > 0) {
+            console.log(`[send-email] Auto-completed ${completedTasks.length} incoming_email task(s)`);
+          }
         }
       }
     } catch (err) {
       // Don't fail the job if status update fails
-      console.warn('[send-email] Failed to update lead status:', err);
+      console.warn('[send-email] Failed to update lead status or tasks:', err);
     }
 
     console.log(`[send-email] Sent to ${toEmail}`);

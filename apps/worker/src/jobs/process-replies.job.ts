@@ -439,6 +439,11 @@ async function processEmail(email: EmailRecord): Promise<void> {
 
   // Step 5: Execute action based on classification
   await executeAction(result, email, contact, lead, property, deal);
+
+  // Step 6: Create incoming_email task for inbox (except bounces and passes)
+  if (result.classification !== 'bounce' && result.classification !== 'pass') {
+    await createIncomingEmailTask(email, contact, lead);
+  }
 }
 
 // =============================================================================
@@ -829,6 +834,71 @@ async function createDraft(
   });
 
   console.log(`[process-replies] Created draft for review: ${contact.email}`);
+}
+
+// =============================================================================
+// TASK CREATION FOR INBOX
+// =============================================================================
+
+async function createIncomingEmailTask(
+  email: EmailRecord,
+  contact: ContactRecord | null,
+  lead: LeadRecord | null
+): Promise<void> {
+  // Only create task if we have a matched lead
+  if (!lead) {
+    console.log(`[process-replies] No lead matched - skipping task creation for ${email.id}`);
+    return;
+  }
+
+  // Get the conversation/thread ID
+  const { data: fullEmail } = await supabase
+    .from('synced_emails')
+    .select('outlook_conversation_id')
+    .eq('id', email.id)
+    .single();
+
+  const threadId = fullEmail?.outlook_conversation_id || email.id;
+
+  // Check if there's already an open task for this thread
+  const { data: existingTask } = await supabase
+    .from('tasks')
+    .select('id')
+    .eq('type', 'incoming_email')
+    .eq('object_type', 'emailthread')
+    .eq('object_id', threadId)
+    .in('status', ['pending', 'snoozed'])
+    .single();
+
+  if (existingTask) {
+    console.log(`[process-replies] Task already exists for thread ${threadId}`);
+    return;
+  }
+
+  // Create the task
+  const taskTitle = contact?.name
+    ? `Reply to ${contact.name}`
+    : `Reply to ${email.from_name || email.from_email}`;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const { error } = await supabase.from('tasks').insert({
+    type: 'incoming_email',
+    lead_id: lead.id,
+    contact_id: contact?.id || null,
+    title: taskTitle,
+    subject: email.subject || '(no subject)',
+    object_type: 'emailthread',
+    object_id: threadId,
+    due_date: today,
+    status: 'pending',
+  });
+
+  if (error) {
+    console.error(`[process-replies] Failed to create task:`, error.message);
+  } else {
+    console.log(`[process-replies] Created incoming_email task for lead ${lead.id}`);
+  }
 }
 
 function extractBounceRecipient(subject: string, body: string): string | null {
