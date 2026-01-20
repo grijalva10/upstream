@@ -13,11 +13,21 @@ ALTER TABLE tasks ADD COLUMN IF NOT EXISTS object_id UUID;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS subject TEXT;
 
 -- =============================================================================
--- UPDATE TYPE CONSTRAINT
+-- MIGRATE EXISTING DATA (must run before new constraint)
 -- =============================================================================
 
--- Drop old constraint
+-- Drop old constraint first
 ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_type_check;
+
+-- Map old types to new types
+UPDATE tasks SET type = 'outgoing_call' WHERE type = 'call_reminder';
+UPDATE tasks SET type = 'lead' WHERE type = 'follow_up';
+UPDATE tasks SET type = 'deal' WHERE type = 'review_deal';
+UPDATE tasks SET type = 'lead' WHERE type = 'call_prep';
+
+-- =============================================================================
+-- ADD NEW TYPE CONSTRAINT
+-- =============================================================================
 
 -- Add new constraint with expanded types
 ALTER TABLE tasks ADD CONSTRAINT tasks_type_check CHECK (type IN (
@@ -27,16 +37,6 @@ ALTER TABLE tasks ADD CONSTRAINT tasks_type_check CHECK (type IN (
   'deal',           -- Deal close date reminder
   'outgoing_call'   -- Reminder to call a contact
 ));
-
--- =============================================================================
--- MIGRATE EXISTING DATA
--- =============================================================================
-
--- Map old types to new types
-UPDATE tasks SET type = 'outgoing_call' WHERE type = 'call_reminder';
-UPDATE tasks SET type = 'lead' WHERE type = 'follow_up';
-UPDATE tasks SET type = 'deal' WHERE type = 'review_deal';
-UPDATE tasks SET type = 'lead' WHERE type = 'call_prep';
 
 -- =============================================================================
 -- ADD INDEXES
