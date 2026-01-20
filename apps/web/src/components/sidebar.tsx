@@ -8,6 +8,7 @@ import {
   Search,
   Send,
   Inbox,
+  Mail,
   Kanban,
   Phone,
   Database,
@@ -24,10 +25,11 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/inbox", icon: Inbox, label: "Inbox" },
   { href: "/leads", icon: Users, label: "Leads" },
   { href: "/searches", icon: Search, label: "Searches" },
   { href: "/campaigns", icon: Send, label: "Campaigns" },
-  { href: "/inbox", icon: Inbox, label: "Inbox" },
+  { href: "/mail", icon: Mail, label: "Mail" },
   { href: "/pipeline", icon: Kanban, label: "Pipeline" },
   { href: "/calls", icon: Phone, label: "Calls" },
   { href: "/data", icon: Database, label: "Data" },

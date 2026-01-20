@@ -3,9 +3,17 @@
 import type { ReactNode } from "react";
 import { PageProvider } from "@/components/layout";
 
-export function PageSetup({ children }: { children: ReactNode }): ReactNode {
+interface PageSetupProps {
+  children: ReactNode;
+}
+
+export function PageSetup({ children }: PageSetupProps): ReactNode {
   return (
-    <PageProvider title="Inbox" breadcrumbs={[{ label: "Inbox" }]}>
+    <PageProvider
+      title="Inbox"
+      description="Tasks that need your attention"
+      breadcrumbs={[{ label: "Inbox" }]}
+    >
       {children}
     </PageProvider>
   );

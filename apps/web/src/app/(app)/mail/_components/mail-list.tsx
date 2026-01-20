@@ -137,7 +137,7 @@ export function MailList({
       } else {
         params.delete("page");
       }
-      router.push(`/inbox?${params.toString()}`, { scroll: false });
+      router.push(`/mail?${params.toString()}`, { scroll: false });
     },
     [router, searchParams]
   );

@@ -40,8 +40,8 @@ export function NewRepliesCard({ replies, total }: NewRepliesCardProps) {
           </div>
         )}
         <Button variant="ghost" className="w-full mt-2 justify-between" asChild>
-          <Link href="/inbox">
-            Process Inbox
+          <Link href="/mail">
+            View Mail
             <ChevronRight className="h-4 w-4" />
           </Link>
         </Button>
