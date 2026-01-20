@@ -16,7 +16,9 @@ Usage:
 import argparse
 import logging
 import os
+import re
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -30,6 +32,82 @@ from supabase import create_client, Client
 from integrations.outlook import OutlookClient, Email
 
 load_dotenv()
+
+# Patterns to identify bounce emails
+BOUNCE_SUBJECT_PATTERNS = [
+    r'undeliverable',
+    r'delivery.*failed',
+    r'mail delivery',
+    r'returned mail',
+    r'delivery status notification.*failure',
+    r'undelivered mail',
+]
+
+BOUNCE_FROM_PATTERNS = [
+    r'mailer-daemon',
+    r'postmaster@',
+    r'mailerdaemon',
+]
+
+
+def is_bounce_email(from_email: str, subject: str) -> bool:
+    """Check if an email is a bounce notification."""
+    from_lower = (from_email or "").lower()
+    subject_lower = (subject or "").lower()
+
+    for pattern in BOUNCE_FROM_PATTERNS:
+        if re.search(pattern, from_lower, re.IGNORECASE):
+            return True
+
+    for pattern in BOUNCE_SUBJECT_PATTERNS:
+        if re.search(pattern, subject_lower, re.IGNORECASE):
+            return True
+
+    return False
+
+
+def extract_bounce_attachment_content(email: Email) -> Optional[str]:
+    """
+    Extract content from bounce email attachments.
+    Bounce emails often contain the actual error in attached .eml or message parts.
+    """
+    if not email.attachments:
+        return None
+
+    attachment_content = []
+
+    for att in email.attachments:
+        try:
+            if not att._com_object:
+                continue
+
+            # Save attachment to temp file and read it
+            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as f:
+                temp_path = f.name
+
+            try:
+                att._com_object.SaveAsFile(temp_path)
+                with open(temp_path, 'rb') as f:
+                    raw = f.read()
+                    # Decode and clean - remove null bytes and control chars
+                    content = raw.decode('utf-8', errors='ignore')
+                    content = ''.join(c for c in content if c.isprintable() or c in '\n\r\t')
+                    if content and len(content) > 50:  # Skip empty/tiny attachments
+                        attachment_content.append(content[:10000])  # Limit per attachment
+            finally:
+                try:
+                    os.unlink(temp_path)
+                except:
+                    pass
+
+        except Exception as e:
+            # Attachment extraction failed - not critical
+            continue
+
+    if attachment_content:
+        return "\n---ATTACHMENT---\n".join(attachment_content)
+    return None
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -118,6 +196,14 @@ def save_email(db: Client, email: Email, direction: str, source_folder: str) -> 
     received_at = email.received_time.isoformat() if email.received_time else None
     sent_at = email.sent_time.isoformat() if email.sent_time else None
 
+    # Get body text - for bounce emails, also extract from attachments
+    body_text = email.body or ""
+    if is_bounce_email(email.sender_email, email.subject):
+        attachment_content = extract_bounce_attachment_content(email)
+        if attachment_content:
+            body_text = f"{body_text}\n\n{attachment_content}"
+            logger.debug(f"Extracted {len(attachment_content)} chars from bounce attachments")
+
     data = {
         "outlook_entry_id": email.entry_id,
         "outlook_conversation_id": email.conversation_id,
@@ -127,7 +213,7 @@ def save_email(db: Client, email: Email, direction: str, source_folder: str) -> 
         "to_emails": to_emails,
         "cc_emails": cc_emails,
         "subject": email.subject,
-        "body_text": email.body[:50000] if email.body else None,  # Limit body size
+        "body_text": body_text[:50000] if body_text else None,  # Limit body size
         "body_html": email.html_body[:100000] if email.html_body else None,
         "received_at": received_at,
         "sent_at": sent_at,
@@ -221,6 +307,81 @@ def sync_folder(
     return new_count, skipped_count
 
 
+def resync_bounce_emails(
+    client: OutlookClient,
+    db: Client,
+    days: int = 90,
+) -> int:
+    """
+    Re-sync bounce emails to extract full content from attachments.
+    Updates existing records with the extracted content.
+    """
+    from datetime import timedelta
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    updated = 0
+
+    # Get existing bounce emails from DB that have short body
+    result = db.table("synced_emails").select(
+        "id, outlook_entry_id, subject, from_email, body_text"
+    ).or_(
+        "subject.ilike.%undeliverable%,"
+        "subject.ilike.%delivery%failed%,"
+        "subject.ilike.%mail delivery%,"
+        "from_email.ilike.%mailer-daemon%,"
+        "from_email.ilike.%postmaster%"
+    ).gte("received_at", cutoff.isoformat()).execute()
+
+    # Filter to those with short body (likely missing attachment content)
+    short_body_emails = [
+        e for e in result.data
+        if len(e.get('body_text') or '') < 500
+    ]
+
+    if not short_body_emails:
+        logger.info("No bounce emails with short body found")
+        return 0
+
+    logger.info(f"Found {len(short_body_emails)} bounce emails to re-sync")
+
+    # Get namespace for Outlook lookups
+    namespace = client.namespace
+
+    for email_record in short_body_emails:
+        entry_id = email_record.get('outlook_entry_id')
+        if not entry_id:
+            continue
+
+        try:
+            # Get the email from Outlook by entry ID
+            item = namespace.GetItemFromID(entry_id)
+            if not item:
+                continue
+
+            # Parse it to get attachments
+            parsed = client.email._parse_mail_item(item)
+
+            # Extract attachment content
+            attachment_content = extract_bounce_attachment_content(parsed)
+
+            if attachment_content:
+                new_body = f"{email_record.get('body_text', '')}\n\n{attachment_content}"
+
+                # Update the database record
+                db.table("synced_emails").update({
+                    "body_text": new_body[:50000]
+                }).eq("id", email_record['id']).execute()
+
+                updated += 1
+                logger.info(f"Updated: {email_record.get('subject', '')[:50]}...")
+
+        except Exception as e:
+            logger.debug(f"Failed to re-sync {entry_id}: {e}")
+            continue
+
+    return updated
+
+
 def main():
     parser = argparse.ArgumentParser(description="Sync Outlook emails to database")
     parser.add_argument(
@@ -240,6 +401,17 @@ def main():
         action="store_true",
         help="Full sync - ignore previous sync state",
     )
+    parser.add_argument(
+        "--resync-bounces",
+        action="store_true",
+        help="Re-sync bounce emails to extract attachment content",
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=90,
+        help="Days to look back for --resync-bounces (default: 90)",
+    )
 
     args = parser.parse_args()
 
@@ -251,6 +423,15 @@ def main():
     logger.info("Connecting to Supabase...")
     db = get_supabase_client()
     logger.info("Database connected")
+
+    # Handle --resync-bounces mode
+    if args.resync_bounces:
+        logger.info(f"\n{'='*50}")
+        logger.info("RE-SYNCING BOUNCE EMAILS")
+        logger.info(f"{'='*50}")
+        updated = resync_bounce_emails(outlook, db, days=args.days)
+        logger.info(f"\n✓ Updated {updated} bounce emails with attachment content")
+        return
 
     # Determine folders to sync
     folders = ["inbox", "sent"] if args.folder == "both" else [args.folder]
