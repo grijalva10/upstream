@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from integrations.costar.session import CoStarSession
 from integrations.costar.client import CoStarClient
-from integrations.costar.extract import ContactExtractor
+from integrations.costar.extract import ContactExtractor, PropertyEnricher
 
 load_dotenv()
 
@@ -402,6 +402,95 @@ def count_properties():
     return jsonify(result["data"])
 
 
+@app.route("/enrich", methods=["POST"])
+def enrich_properties():
+    """Enrich properties with full details from CoStar APIs.
+
+    Request body:
+    {
+        "property_ids": [123, 456, 789],
+        "options": {
+            "include_contacts": true,
+            "include_parcel": true,
+            "include_loans": true,
+            "concurrency": 5
+        }
+    }
+
+    Returns enriched property data including:
+    - Property details (building, location, land, sale)
+    - True owner contacts
+    - Parcel/PIN data
+    - Loan information
+    """
+    global session, loop
+
+    if state.status != "connected" or not session:
+        return jsonify({"error": "Session not connected"}), 400
+
+    if not is_session_valid():
+        return jsonify({"error": "Session expired - please re-authenticate"}), 401
+
+    data = request.json
+    property_ids = data.get("property_ids", [])
+    options = data.get("options", {})
+
+    if not property_ids:
+        return jsonify({"error": "No property_ids provided"}), 400
+
+    logger.info(f"Enrich request for {len(property_ids)} properties")
+
+    result = {"error": None, "data": None}
+    done_event = threading.Event()
+
+    async def run_enrich():
+        try:
+            client = CoStarClient(session.tab, rate_limit=0.5)
+            enricher = PropertyEnricher(
+                client=client,
+                include_contacts=options.get("include_contacts", True),
+                include_parcel=options.get("include_parcel", True),
+                include_loans=options.get("include_loans", True),
+                concurrency=options.get("concurrency", 5),
+            )
+
+            enriched = await enricher.enrich_properties(property_ids)
+
+            result["data"] = {
+                "properties": enriched,
+                "count": len(enriched),
+                "success_count": len([p for p in enriched if not p.get("error")]),
+                "error_count": len([p for p in enriched if p.get("error")]),
+            }
+
+            update_state(
+                last_activity=datetime.now().isoformat(),
+                queries_run=state.queries_run + len(property_ids),
+            )
+
+        except Exception as e:
+            logger.error(f"Enrich error: {e}")
+            result["error"] = str(e)
+        finally:
+            done_event.set()
+
+    # Schedule on the session's event loop
+    if loop and loop.is_running():
+        asyncio.run_coroutine_threadsafe(run_enrich(), loop)
+    else:
+        return jsonify({"error": "Event loop not running"}), 500
+
+    # Wait for completion (longer timeout for bulk operations)
+    timeout = options.get("timeout", 600)  # 10 min default for enrichment
+    if not done_event.wait(timeout):
+        return jsonify({"error": "Enrich timeout"}), 504
+
+    if result["error"]:
+        return jsonify({"error": result["error"]}), 500
+
+    return jsonify(result["data"])
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="CoStar Session Service")
@@ -416,6 +505,7 @@ def main():
     logger.info("  POST /auth    - Trigger re-authentication")
     logger.info("  POST /query   - Execute a query")
     logger.info("  POST /count   - Get property counts (fast preview)")
+    logger.info("  POST /enrich  - Enrich properties with full details")
 
     app.run(host="0.0.0.0", port=args.port, threaded=True)
 

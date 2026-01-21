@@ -441,3 +441,280 @@ class ContactExtractor:
             return ids if isinstance(ids, list) else [ids]
         except (KeyError, TypeError):
             return []
+
+
+class PropertyEnricher:
+    """Enriches properties with full details from CoStar APIs.
+
+    Orchestrates multiple API calls per property:
+    1. PDS REST API for property details (building, location, land, sale)
+    2. GraphQL for true owner contacts
+    3. GraphQL for parcel PIN lookup
+    4. GraphQL for parcel/loan details
+    """
+
+    def __init__(
+        self,
+        client: CoStarClient,
+        include_contacts: bool = True,
+        include_parcel: bool = True,
+        include_loans: bool = True,
+        concurrency: int = 5,
+        min_delay: float = 0.2,
+        max_delay: float = 0.5,
+    ):
+        self.client = client
+        self.include_contacts = include_contacts
+        self.include_parcel = include_parcel
+        self.include_loans = include_loans
+        self.concurrency = concurrency
+        self.min_delay = min_delay
+        self.max_delay = max_delay
+        self._semaphore: Optional[asyncio.Semaphore] = None
+
+    async def enrich_properties(self, property_ids: List[int]) -> List[Dict]:
+        """Enrich multiple properties with full details.
+
+        Returns list of enriched property dicts with all available data.
+        """
+        self._semaphore = asyncio.Semaphore(self.concurrency)
+        results = []
+
+        # Process in batches for progress logging
+        batch_size = 50
+        for batch_start in range(0, len(property_ids), batch_size):
+            batch = property_ids[batch_start:batch_start + batch_size]
+
+            tasks = [self._enrich_with_rate_limit(pid) for pid in batch]
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for pid, result in zip(batch, batch_results):
+                if isinstance(result, Exception):
+                    logger.warning(f"Failed to enrich property {pid}: {result}")
+                    results.append({"property_id": pid, "error": str(result)})
+                else:
+                    results.append(result)
+
+            processed = batch_start + len(batch)
+            logger.info(f"Progress: {processed}/{len(property_ids)} properties enriched")
+
+        return results
+
+    async def _enrich_with_rate_limit(self, property_id: int) -> Dict:
+        """Enrich single property with rate limiting."""
+        async with self._semaphore:
+            delay = random.uniform(self.min_delay, self.max_delay)
+            await asyncio.sleep(delay)
+            return await self._enrich_property(property_id)
+
+    async def _enrich_property(self, property_id: int) -> Dict:
+        """Enrich a single property with all available data."""
+        result = {"property_id": property_id}
+
+        # 1. Get property details from PDS REST API
+        pds_data = await self.client.get_property_details(property_id)
+        if pds_data.get("error"):
+            result["error"] = pds_data["error"]
+            return result
+
+        # Extract and flatten PDS data
+        result.update(self._extract_pds_data(pds_data))
+
+        # 2. Get contacts if requested
+        if self.include_contacts:
+            contacts = await self._get_contacts(property_id)
+            result["contacts"] = contacts
+
+        # 3. Get parcel/loan data if requested
+        if self.include_parcel or self.include_loans:
+            parcel_data = await self._get_parcel_and_loans(property_id)
+            result.update(parcel_data)
+
+        return result
+
+    def _extract_pds_data(self, pds: Dict) -> Dict:
+        """Extract and flatten relevant fields from PDS response."""
+        building = pds.get("Building", {})
+        location = pds.get("Location", {})
+        delivery = location.get("DeliveryAddress", {})
+        land = pds.get("Land", {})
+        header = pds.get("DetailHeader", {})
+        sale = pds.get("RecentSaleCompSummary", {})
+        geo = location.get("Location", {})
+
+        # Extract building area with fallback
+        building_area = building.get("BuildingArea", {})
+        rba = building.get("RBA", {})
+
+        # Extract land area
+        land_area_high = land.get("HighPrecisionGrossArea", {})
+        land_area_low = land.get("LowPrecisionGrossArea", {})
+
+        return {
+            # Property identifiers
+            "costar_property_id": str(pds.get("PropertyId")),
+            "property_name": pds.get("Name"),
+
+            # Address
+            "address": delivery.get("DeliveryAddress"),
+            "city": delivery.get("CityName"),
+            "state_code": delivery.get("SubdivisionCode"),
+            "postal_code": delivery.get("PostalCode"),
+            "county": delivery.get("CountyName"),
+
+            # Location
+            "latitude": geo.get("Latitude"),
+            "longitude": geo.get("Longitude"),
+            "market_id": location.get("MarketId"),
+            "market": location.get("Market"),
+            "submarket": location.get("Submarket"),
+            "submarket_id": location.get("SubmarketId"),
+            "submarket_cluster": location.get("SubmarketCluster"),
+            "location_type": pds.get("LocationType"),
+
+            # Property type
+            "property_type": pds.get("Type"),
+            "property_type_id": pds.get("PropertyTypeId"),
+            "secondary_type": pds.get("Subtype"),
+            "property_subtype_id": pds.get("PropertySubtypeId"),
+            "star_rating": pds.get("Rating") or header.get("StarRating"),
+
+            # Building
+            "building_size_sqft": building_area.get("Raw") or rba.get("Raw"),
+            "building_class": building.get("BuildingClass"),
+            "year_built": building.get("YearBuilt"),
+            "year_renovated": building.get("YearRenovated"),
+            "number_of_stories": building.get("Stories", {}).get("Raw"),
+            "tenancy": building.get("Tenancy"),
+            "owner_occupied": building.get("OwnerOccupied"),
+
+            # Building details
+            "ceiling_height": building.get("CeilingHeight"),
+            "parking_ratio": building.get("ParkingRatio"),
+            "parking_spaces": building.get("ParkingSpaces"),
+            "parking_description": building.get("ParkingDescription"),
+
+            # Industrial specific
+            "docks": building.get("Docks"),
+            "cross_docks": building.get("CrossDocks"),
+            "drive_ins": building.get("DriveIns"),
+            "crane": building.get("Cranes"),
+            "rail": building.get("RailSpots"),
+            "power": building.get("Power"),
+
+            # Multifamily specific
+            "units": building.get("Units"),
+            "num_of_beds": building.get("NumberOfBeds"),
+
+            # Land
+            "lot_size_sqft": land_area_high.get("Raw"),
+            "lot_size_acres": land_area_low.get("Raw"),
+            "zoning": land.get("Zoning"),
+            "parcel_number": land.get("Parcel"),
+            "far": building.get("FAR"),
+
+            # Sale info
+            "last_sale_date": sale.get("SoldDate", {}).get("Raw"),
+            "last_sale_price": sale.get("SoldDescription"),
+            "cap_rate": sale.get("CapitalizationRate"),
+            "sale_type": sale.get("SaleType"),
+
+            # Amenities
+            "amenities": [a.get("Name") for a in pds.get("Amenities", {}).get("Items", [])],
+
+            # Flags
+            "is_opportunity_zone": pds.get("isOpportunityZone"),
+            "is_leed_certified": building.get("IsLeedCertified"),
+            "is_energy_star": building.get("IsEnergyStarCertified"),
+        }
+
+    async def _get_contacts(self, property_id: int) -> List[Dict]:
+        """Get true owner contacts for property."""
+        try:
+            data = await self.client.graphql(CONTACTS_QUERY, {"propertyId": property_id})
+
+            prop_detail = data.get("propertyDetail", {})
+            contact_info = prop_detail.get("propertyContactDetails_info", {})
+            true_owner = contact_info.get("trueOwner")
+
+            if isinstance(true_owner, list):
+                true_owner = true_owner[0] if true_owner else {}
+            elif not true_owner:
+                true_owner = {}
+
+            if not true_owner:
+                return []
+
+            contacts = []
+            for person in true_owner.get("contacts", []):
+                contacts.append({
+                    "person_id": person.get("personId"),
+                    "name": person.get("name"),
+                    "title": person.get("title"),
+                    "email": person.get("email"),
+                    "phones": person.get("phoneNumbers", []),
+                    "company_id": true_owner.get("companyId"),
+                    "company_name": true_owner.get("name"),
+                    "company_address": true_owner.get("address"),
+                    "company_phones": true_owner.get("phoneNumbers", []),
+                })
+
+            return contacts
+
+        except Exception as e:
+            logger.warning(f"Failed to get contacts for property {property_id}: {e}")
+            return []
+
+    async def _get_parcel_and_loans(self, property_id: int) -> Dict:
+        """Get parcel and loan data for property."""
+        result = {}
+
+        try:
+            # Get parcel PIN
+            pins_data = await self.client.graphql(PARCEL_PINS_QUERY, {"propertyId": property_id})
+            parcel_pins = pins_data.get("parcelPinsFromProperty", {}).get("parcelPins", [])
+
+            if not parcel_pins or not parcel_pins[0].get("id"):
+                return result
+
+            parcel_id = str(parcel_pins[0]["id"])
+
+            # Small delay before next request
+            await asyncio.sleep(random.uniform(0.05, 0.15))
+
+            # Get parcel details
+            parcel_data = await self.client.graphql(PARCEL_DETAILS_QUERY, {"parcelId": parcel_id})
+            pr_detail = parcel_data.get("publicRecordDetailNew", {})
+            parcel = pr_detail.get("parcelDetail", {})
+            sales = pr_detail.get("parcelSales", {}).get("sales", [])
+
+            if self.include_parcel:
+                result["apn"] = parcel.get("apn")
+                result["parcel_lot_size_sf"] = parcel.get("lotSizeSf")
+                result["parcel_zoning"] = parcel.get("zoning")
+
+            if self.include_loans and sales:
+                sale = sales[0]
+                result["sale_date"] = sale.get("saleDate")
+                result["sale_price"] = sale.get("salePriceTotal")
+                result["seller"] = sale.get("seller")
+                result["ltv"] = sale.get("ltv")
+
+                loans = sale.get("loans", [])
+                if loans:
+                    # Include all loans, not just first
+                    result["loans"] = [
+                        {
+                            "lender": loan.get("lender"),
+                            "amount": loan.get("mortgageAmount"),
+                            "rate": loan.get("intRate"),
+                            "term_months": loan.get("mortgageTerm"),
+                            "origination_date": loan.get("originationDate"),
+                        }
+                        for loan in loans
+                    ]
+
+        except Exception as e:
+            logger.warning(f"Failed to get parcel/loan data for property {property_id}: {e}")
+
+        return result

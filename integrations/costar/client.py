@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 GRAPHQL_URL = "https://product.costar.com/graphql"
 PROPERTY_SEARCH_URL = "https://product.costar.com/bff2/property/search/list-properties"
 PROPERTY_COUNT_URL = "https://product.costar.com/bff2/property/search/count"
+PROPERTY_DETAILS_URL = "https://product.costar.com/pds/properties"
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2.0
@@ -173,3 +174,42 @@ class CoStarClient:
         except Exception as e:
             logger.error(f"Count error: {e}")
             return {"error": str(e)}
+
+    async def get_property_details(self, property_id: int) -> Dict:
+        """Get full property details from PDS REST endpoint.
+
+        Returns comprehensive property data including:
+        - Building: size, class, year built, stories, parking, docks, drive-ins
+        - Location: full address, lat/lng, market/submarket
+        - Land: parcel (APN), zoning, lot size
+        - Sale: last sale price/date, cap rate
+        - Amenities, expenses, etc.
+        """
+        for attempt in range(MAX_RETRIES):
+            try:
+                await self._enforce_rate_limit()
+
+                url = f"{PROPERTY_DETAILS_URL}/{property_id}"
+                response = await self.tab.request.get(url, timeout=REQUEST_TIMEOUT)
+
+                if not response or not response.ok:
+                    status = getattr(response, 'status', 'No response')
+                    if status == 404:
+                        logger.warning(f"Property {property_id} not found")
+                        return {"error": "not_found"}
+                    raise Exception(f"HTTP {status}")
+
+                data = response.json()
+                self.request_count += 1
+                return data
+
+            except Exception as e:
+                if attempt < MAX_RETRIES - 1:
+                    wait = RETRY_DELAY * (2 ** attempt)
+                    logger.warning(f"Property details request failed, retry in {wait}s: {e}")
+                    await asyncio.sleep(wait)
+                else:
+                    logger.error(f"Failed to get property {property_id} details: {e}")
+                    return {"error": str(e)}
+
+        return {"error": "Max retries exceeded"}
