@@ -4,7 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-Upstream Sourcing Engine - AI agents that help find off-market CRE deals. See `PRD.md` for the simple version, `docs/upstream-spec.md` for the detailed IP spec.
+**Upstream** is the sourcing engine that feeds **Lee 1031 X** (a deal distribution platform) with off-market CRE deals.
+
+**The full picture:**
+- **Lee 1031 X** - Brokers submit buyer criteria for 1031 exchange clients, deals get matched to them via progressive disclosure (teaser → CA → details → LOI → seller contact)
+- **Upstream** (this repo) - Finds motivated sellers via CoStar queries + email campaigns, qualifies them through calls, packages deals for handoff
+
+**Key insight:** Leads are bidirectional. The same entity can be a buyer, seller, or both. Campaigns generate intel beyond just yes/no:
+- "Won't sell my industrial, but I'll sell my office in PHX" → new opportunity
+- "Won't sell, but I'm looking to buy" → new buyer criteria captured
+
+See `docs/VISION.md` for the full architecture and bidirectional flows.
 
 ## Current Focus
 
@@ -155,10 +165,12 @@ npx supabase db diff        # Generate migration from changes
 | Table | Purpose |
 |-------|---------|
 | `properties` | CRE assets from CoStar (address, type, size, class) |
-| `leads` | Owner organizations (status: new→contacted→qualified→handed_off) |
+| `leads` | Organizations we're engaging (see Lead Status below) |
 | `contacts` | People at leads who receive outreach |
+| `deals` | Specific property opportunities (qualification tracking) |
 | `property_loans` | Loan/distress data (maturity, LTV, DSCR, payment status) |
 | `property_leads` | Junction: property ↔ lead (owner/manager/lender) |
+| `lead_actions` | **VIEW** - AI query interface with computed `next_action` |
 
 **Searches & Sourcing:**
 | Table | Purpose |
@@ -222,10 +234,62 @@ activities → contacts, leads, properties
 searches → campaigns (1:many)
 ```
 
-### Key Status Flows
-- **Lead**: `new` → `contacted` → `engaged` → `qualified` → `handed_off` | `dnc` | `rejected`
-- **Contact**: `active` → `dnc` | `bounced` | `unsubscribed`
-- **Enrollment**: `pending` → `active` → `replied` | `completed` | `stopped`
+### Lead Status (Single Source of Truth)
+
+```
+new → contacted → replied → engaged → waiting → qualified → handed_off
+                                         ↘ nurture (soft pass, revisit later)
+                                         ↘ closed (dead, see closed_reason)
+```
+
+| Status | Definition | AI Action |
+|--------|------------|-----------|
+| `new` | Identified, no outreach yet | Enroll in campaign |
+| `contacted` | Email sent, waiting for reply | Wait |
+| `replied` | Got response, needs triage | Triage & route |
+| `engaged` | Two-way conversation active | Draft responses, gather info |
+| `waiting` | Ball in their court | Monitor, follow up if silent 7+ days |
+| `qualified` | Has pricing + motivation + timeline | Package deal |
+| `handed_off` | Sent to Lee 1031 X | Done |
+| `nurture` | "Not now, maybe later" | Schedule future outreach |
+| `closed` | Dead (see `closed_reason`) | Nothing |
+
+**closed_reason values:** `dnc`, `not_interested`, `has_broker`, `wrong_contact`, `bad_data`, `duplicate`
+
+### Lead Type (Relationship)
+
+| Type | Definition | Example |
+|------|------------|---------|
+| `seller` | We want to GET a deal from them | Owner with property to sell |
+| `buyer` | We want to GIVE deals to them | Investor with capital |
+| `buyer_seller` | Bidirectional | Owner selling one, buying another |
+| `broker` | Middleman | Lee & Associates |
+| `other` | Vendor, lender, etc. | Title company |
+
+### Deal Status
+
+```
+new → gathering → qualified → packaging → handed_off
+                     ↘ lost (see lost_reason)
+```
+
+**lost_reason values:** `not_interested`, `price_unrealistic`, `timing`, `went_with_broker`, `ghosted`, `other`
+
+### Other Status Flows
+- **Contact**: `active` | `invalid` | `bounced` | `dnc` | `unsubscribed`
+- **Search**: `new` → `queries_ready` → `extracting` → `extracted` → `campaign_active` → `complete`
+- **Task**: `pending` → `in_progress` → `completed` | `snoozed` | `cancelled`
+- **Email Draft**: `pending` → `approved` → `sent` | `rejected`
+
+### AI Query Interface: lead_actions VIEW
+
+AI agents should query the `lead_actions` view to determine next action:
+
+```sql
+SELECT * FROM lead_actions WHERE next_action IS NOT NULL ORDER BY updated_at DESC;
+```
+
+Returns leads with computed `next_action`: `enroll_campaign`, `triage_reply`, `review_draft`, `complete_task`, `package_deal`, `follow_up`, `nurture_outreach`
 
 ## Local Requirements
 
@@ -326,6 +390,15 @@ This enables Claude to query the database directly via MCP tools.
 - **Outbound emails**: Do NOT include signature - Outlook auto-adds it
 
 ## Critical Rules
+
+### Email Safety (ACTIVE)
+**ALL outbound emails MUST be sent to the test address: `grijalva10@gmail.com`**
+
+Until this rule is removed:
+- NEVER approve, send, or queue emails to any other address
+- If creating email drafts, override `to_email` to the test address
+- If you see real recipient addresses in drafts/queue, STOP and warn the user
+- This applies to: campaign emails, AI-generated drafts, manual replies, all email types
 
 ### Database Protection
 **NEVER reset the database without:**
