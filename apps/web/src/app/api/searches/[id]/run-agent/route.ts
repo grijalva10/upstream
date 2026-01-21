@@ -71,7 +71,7 @@ ${JSON.stringify(criteria_json, null, 2)}
           },
           "ListingType": 0
         },
-        "1": 100,
+        "1": 9999,
         "2": 1,
         "3": {"RateBasis": "month", "CurrencyCode": "USD", "BuildingAreaUnit": "SF", "secondaryAreaUnit": "SF", "AreaUom": "AC", "lengthUnit": "FT"},
         "4": false,

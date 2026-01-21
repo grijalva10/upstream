@@ -55,12 +55,23 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  // Don't auto-complete the task - user might want to handle it differently
-  // They can dismiss/complete manually from inbox
+  // Complete the associated task (moves to archive)
+  // Find task by contact_id + type
+  if (draft.contact_id) {
+    await supabase
+      .from("tasks")
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      })
+      .eq("contact_id", draft.contact_id)
+      .eq("type", "incoming_email")
+      .in("status", ["pending", "snoozed"]);
+  }
 
   return NextResponse.json({
     success: true,
     draft_id: id,
-    message: "Draft rejected",
+    message: "Draft dismissed and task completed",
   });
 }

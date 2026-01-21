@@ -24,6 +24,7 @@ import { handleGenerateQueries } from './generate-queries.job.js';
 import { createProcessRepliesHandler } from './process-replies.job.js';
 import { createAutoFollowUpHandler } from './auto-follow-up.job.js';
 import { handleGhostDetection } from './ghost-detection.job.js';
+import { handleReconcileLeadStatus } from './reconcile-lead-status.job.js';
 
 const QUEUES = [
   // Core queues
@@ -35,6 +36,8 @@ const QUEUES = [
   // Autonomous operations
   'auto-follow-up',
   'ghost-detection',
+  // Data reconciliation (on-demand + scheduled)
+  'reconcile-lead-status',
 ];
 
 interface JobCallbacks {
@@ -143,6 +146,17 @@ export async function registerJobs(boss: PgBoss, callbacks: JobCallbacks) {
     wrapHandler('ghost-detection', handleGhostDetection)
   );
 
+  // ==========================================================================
+  // DATA RECONCILIATION
+  // ==========================================================================
+
+  // Reconcile lead statuses from email activity (scheduled weekly + on-demand)
+  await boss.work(
+    'reconcile-lead-status',
+    { teamSize: 1, teamConcurrency: 1 },
+    wrapHandler('reconcile-lead-status', handleReconcileLeadStatus)
+  );
+
   console.log('[jobs] Registered all job handlers');
 }
 
@@ -186,6 +200,16 @@ export async function scheduleRecurringJobs(boss: PgBoss) {
     tz: config.defaultTimezone,
   });
   console.log('  - ghost-detection: daily at 9:30 AM');
+
+  // ==========================================================================
+  // WEEKLY JOBS (run Sunday morning)
+  // ==========================================================================
+
+  // Reconcile lead statuses - weekly on Sunday at 6 AM
+  await boss.schedule('reconcile-lead-status', '0 6 * * 0', undefined, {
+    tz: config.defaultTimezone,
+  });
+  console.log('  - reconcile-lead-status: weekly Sunday 6 AM');
 
   console.log('[jobs] Recurring jobs scheduled');
 }
