@@ -70,6 +70,9 @@ interface DataTableProps<T extends { id: string }> {
   searchPlaceholder?: string;
   exportFilename?: string;
   enableSelection?: boolean;
+  enableSearch?: boolean;
+  enableExport?: boolean;
+  enableColumnToggle?: boolean;
   onSelectionChange?: (ids: Set<string>) => void;
   onRowClick?: (row: T) => void;
 }
@@ -86,6 +89,9 @@ function DataTableInner<T extends { id: string }>({
   searchPlaceholder = "Search...",
   exportFilename = "export",
   enableSelection = true,
+  enableSearch = true,
+  enableExport = true,
+  enableColumnToggle = true,
   onRowClick,
 }: DataTableProps<T>) {
   const table = useDataTable({
@@ -98,26 +104,30 @@ function DataTableInner<T extends { id: string }>({
   });
 
   const showFilters = table.activeFilterCount > 0;
+  const hasHideableColumns = columns.filter((c) => c.enableHiding !== false).length > 0;
+  const hasToolbarItems = enableSearch || filters.length > 0 || (enableColumnToggle && hasHideableColumns) || (enableExport && data.length > 0) || endpoint;
 
   return (
     <div className="space-y-4">
       {/* Toolbar - responsive layout */}
-      <div className="flex flex-col gap-3">
+      {hasToolbarItems && <div className="flex flex-col gap-3">
         {/* Row 1: Search and primary actions */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           {/* Search */}
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={table.search}
-              onChange={(e) => table.setSearch(e.target.value)}
-              className="pl-8 h-9 w-full"
-            />
-          </div>
+          {enableSearch && (
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={table.search}
+                onChange={(e) => table.setSearch(e.target.value)}
+                className="pl-8 h-9 w-full"
+              />
+            </div>
+          )}
 
           {/* Action buttons - wrap on mobile */}
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <div className={cn("flex items-center gap-2 flex-wrap sm:flex-nowrap", !enableSearch && "flex-1 justify-end")}>
             {/* Filters toggle */}
             {filters.length > 0 && (
               <DropdownMenu>
@@ -180,38 +190,42 @@ function DataTableInner<T extends { id: string }>({
             )}
 
             {/* Column visibility */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                  <Columns3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Columns</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                {columns
-                  .filter((c) => c.enableHiding !== false)
-                  .map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      checked={table.columnVisibility[column.id]}
-                      onCheckedChange={() => table.toggleColumn(column.id)}
-                    >
-                      {column.header}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {enableColumnToggle && columns.filter((c) => c.enableHiding !== false).length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                    <Columns3 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Columns</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  {columns
+                    .filter((c) => c.enableHiding !== false)
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        checked={table.columnVisibility[column.id]}
+                        onCheckedChange={() => table.toggleColumn(column.id)}
+                      >
+                        {column.header}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
             {/* Export */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.exportCsv(exportFilename)}
-              className="h-9 gap-1.5"
-            >
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
+            {enableExport && data.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.exportCsv(exportFilename)}
+                className="h-9 gap-1.5"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Export</span>
+              </Button>
+            )}
 
             {/* Refresh */}
             {endpoint && (
@@ -252,13 +266,15 @@ function DataTableInner<T extends { id: string }>({
           </div>
         )}
 
-        {/* Results count & selection */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>{table.total.toLocaleString()} results</span>
-          {enableSelection && table.selectedIds.size > 0 && (
-            <Badge variant="outline">{table.selectedIds.size} selected</Badge>
-          )}
-        </div>
+        {/* Results count & selection - only show when meaningful */}
+        {(table.search || table.activeFilterCount > 0 || (enableSelection && table.selectedIds.size > 0)) && (
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{table.total.toLocaleString()} results</span>
+            {enableSelection && table.selectedIds.size > 0 && (
+              <Badge variant="outline">{table.selectedIds.size} selected</Badge>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Table - horizontal scroll on mobile */}

@@ -14,9 +14,10 @@ export function SearchesDataTable({ data }: SearchesDataTableProps) {
       data={data}
       columns={searchColumns}
       filters={searchFilters}
-      searchPlaceholder="Search by name..."
       exportFilename="searches"
       enableSelection={false}
+      enableSearch={false}
+      enableColumnToggle={false}
     />
   );
 }
