@@ -1,22 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Column, Filter } from "@/app/(app)/data/_components/data-table";
 import { StatusDot } from "@/components/ui/status-dot";
-import type { SearchWithRelations } from "../_lib/types";
-import { getStatusConfig } from "../_lib/utils";
+import type { LeadWithRelations } from "../_lib/types";
 import { formatDistanceToNow } from "date-fns";
 
 // Re-export type
-export type { SearchWithRelations };
+export type { LeadWithRelations };
 
 // ============================================================================
-// COLUMNS
+// COLUMNS - Simplified to 5 essential columns
 // ============================================================================
 
-export const searchColumns: Column<SearchWithRelations>[] = [
+export const leadColumns: Column<LeadWithRelations>[] = [
   {
     id: "name",
     header: "Name",
@@ -25,7 +24,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     enableHiding: false,
     cell: (_, row) => (
       <Link
-        href={`/searches/${row.id}`}
+        href={`/leads/${row.id}`}
         className="font-medium text-foreground hover:underline"
       >
         {row.name}
@@ -39,46 +38,42 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     enableSorting: true,
     cell: (v) => {
       const status = v as string;
-      const config = getStatusConfig(status);
-      if (config.isLoading) {
-        return (
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            {config.label}
-          </span>
-        );
-      }
-      return <StatusDot status={status} label={config.label} />;
+      return <StatusDot status={status} showLabel />;
     },
   },
   {
-    id: "results",
-    header: "Results",
-    accessorFn: (row) => row.total_properties ?? 0,
+    id: "info",
+    header: "Info",
+    accessorFn: (row) => row.contacts.length + row.property_count,
     align: "right",
-    enableSorting: true,
+    enableSorting: false,
     cell: (_, row) => {
-      const props = row.total_properties ?? 0;
-      const leads = row.total_leads ?? 0;
-      if (props === 0 && leads === 0) {
+      const contacts = row.contacts.length;
+      const props = row.property_count;
+      if (contacts === 0 && props === 0) {
         return <span className="text-muted-foreground">—</span>;
       }
       return (
         <span className="text-sm text-muted-foreground tabular-nums">
-          {props.toLocaleString()} props
-          {leads > 0 && <span className="text-muted-foreground/60"> · {leads.toLocaleString()} leads</span>}
+          {contacts} contact{contacts !== 1 ? "s" : ""}
+          {props > 0 && (
+            <span className="text-muted-foreground/60">
+              {" · "}
+              {props} prop{props !== 1 ? "s" : ""}
+            </span>
+          )}
         </span>
       );
     },
   },
   {
-    id: "created_at",
-    header: "Created",
-    accessorKey: "created_at",
+    id: "last_activity",
+    header: "Activity",
+    accessorKey: "last_activity_at",
     align: "right",
     enableSorting: true,
     cell: (v) => {
-      if (!v) return "—";
+      if (!v) return <span className="text-muted-foreground">—</span>;
       return (
         <span className="text-sm text-muted-foreground">
           {formatDistanceToNow(new Date(v as string), { addSuffix: true })}
@@ -95,7 +90,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     accessorFn: () => null,
     cell: (_, row) => (
       <Button size="sm" variant="ghost" className="h-7 w-7 p-0" asChild>
-        <Link href={`/searches/${row.id}`}>
+        <Link href={`/leads/${row.id}`}>
           <ArrowRight className="h-4 w-4" />
         </Link>
       </Button>
@@ -107,28 +102,33 @@ export const searchColumns: Column<SearchWithRelations>[] = [
 // FILTERS
 // ============================================================================
 
-export const searchFilters: Filter[] = [
+export const leadFilters: Filter[] = [
   {
     id: "status",
     label: "Status",
     options: [
       { value: "all", label: "All" },
       { value: "new", label: "New" },
-      { value: "queries_ready", label: "Queries Ready" },
-      { value: "extracting", label: "Extracting" },
-      { value: "extracted", label: "Extracted" },
-      { value: "campaign_active", label: "Campaign Active" },
-      { value: "complete", label: "Complete" },
+      { value: "contacted", label: "Contacted" },
+      { value: "replied", label: "Replied" },
+      { value: "engaged", label: "Engaged" },
+      { value: "waiting", label: "Waiting" },
+      { value: "qualified", label: "Qualified" },
+      { value: "handed_off", label: "Handed Off" },
+      { value: "nurture", label: "Nurture" },
+      { value: "closed", label: "Closed" },
     ],
   },
   {
-    id: "source",
-    label: "Source",
+    id: "lead_type",
+    label: "Type",
     options: [
       { value: "all", label: "All" },
-      { value: "lee-1031-x", label: "Lee 1031-X" },
-      { value: "manual", label: "Manual" },
-      { value: "inbound", label: "Inbound" },
+      { value: "seller", label: "Seller" },
+      { value: "buyer", label: "Buyer" },
+      { value: "buyer_seller", label: "Buyer/Seller" },
+      { value: "broker", label: "Broker" },
+      { value: "other", label: "Other" },
     ],
   },
 ];

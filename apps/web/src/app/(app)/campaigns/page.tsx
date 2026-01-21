@@ -22,7 +22,7 @@ async function getReadySearches() {
   const { data, error } = await supabase
     .from("searches")
     .select("id, name")
-    .in("status", ["ready", "campaign_created"])
+    .in("status", ["extracted", "campaign_active"])
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -42,7 +42,7 @@ export default async function CampaignsPage() {
   return (
     <PageSetup searches={readySearches} count={count}>
       <PageContainer>
-        <CampaignsDataTable data={campaigns as Campaign[]} total={count} />
+        <CampaignsDataTable data={campaigns as Campaign[]} />
       </PageContainer>
     </PageSetup>
   );

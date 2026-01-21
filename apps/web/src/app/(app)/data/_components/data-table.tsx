@@ -73,6 +73,7 @@ interface DataTableProps<T extends { id: string }> {
   enableSearch?: boolean;
   enableExport?: boolean;
   enableColumnToggle?: boolean;
+  enablePagination?: boolean;
   onSelectionChange?: (ids: Set<string>) => void;
   onRowClick?: (row: T) => void;
 }
@@ -92,6 +93,7 @@ function DataTableInner<T extends { id: string }>({
   enableSearch = true,
   enableExport = true,
   enableColumnToggle = true,
+  enablePagination = true,
   onRowClick,
 }: DataTableProps<T>) {
   const table = useDataTable({
@@ -275,11 +277,11 @@ function DataTableInner<T extends { id: string }>({
             )}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* Table - horizontal scroll on mobile */}
       <div className="rounded-xl border bg-card overflow-hidden overflow-x-auto">
-        <Table className="min-w-[600px]">
+        <Table>
           <TableHeader>
             <TableRow className="bg-muted/30 border-b hover:bg-muted/30">
               {enableSelection && (
@@ -369,69 +371,79 @@ function DataTableInner<T extends { id: string }>({
         </Table>
       </div>
 
-      {/* Pagination - responsive */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="hidden sm:inline">Rows per page</span>
-          <span className="sm:hidden">Per page</span>
-          <Select
-            value={String(table.pageSize)}
-            onValueChange={(v) => table.setPageSize(Number(v))}
-          >
-            <SelectTrigger size="sm" className="w-16">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PAGE_SIZES.map((size) => (
-                <SelectItem key={size} value={String(size)}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Pagination - only show when enabled and multiple pages */}
+      {enablePagination && table.totalPages > 1 && (
+        <div className="flex items-center justify-between gap-3">
+          {/* Rows per page - only show when data exceeds smallest page size */}
+          {table.total > PAGE_SIZES[0] ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="hidden sm:inline">Rows per page</span>
+              <Select
+                value={String(table.pageSize)}
+                onValueChange={(v) => table.setPageSize(Number(v))}
+              >
+                <SelectTrigger size="sm" className="w-16">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZES.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div />
+          )}
 
-        <div className="flex items-center gap-1">
-          {/* First/Last buttons hidden on mobile */}
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className="hidden sm:inline-flex"
-            onClick={() => table.setPage(1)}
-            disabled={table.page === 1}
-          >
-            <ChevronsLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={() => table.setPage(table.page - 1)}
-            disabled={table.page === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="px-3 text-sm text-muted-foreground tabular-nums">
-            {table.page} / {table.totalPages || 1}
-          </span>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={() => table.setPage(table.page + 1)}
-            disabled={table.page >= table.totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className="hidden sm:inline-flex"
-            onClick={() => table.setPage(table.totalPages)}
-            disabled={table.page >= table.totalPages}
-          >
-            <ChevronsRight className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            {/* First/Last buttons only when 4+ pages */}
+            {table.totalPages > 3 && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="hidden sm:inline-flex"
+                onClick={() => table.setPage(1)}
+                disabled={table.page === 1}
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={() => table.setPage(table.page - 1)}
+              disabled={table.page === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="px-3 text-sm text-muted-foreground tabular-nums">
+              {table.page} / {table.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={() => table.setPage(table.page + 1)}
+              disabled={table.page >= table.totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            {table.totalPages > 3 && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="hidden sm:inline-flex"
+                onClick={() => table.setPage(table.totalPages)}
+                disabled={table.page >= table.totalPages}
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { StatValue } from "@/components/ui/stat-value";
@@ -429,57 +434,44 @@ export const campaignColumns: Column<Campaign>[] = [
     header: "Name",
     accessorKey: "name",
     enableSorting: true,
-    className: "font-medium",
-  },
-  {
-    id: "search",
-    header: "Search",
-    accessorFn: (row) => row.search?.name || "-",
-    className: "text-muted-foreground",
+    enableHiding: false,
+    cell: (_, row) => (
+      <Link
+        href={`/campaigns/${row.id}`}
+        className="font-medium text-foreground hover:underline"
+      >
+        {row.name}
+      </Link>
+    ),
   },
   {
     id: "status",
     header: "Status",
     accessorKey: "status",
-    align: "center",
-    cell: (v) => <StatusDot status={v as string} showLabel />,
+    enableSorting: true,
+    cell: (v) => <StatusDot status={v as string} label={v as string} />,
   },
   {
-    id: "enrolled",
-    header: "Enrolled",
-    accessorKey: "total_enrolled",
+    id: "activity",
+    header: "Activity",
+    accessorFn: (row) => row.total_sent ?? 0,
     align: "right",
-    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
-  },
-  {
-    id: "sent",
-    header: "Sent",
-    accessorKey: "total_sent",
-    align: "right",
-    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
-  },
-  {
-    id: "opened",
-    header: "Opened",
-    accessorKey: "total_opened",
-    align: "right",
-    defaultHidden: true,
-    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
-  },
-  {
-    id: "replied",
-    header: "Replied",
-    accessorKey: "total_replied",
-    align: "right",
-    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
-  },
-  {
-    id: "stopped",
-    header: "Stopped",
-    accessorKey: "total_stopped",
-    align: "right",
-    defaultHidden: true,
-    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
+    enableSorting: true,
+    cell: (_, row) => {
+      const enrolled = row.total_enrolled ?? 0;
+      const sent = row.total_sent ?? 0;
+      const replied = row.total_replied ?? 0;
+      if (enrolled === 0 && sent === 0) {
+        return <span className="text-muted-foreground">—</span>;
+      }
+      return (
+        <span className="text-sm text-muted-foreground tabular-nums">
+          {enrolled.toLocaleString()} enrolled
+          {sent > 0 && <span className="text-muted-foreground/60"> · {sent.toLocaleString()} sent</span>}
+          {replied > 0 && <span className="text-muted-foreground/60"> · {replied.toLocaleString()} replied</span>}
+        </span>
+      );
+    },
   },
   {
     id: "created_at",
@@ -487,15 +479,29 @@ export const campaignColumns: Column<Campaign>[] = [
     accessorKey: "created_at",
     align: "right",
     enableSorting: true,
-    cell: (v) => <StatValue muted>{new Date(v as string).toLocaleDateString()}</StatValue>,
+    cell: (v) => {
+      if (!v) return "—";
+      return (
+        <span className="text-sm text-muted-foreground">
+          {formatDistanceToNow(new Date(v as string), { addSuffix: true })}
+        </span>
+      );
+    },
   },
   {
-    id: "started_at",
-    header: "Started",
-    accessorKey: "started_at",
+    id: "actions",
+    header: "",
     align: "right",
-    defaultHidden: true,
-    cell: (v) => <StatValue muted>{v ? new Date(v as string).toLocaleDateString() : "-"}</StatValue>,
+    enableHiding: false,
+    enableSorting: false,
+    accessorFn: () => null,
+    cell: (_, row) => (
+      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" asChild>
+        <Link href={`/campaigns/${row.id}`}>
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </Button>
+    ),
   },
 ];
 
