@@ -130,7 +130,7 @@ async function getTasks(
   if (contactIds.length > 0) {
     const { data: drafts } = await supabase
       .from("email_drafts")
-      .select("id, subject, body, to_email, to_name, status, contact_id, source_email_id")
+      .select("id, subject, body, to_email, to_name, status, contact_id, source_email_id, context_brief")
       .in("contact_id", contactIds)
       .eq("status", "pending");
 
@@ -223,6 +223,7 @@ async function getTasks(
           to_email: draft.to_email,
           to_name: draft.to_name,
           status: draft.status,
+          context_brief: draft.context_brief,
         } : null,
         thread,
         property_address: propertyAddress,

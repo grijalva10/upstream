@@ -13,16 +13,14 @@ import {
   ChevronDown,
   ChevronUp,
   Send,
-  X,
   Pencil,
   ExternalLink,
-  Flame,
-  HelpCircle,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+import { StatusDot } from "@/components/ui/status-dot";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -48,6 +46,7 @@ export interface EmailDraft {
   to_email: string;
   to_name: string | null;
   status: string;
+  context_brief: string | null;
 }
 
 export interface ThreadMessage {
@@ -93,37 +92,37 @@ function getTaskTypeStyle(type: string): {
     case "email_followup":
       return {
         icon: Mail,
-        bgColor: "bg-blue-100",
-        iconColor: "text-blue-600",
+        bgColor: "bg-primary/10",
+        iconColor: "text-primary",
       };
     case "outgoing_call":
       return {
         icon: Phone,
-        bgColor: "bg-green-100",
-        iconColor: "text-green-600",
+        bgColor: "bg-muted",
+        iconColor: "text-foreground",
       };
     case "deal":
       return {
         icon: Briefcase,
-        bgColor: "bg-purple-100",
-        iconColor: "text-purple-600",
+        bgColor: "bg-muted",
+        iconColor: "text-foreground",
       };
     case "lead":
     default:
       return {
         icon: FileText,
-        bgColor: "bg-orange-100",
-        iconColor: "text-orange-600",
+        bgColor: "bg-muted",
+        iconColor: "text-muted-foreground",
       };
   }
 }
 
-function getClassificationStyle(classification: string | null) {
+function getClassificationLabel(classification: string | null) {
   switch (classification) {
     case "hot":
-      return { label: "Hot", icon: Flame, color: "bg-red-100 text-red-700" };
+      return "Hot";
     case "question":
-      return { label: "Question", icon: HelpCircle, color: "bg-amber-100 text-amber-700" };
+      return "Question";
     default:
       return null;
   }
@@ -196,6 +195,25 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
     });
   };
 
+  const handleReopen = async () => {
+    setActionPending(true);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/reopen`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to reopen");
+      }
+    } catch (err) {
+      alert("Failed to reopen task");
+    } finally {
+      setActionPending(false);
+    }
+  };
+
   const handleApprove = async () => {
     if (!task.draft) return;
     setActionPending(true);
@@ -262,9 +280,11 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
     task.status !== "completed" &&
     task.status !== "cancelled";
 
+  const isArchived = task.status === "completed" || task.status === "cancelled";
+
   const typeStyle = getTaskTypeStyle(task.type);
   const TypeIcon = typeStyle.icon;
-  const classificationStyle = getClassificationStyle(task.classification);
+  const classificationLabel = getClassificationLabel(task.classification);
   const hasEmailContext = task.type === "incoming_email" && (task.draft || task.thread.length > 0);
 
   // Get the last inbound message for preview
@@ -275,7 +295,7 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
       className={cn(
         "border-b transition-colors",
         isPending && "opacity-50",
-        isOverdue && "bg-red-50/50",
+        isOverdue && "bg-destructive/5",
         selected && "bg-muted/30"
       )}
     >
@@ -305,12 +325,9 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
           {task.lead_name || "Unknown"}
         </span>
 
-        {/* Classification badge */}
-        {classificationStyle && (
-          <Badge variant="secondary" className={cn("text-xs", classificationStyle.color)}>
-            <classificationStyle.icon className="h-3 w-3 mr-1" />
-            {classificationStyle.label}
-          </Badge>
+        {/* Classification indicator */}
+        {task.classification && classificationLabel && (
+          <StatusDot status={task.classification} label={classificationLabel} />
         )}
 
         {/* Content */}
@@ -328,7 +345,7 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
         <span
           className={cn(
             "text-xs flex-shrink-0",
-            isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"
+            isOverdue ? "text-destructive font-medium" : "text-muted-foreground"
           )}
         >
           {formatDueDate(task.due_date, task.due_time)}
@@ -357,34 +374,51 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleComplete}>
-              <Check className="h-4 w-4 mr-2" />
-              Mark as done
-            </DropdownMenuItem>
-            {task.lead_id && (
-              <DropdownMenuItem onClick={() => router.push(`/leads/${task.lead_id}`)}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View Lead
-              </DropdownMenuItem>
+            {isArchived ? (
+              <>
+                <DropdownMenuItem onClick={handleReopen}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reopen
+                </DropdownMenuItem>
+                {task.lead_id && (
+                  <DropdownMenuItem onClick={() => router.push(`/leads/${task.lead_id}`)}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Lead
+                  </DropdownMenuItem>
+                )}
+              </>
+            ) : (
+              <>
+                <DropdownMenuItem onClick={handleComplete}>
+                  <Check className="h-4 w-4 mr-2" />
+                  Mark as done
+                </DropdownMenuItem>
+                {task.lead_id && (
+                  <DropdownMenuItem onClick={() => router.push(`/leads/${task.lead_id}`)}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Lead
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Clock className="h-4 w-4 mr-2" />
+                    Snooze
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem onClick={() => handleSnooze(1)}>
+                      1 day
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSnooze(3)}>
+                      3 days
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSnooze(7)}>
+                      1 week
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Clock className="h-4 w-4 mr-2" />
-                Snooze
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                <DropdownMenuItem onClick={() => handleSnooze(1)}>
-                  1 day
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSnooze(3)}>
-                  3 days
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSnooze(7)}>
-                  1 week
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -408,8 +442,8 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
                     className={cn(
                       "text-xs p-2 rounded",
                       msg.direction === "inbound"
-                        ? "bg-muted/50 border-l-2 border-blue-400"
-                        : "bg-muted/30 border-l-2 border-gray-300"
+                        ? "bg-muted/50 border-l-2 border-primary/50"
+                        : "bg-muted/30 border-l-2 border-muted-foreground/30"
                     )}
                   >
                     <div className="font-medium mb-1">
@@ -427,10 +461,22 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
             </Collapsible>
           )}
 
+          {/* Context brief (AI-generated summary) */}
+          {task.draft?.context_brief && (
+            <div className="text-sm p-3 rounded-lg bg-muted/50 border border-border">
+              <div className="font-medium text-muted-foreground mb-1 text-xs uppercase tracking-wide">
+                Context
+              </div>
+              <div className="text-foreground">
+                {task.draft.context_brief}
+              </div>
+            </div>
+          )}
+
           {/* Last inbound message preview (always visible) */}
           {lastInbound && !isEditing && (
-            <div className="text-xs p-2 rounded bg-blue-50 border-l-2 border-blue-400">
-              <div className="font-medium mb-1">
+            <div className="text-xs p-2 rounded bg-muted/30 border-l-2 border-primary/50">
+              <div className="font-medium mb-1 text-foreground">
                 Their message:
               </div>
               <div className="text-muted-foreground whitespace-pre-wrap">
@@ -499,7 +545,6 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
                     size="sm"
                     onClick={handleApprove}
                     disabled={actionPending}
-                    className="bg-green-600 hover:bg-green-700"
                   >
                     <Send className="h-3 w-3 mr-1" />
                     Approve & Send
@@ -510,8 +555,8 @@ export function TaskItem({ task, selected, onSelect }: TaskItemProps) {
                     onClick={handleReject}
                     disabled={actionPending}
                   >
-                    <X className="h-3 w-3 mr-1" />
-                    Dismiss
+                    <Check className="h-3 w-3 mr-1" />
+                    Done (Don't Send)
                   </Button>
                 </div>
               )}

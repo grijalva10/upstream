@@ -1,18 +1,27 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { PageProvider } from "@/components/layout";
+import { PageHeader, PageHeaderLeft, PageHeaderRight } from "@/components/layout";
+import { SectionHeader } from "@/components/ui/section-header";
 import { NewSearchDialog } from "./new-search-dialog";
 
-export function PageSetup({ children }: { children: ReactNode }): ReactNode {
+interface PageSetupProps {
+  children: ReactNode;
+  count?: number;
+}
+
+export function PageSetup({ children, count }: PageSetupProps): ReactNode {
   return (
-    <PageProvider
-      title="Searches"
-      description="Create and manage property searches from buyer criteria"
-      breadcrumbs={[{ label: "Searches" }]}
-      actions={<NewSearchDialog />}
-    >
+    <>
+      <PageHeader>
+        <PageHeaderLeft>
+          <SectionHeader count={count}>Searches</SectionHeader>
+        </PageHeaderLeft>
+        <PageHeaderRight>
+          <NewSearchDialog />
+        </PageHeaderRight>
+      </PageHeader>
       {children}
-    </PageProvider>
+    </>
   );
 }

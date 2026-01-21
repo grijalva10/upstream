@@ -40,7 +40,7 @@ export default async function CampaignsPage() {
   ]);
 
   return (
-    <PageSetup searches={readySearches}>
+    <PageSetup searches={readySearches} count={count}>
       <PageContainer>
         <CampaignsDataTable data={campaigns as Campaign[]} total={count} />
       </PageContainer>

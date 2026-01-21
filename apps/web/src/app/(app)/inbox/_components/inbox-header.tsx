@@ -44,12 +44,14 @@ export function InboxHeader({ counts }: InboxHeaderProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto p-0 text-lg font-semibold hover:bg-transparent">
-          {viewLabels[currentView]}
-          <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            {viewLabels[currentView]}
+          </span>
+          <span className="ml-2 text-xs font-mono text-muted-foreground">
             {counts[currentView]}
           </span>
-          <ChevronDown className="ml-1 h-4 w-4 text-muted-foreground" />
+          <ChevronDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -59,8 +61,8 @@ export function InboxHeader({ counts }: InboxHeaderProps) {
             onClick={() => handleViewChange(view)}
             className="flex items-center justify-between"
           >
-            <span>{viewLabels[view]}</span>
-            <span className="ml-4 text-xs text-muted-foreground">
+            <span className="text-xs uppercase tracking-wider">{viewLabels[view]}</span>
+            <span className="ml-4 text-xs font-mono text-muted-foreground">
               {counts[view]}
             </span>
           </DropdownMenuItem>

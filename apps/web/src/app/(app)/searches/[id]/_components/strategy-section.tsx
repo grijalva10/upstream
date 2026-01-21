@@ -42,7 +42,7 @@ export function StrategySection({ searchId, strategySummary, payloadsJson, statu
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractResult, setExtractResult] = useState<{ success: boolean; message: string } | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
-  const [maxProperties, setMaxProperties] = useState(20);
+  const [maxProperties, setMaxProperties] = useState(5000);
   const [countResult, setCountResult] = useState<CountResult | null>(null);
   const [isCounting, setIsCounting] = useState(false);
 
@@ -193,10 +193,9 @@ export function StrategySection({ searchId, strategySummary, payloadsJson, statu
                 <Input
                   type="number"
                   min={1}
-                  max={1000}
                   value={maxProperties}
-                  onChange={(e) => setMaxProperties(Number(e.target.value) || 20)}
-                  className="w-16 h-7 text-xs"
+                  onChange={(e) => setMaxProperties(Number(e.target.value) || 5000)}
+                  className="w-20 h-7 text-xs"
                   disabled={isExtracting}
                 />
               </div>

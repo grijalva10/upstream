@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Column, Filter } from "@/app/(app)/data/_components/data-table";
+import { StatusDot } from "@/components/ui/status-dot";
+import { StatValue } from "@/components/ui/stat-value";
 import type { SearchWithRelations } from "../_lib/types";
-import { StatusBadge, getSourceLabel, getCriteriaSummary, isProcessing } from "../_lib/utils";
+import { getSourceLabel, getCriteriaSummary, isProcessing, getStatusConfig } from "../_lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 // Re-export type
@@ -44,7 +45,19 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     accessorKey: "status",
     align: "center",
     enableSorting: true,
-    cell: (v) => <StatusBadge status={v as string} size="sm" />,
+    cell: (v) => {
+      const status = v as string;
+      const config = getStatusConfig(status);
+      if (config.isLoading) {
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            {config.label}
+          </span>
+        );
+      }
+      return <StatusDot status={status} label={config.label} />;
+    },
   },
   {
     id: "source",
@@ -53,9 +66,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     align: "center",
     enableSorting: true,
     cell: (v) => (
-      <Badge variant="outline" className="text-xs">
-        {getSourceLabel(v as string)}
-      </Badge>
+      <StatValue muted>{getSourceLabel(v as string)}</StatValue>
     ),
   },
   {
@@ -64,7 +75,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     accessorKey: "total_properties",
     align: "right",
     enableSorting: true,
-    cell: (v) => (v as number)?.toLocaleString() ?? "0",
+    cell: (v) => <StatValue muted>{(v as number)?.toLocaleString() ?? "0"}</StatValue>,
   },
   {
     id: "leads",
@@ -72,7 +83,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     accessorKey: "total_leads",
     align: "right",
     enableSorting: true,
-    cell: (v) => (v as number)?.toLocaleString() ?? "0",
+    cell: (v) => <StatValue muted>{(v as number)?.toLocaleString() ?? "0"}</StatValue>,
   },
   {
     id: "contacts",
@@ -80,7 +91,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     accessorKey: "total_contacts",
     align: "right",
     enableSorting: true,
-    cell: (v) => (v as number)?.toLocaleString() ?? "0",
+    cell: (v) => <StatValue muted>{(v as number)?.toLocaleString() ?? "0"}</StatValue>,
   },
   {
     id: "campaign",
@@ -90,11 +101,7 @@ export const searchColumns: Column<SearchWithRelations>[] = [
     cell: (_, row) => {
       const campaign = row.campaigns?.[0];
       if (!campaign) return <span className="text-muted-foreground">—</span>;
-      return (
-        <Badge variant="outline" className="text-xs">
-          {campaign.status}
-        </Badge>
-      );
+      return <StatusDot status={campaign.status} showLabel />;
     },
   },
   {

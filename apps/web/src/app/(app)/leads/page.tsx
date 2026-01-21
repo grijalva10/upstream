@@ -18,7 +18,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+import { StatusDot } from "@/components/ui/status-dot";
+import { StatValue } from "@/components/ui/stat-value";
 import { ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -173,26 +174,6 @@ async function getLeads(
   return { data: leads, count: count ?? 0 };
 }
 
-function getStatusColor(status: string): string {
-  switch (status) {
-    case "new":
-      return "bg-slate-100 text-slate-800";
-    case "contacted":
-      return "bg-blue-100 text-blue-800";
-    case "engaged":
-      return "bg-amber-100 text-amber-800";
-    case "qualified":
-      return "bg-green-100 text-green-800";
-    case "handed_off":
-      return "bg-purple-100 text-purple-800";
-    case "dnc":
-      return "bg-red-100 text-red-800";
-    case "rejected":
-      return "bg-gray-100 text-gray-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-}
 
 interface PageProps {
   searchParams: Promise<{ page?: string; sort?: string; dir?: string; status?: string }>;
@@ -253,12 +234,10 @@ interface StatusFilterProps {
 function StatusFilter({ currentStatus, sortField, sortDir }: StatusFilterProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="inline-flex items-center gap-1 hover:text-foreground transition-colors text-muted-foreground">
+      <DropdownMenuTrigger className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors text-muted-foreground">
         Status
         {currentStatus && (
-          <Badge variant="secondary" className={cn("ml-1 text-xs", getStatusColor(currentStatus))}>
-            {currentStatus}
-          </Badge>
+          <StatusDot status={currentStatus} showLabel className="ml-1" />
         )}
         <ChevronDown className="h-3.5 w-3.5 opacity-50" />
       </DropdownMenuTrigger>
@@ -276,9 +255,7 @@ function StatusFilter({ currentStatus, sortField, sortDir }: StatusFilterProps) 
               href={buildUrl({ sort: sortField, dir: sortDir, status })}
               className="flex items-center justify-between gap-4"
             >
-              <Badge variant="secondary" className={getStatusColor(status)}>
-                {status}
-              </Badge>
+              <StatusDot status={status} showLabel />
               {currentStatus === status && <Check className="h-4 w-4" />}
             </Link>
           </DropdownMenuItem>
@@ -350,7 +327,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                 </TableRow>
               ) : (
                 leads.map((lead) => (
-                  <TableRow key={lead.id}>
+                  <TableRow key={lead.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       <Link
                         href={`/leads/${lead.id}`}
@@ -360,22 +337,23 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={getStatusColor(lead.status)}
-                      >
-                        {lead.status}
-                      </Badge>
+                      <StatusDot status={lead.status} showLabel />
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {lead.lead_type}
                     </TableCell>
-                    <TableCell>{lead.contacts.length}</TableCell>
-                    <TableCell>{lead.property_count}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {lead.last_activity_at
-                        ? formatRelativeDate(lead.last_activity_at)
-                        : "-"}
+                    <TableCell>
+                      <StatValue muted>{lead.contacts.length}</StatValue>
+                    </TableCell>
+                    <TableCell>
+                      <StatValue muted>{lead.property_count}</StatValue>
+                    </TableCell>
+                    <TableCell>
+                      <StatValue muted>
+                        {lead.last_activity_at
+                          ? formatRelativeDate(lead.last_activity_at)
+                          : "-"}
+                      </StatValue>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {lead.source || "-"}

@@ -29,7 +29,7 @@ export default async function SearchesPage() {
   const searches = await getSearches();
 
   return (
-    <PageSetup>
+    <PageSetup count={searches.length}>
       <PageContainer>
         <SearchesDataTable data={searches} />
       </PageContainer>

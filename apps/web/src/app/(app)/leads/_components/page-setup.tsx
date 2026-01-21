@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { PageHeader, PageHeaderLeft, PageHeaderRight } from "@/components/layout";
+import { SectionHeader } from "@/components/ui/section-header";
 import { QuickCreateLead } from "./quick-create-lead";
 
 interface PageSetupProps {
@@ -14,10 +15,7 @@ export function PageSetup({ children, count }: PageSetupProps): ReactNode {
     <>
       <PageHeader>
         <PageHeaderLeft>
-          <h1 className="text-lg font-semibold">Leads</h1>
-          <span className="text-sm text-muted-foreground">
-            {count.toLocaleString()}
-          </span>
+          <SectionHeader count={count}>Leads</SectionHeader>
         </PageHeaderLeft>
         <PageHeaderRight>
           <QuickCreateLead />

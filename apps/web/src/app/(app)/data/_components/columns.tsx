@@ -1,6 +1,8 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { StatusDot } from "@/components/ui/status-dot";
+import { StatValue } from "@/components/ui/stat-value";
 import { Column, Filter } from "./data-table";
 import type { Contact, Lead, Property, Campaign, Exclusion } from "./types";
 
@@ -421,13 +423,6 @@ export const propertyFilters: Filter[] = [
 // CAMPAIGNS
 // ============================================================================
 
-const campaignStatusColors: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-800",
-  active: "bg-green-100 text-green-800",
-  paused: "bg-yellow-100 text-yellow-800",
-  completed: "bg-blue-100 text-blue-800",
-};
-
 export const campaignColumns: Column<Campaign>[] = [
   {
     id: "name",
@@ -447,21 +442,21 @@ export const campaignColumns: Column<Campaign>[] = [
     header: "Status",
     accessorKey: "status",
     align: "center",
-    cell: (v) => coloredBadge(v as string, campaignStatusColors),
+    cell: (v) => <StatusDot status={v as string} showLabel />,
   },
   {
     id: "enrolled",
     header: "Enrolled",
     accessorKey: "total_enrolled",
     align: "right",
-    cell: (v) => formatNumber(v as number | null),
+    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
   },
   {
     id: "sent",
     header: "Sent",
     accessorKey: "total_sent",
     align: "right",
-    cell: (v) => formatNumber(v as number | null),
+    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
   },
   {
     id: "opened",
@@ -469,14 +464,14 @@ export const campaignColumns: Column<Campaign>[] = [
     accessorKey: "total_opened",
     align: "right",
     defaultHidden: true,
-    cell: (v) => formatNumber(v as number | null),
+    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
   },
   {
     id: "replied",
     header: "Replied",
     accessorKey: "total_replied",
     align: "right",
-    cell: (v) => formatNumber(v as number | null),
+    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
   },
   {
     id: "stopped",
@@ -484,7 +479,7 @@ export const campaignColumns: Column<Campaign>[] = [
     accessorKey: "total_stopped",
     align: "right",
     defaultHidden: true,
-    cell: (v) => formatNumber(v as number | null),
+    cell: (v) => <StatValue muted>{formatNumber(v as number | null)}</StatValue>,
   },
   {
     id: "created_at",
@@ -492,7 +487,7 @@ export const campaignColumns: Column<Campaign>[] = [
     accessorKey: "created_at",
     align: "right",
     enableSorting: true,
-    cell: (v) => new Date(v as string).toLocaleDateString(),
+    cell: (v) => <StatValue muted>{new Date(v as string).toLocaleDateString()}</StatValue>,
   },
   {
     id: "started_at",
@@ -500,7 +495,7 @@ export const campaignColumns: Column<Campaign>[] = [
     accessorKey: "started_at",
     align: "right",
     defaultHidden: true,
-    cell: (v) => v ? new Date(v as string).toLocaleDateString() : "-",
+    cell: (v) => <StatValue muted>{v ? new Date(v as string).toLocaleDateString() : "-"}</StatValue>,
   },
 ];
 
