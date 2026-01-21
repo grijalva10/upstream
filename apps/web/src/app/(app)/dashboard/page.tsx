@@ -23,7 +23,8 @@ async function getDashboardData() {
     callsResult,
     repliesResult,
     stalledResult,
-    pipelineResult,
+    dealPipelineResult,
+    leadPipelineResult,
     dealsReadyResult,
     costarStatusResult,
     outlookStatusResult,
@@ -88,8 +89,9 @@ async function getDashboardData() {
       )
       .limit(5),
 
-    // Pipeline counts from deals table
-    supabase.from("deals").select("status").not("status", "in", "(handed_off,lost)"),
+    // Pipeline counts using RPC functions (avoids row limits)
+    supabase.rpc("get_deal_pipeline_counts"),
+    supabase.rpc("get_lead_pipeline_counts"),
 
     // Deals ready to package (qualified but not packaged)
     supabase
@@ -185,26 +187,32 @@ async function getDashboardData() {
       status: "stalled",
     })) || [];
 
-  // Process pipeline counts by status
-  const statusCounts: Record<string, number> = {
-    new: 0,
-    engaging: 0,
-    qualifying: 0,
-    qualified: 0,
-    packaged: 0,
-  };
-  pipelineResult.data?.forEach((deal: { status: string }) => {
-    if (deal.status in statusCounts) {
-      statusCounts[deal.status]++;
-    }
+  // Process deal pipeline counts from RPC
+  const dealStatusMap: Record<string, number> = {};
+  dealPipelineResult.data?.forEach((row: { status: string; count: number }) => {
+    dealStatusMap[row.status] = row.count;
   });
-  const pipelineStages = [
-    { name: "New", count: statusCounts.new, color: "bg-slate-500" },
-    { name: "Engaging", count: statusCounts.engaging, color: "bg-blue-500" },
-    { name: "Qualifying", count: statusCounts.qualifying, color: "bg-amber-500" },
-    { name: "Qualified", count: statusCounts.qualified, color: "bg-green-500" },
-    { name: "Packaged", count: statusCounts.packaged, color: "bg-purple-500" },
-  ];
+  const dealPipelineStages = [
+    { name: "New", count: dealStatusMap.new || 0, color: "bg-slate-500" },
+    { name: "Gathering", count: dealStatusMap.gathering || 0, color: "bg-blue-500" },
+    { name: "Qualified", count: dealStatusMap.qualified || 0, color: "bg-green-500" },
+    { name: "Packaging", count: dealStatusMap.packaging || 0, color: "bg-purple-500" },
+  ].filter(stage => stage.count > 0 || ["Gathering", "Qualified"].includes(stage.name));
+
+  // Process lead pipeline counts from RPC
+  const leadStatusMap: Record<string, number> = {};
+  leadPipelineResult.data?.forEach((row: { status: string; count: number }) => {
+    leadStatusMap[row.status] = row.count;
+  });
+  const leadPipelineStages = [
+    { name: "New", count: leadStatusMap.new || 0, color: "bg-slate-400" },
+    { name: "Contacted", count: leadStatusMap.contacted || 0, color: "bg-sky-500" },
+    { name: "Replied", count: leadStatusMap.replied || 0, color: "bg-blue-500" },
+    { name: "Engaged", count: leadStatusMap.engaged || 0, color: "bg-indigo-500" },
+    { name: "Waiting", count: leadStatusMap.waiting || 0, color: "bg-amber-500" },
+    { name: "Qualified", count: leadStatusMap.qualified || 0, color: "bg-green-500" },
+    { name: "Nurture", count: leadStatusMap.nurture || 0, color: "bg-violet-400" },
+  ].filter(stage => stage.count > 0 || ["New", "Contacted", "Qualified"].includes(stage.name));
 
   // Process deals ready to package
   const dealsReady =
@@ -291,7 +299,8 @@ async function getDashboardData() {
     replies,
     totalReplies: repliesResult.data?.length || 0,
     stalledDeals,
-    pipelineStages,
+    dealPipelineStages,
+    leadPipelineStages,
     dealsReady,
     agentActivities,
     services,
@@ -312,9 +321,10 @@ export default async function DashboardPage() {
           <StalledDealsCard deals={data.stalledDeals} />
         </div>
 
-        {/* Pipeline snapshot */}
-        <div className="mb-6">
-          <PipelineSnapshot stages={data.pipelineStages} />
+        {/* Pipeline snapshots */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <PipelineSnapshot title="Lead Pipeline" stages={data.leadPipelineStages} href="/leads" />
+          <PipelineSnapshot title="Deal Pipeline" stages={data.dealPipelineStages} href="/pipeline" />
         </div>
 
         {/* Bottom row: Deals ready + Agent activity */}

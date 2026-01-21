@@ -9,19 +9,21 @@ interface PipelineStage {
 }
 
 interface PipelineSnapshotProps {
+  title: string;
   stages: PipelineStage[];
+  href: string;
 }
 
-export function PipelineSnapshot({ stages }: PipelineSnapshotProps) {
+export function PipelineSnapshot({ title, stages, href }: PipelineSnapshotProps) {
   const total = stages.reduce((sum, stage) => sum + stage.count, 0);
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Pipeline Snapshot</CardTitle>
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <Link href="/pipeline" className="block">
+        <Link href={href} className="block">
           <div className="flex items-center gap-1 h-8 rounded-md overflow-hidden bg-muted">
             {stages.map((stage, index) => {
               const width = total > 0 ? (stage.count / total) * 100 : 0;
