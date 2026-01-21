@@ -419,7 +419,7 @@ For payload structure examples only, you may read:
     },
     "ListingType": 0
   },
-  "1": 100,
+  "1": 9999,
   "2": 1,
   "3": {
     "RateBasis": "month",
