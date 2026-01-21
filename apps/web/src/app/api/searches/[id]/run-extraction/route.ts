@@ -96,7 +96,7 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
-    const maxProperties = body.max_properties ?? 100;
+    const maxProperties = body.max_properties ?? 5000;
 
     const supabase = createAdminClient();
 
@@ -330,9 +330,8 @@ async function upsertExtractedData(
       .upsert({
         costar_company_id: String(costarId),
         costar_key: contact.company_costar_key || null,
-        company_type: contact.company_type || null,
         name: contact.company_name || "Unknown",
-        is_seller: true,
+        lead_type: "seller",
       }, {
         onConflict: "costar_company_id",
         ignoreDuplicates: false,

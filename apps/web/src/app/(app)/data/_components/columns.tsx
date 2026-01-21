@@ -24,7 +24,19 @@ function coloredBadge(value: string, colors: Record<string, string>): React.Reac
   return <Badge className={colors[value]}>{value}</Badge>;
 }
 
-/** Buyer/Seller type badges - shared by contacts and companies */
+/** Lead type badge */
+function leadTypeBadge(leadType: string): React.ReactNode {
+  const labels: Record<string, string> = {
+    seller: "Seller",
+    buyer: "Buyer",
+    buyer_seller: "Buyer/Seller",
+    broker: "Broker",
+    other: "Other",
+  };
+  return <Badge variant="outline" className="text-xs">{labels[leadType] || leadType}</Badge>;
+}
+
+/** Buyer/Seller type badges - for contacts */
 function buyerSellerBadges(isBuyer: boolean | null, isSeller: boolean | null): React.ReactNode {
   if (!isBuyer && !isSeller) {
     return <span className="text-muted-foreground">-</span>;
@@ -143,18 +155,13 @@ export const contactFilters: Filter[] = [
 const leadStatusColors: Record<string, string> = {
   new: "bg-gray-100 text-gray-800",
   contacted: "bg-blue-100 text-blue-800",
+  replied: "bg-cyan-100 text-cyan-800",
   engaged: "bg-yellow-100 text-yellow-800",
+  waiting: "bg-orange-100 text-orange-800",
   qualified: "bg-green-100 text-green-800",
   handed_off: "bg-purple-100 text-purple-800",
-  dnc: "bg-red-100 text-red-800",
-  rejected: "bg-red-100 text-red-800",
-};
-
-const qualificationStatusColors: Record<string, string> = {
-  new: "bg-gray-100 text-gray-800",
-  in_progress: "bg-blue-100 text-blue-800",
-  qualified: "bg-green-100 text-green-800",
-  disqualified: "bg-red-100 text-red-800",
+  nurture: "bg-indigo-100 text-indigo-800",
+  closed: "bg-red-100 text-red-800",
 };
 
 const sourceColors: Record<string, string> = {
@@ -179,18 +186,11 @@ export const leadColumns: Column<Lead>[] = [
     cell: (v) => coloredBadge(v as string, leadStatusColors),
   },
   {
-    id: "qualification_status",
-    header: "Qualification",
-    accessorKey: "qualification_status",
-    align: "center",
-    cell: (v) => v ? coloredBadge(v as string, qualificationStatusColors) : "-",
-  },
-  {
-    id: "type",
+    id: "lead_type",
     header: "Type",
+    accessorKey: "lead_type",
     align: "center",
-    accessorFn: (row) => [row.is_buyer && "Buyer", row.is_seller && "Seller"].filter(Boolean).join(", "),
-    cell: (_, row) => buyerSellerBadges(row.is_buyer, row.is_seller),
+    cell: (v) => leadTypeBadge(v as string),
   },
   {
     id: "source",
@@ -198,22 +198,6 @@ export const leadColumns: Column<Lead>[] = [
     accessorKey: "source",
     align: "center",
     cell: (v) => v ? coloredBadge(v as string, sourceColors) : "-",
-  },
-  {
-    id: "lead_score",
-    header: "Score",
-    accessorKey: "lead_score",
-    align: "right",
-    enableSorting: true,
-    cell: (v) => v != null ? String(v) : "-",
-  },
-  {
-    id: "has_broker",
-    header: "Broker",
-    accessorKey: "has_broker",
-    align: "center",
-    defaultHidden: true,
-    cell: (v) => v ? <Badge className="bg-orange-100 text-orange-800">Yes</Badge> : "-",
   },
   {
     id: "properties",
@@ -226,13 +210,6 @@ export const leadColumns: Column<Lead>[] = [
     header: "Contacts",
     accessorKey: "contact_count",
     align: "right",
-  },
-  {
-    id: "notes",
-    header: "Notes",
-    accessorKey: "notes",
-    defaultHidden: true,
-    cell: (v) => v ? String(v).slice(0, 50) + (String(v).length > 50 ? "..." : "") : "-",
   },
   {
     id: "created_at",
@@ -253,22 +230,25 @@ export const leadFilters: Filter[] = [
       { value: "all", label: "All" },
       { value: "new", label: "New" },
       { value: "contacted", label: "Contacted" },
+      { value: "replied", label: "Replied" },
       { value: "engaged", label: "Engaged" },
+      { value: "waiting", label: "Waiting" },
       { value: "qualified", label: "Qualified" },
       { value: "handed_off", label: "Handed Off" },
-      { value: "dnc", label: "DNC" },
-      { value: "rejected", label: "Rejected" },
+      { value: "nurture", label: "Nurture" },
+      { value: "closed", label: "Closed" },
     ],
   },
   {
-    id: "qualification_status",
-    label: "Qualification",
+    id: "lead_type",
+    label: "Type",
     options: [
       { value: "all", label: "All" },
-      { value: "new", label: "New" },
-      { value: "in_progress", label: "In Progress" },
-      { value: "qualified", label: "Qualified" },
-      { value: "disqualified", label: "Disqualified" },
+      { value: "seller", label: "Seller" },
+      { value: "buyer", label: "Buyer" },
+      { value: "buyer_seller", label: "Buyer/Seller" },
+      { value: "broker", label: "Broker" },
+      { value: "other", label: "Other" },
     ],
   },
   {
@@ -279,24 +259,7 @@ export const leadFilters: Filter[] = [
       { value: "costar", label: "CoStar" },
       { value: "manual", label: "Manual" },
       { value: "referral", label: "Referral" },
-    ],
-  },
-  {
-    id: "type",
-    label: "Type",
-    options: [
-      { value: "all", label: "All" },
-      { value: "buyer", label: "Buyer" },
-      { value: "seller", label: "Seller" },
-    ],
-  },
-  {
-    id: "has_broker",
-    label: "Has Broker",
-    options: [
-      { value: "all", label: "All" },
-      { value: "yes", label: "Yes" },
-      { value: "no", label: "No" },
+      { value: "inbound", label: "Inbound" },
     ],
   },
 ];
@@ -556,44 +519,39 @@ export const campaignFilters: Filter[] = [
 ];
 
 // ============================================================================
-// EXCLUSIONS (uses dnc_entries table)
+// EXCLUSIONS (uses exclusions table)
 // ============================================================================
 
 const exclusionReasonColors: Record<string, string> = {
-  requested: "bg-red-100 text-red-800",
-  bounced: "bg-orange-100 text-orange-800",
-  complaint: "bg-yellow-100 text-yellow-800",
+  dnc: "bg-red-100 text-red-800",
+  bounce: "bg-orange-100 text-orange-800",
+  bad_contact: "bg-yellow-100 text-yellow-800",
+  broker: "bg-purple-100 text-purple-800",
   manual: "bg-blue-100 text-blue-800",
 };
 
-const exclusionSourceColors: Record<string, string> = {
-  email_response: "bg-blue-100 text-blue-800",
-  manual: "bg-gray-100 text-gray-800",
-  import: "bg-purple-100 text-purple-800",
+const exclusionTypeColors: Record<string, string> = {
+  email: "bg-blue-100 text-blue-800",
+  domain: "bg-green-100 text-green-800",
+  company: "bg-purple-100 text-purple-800",
+  contact: "bg-gray-100 text-gray-800",
 };
 
 export const exclusionColumns: Column<Exclusion>[] = [
   {
-    id: "email",
-    header: "Email",
-    accessorKey: "email",
+    id: "value",
+    header: "Value",
+    accessorKey: "value",
     enableSorting: true,
     className: "font-medium",
     cell: displayValue,
   },
   {
-    id: "phone",
-    header: "Phone",
-    accessorKey: "phone",
-    defaultHidden: true,
-    cell: displayValue,
-  },
-  {
-    id: "company_name",
-    header: "Company",
-    accessorKey: "company_name",
-    defaultHidden: true,
-    cell: displayValue,
+    id: "exclusion_type",
+    header: "Type",
+    accessorKey: "exclusion_type",
+    align: "center",
+    cell: (v) => v ? coloredBadge(v as string, exclusionTypeColors) : "-",
   },
   {
     id: "reason",
@@ -603,23 +561,9 @@ export const exclusionColumns: Column<Exclusion>[] = [
     cell: (v) => v ? coloredBadge(v as string, exclusionReasonColors) : "-",
   },
   {
-    id: "source",
-    header: "Source",
-    accessorKey: "source",
-    align: "center",
-    cell: (v) => v ? coloredBadge(v as string, exclusionSourceColors) : "-",
-  },
-  {
-    id: "notes",
-    header: "Notes",
-    accessorKey: "notes",
-    defaultHidden: true,
-    cell: (v) => v ? String(v).slice(0, 50) + (String(v).length > 50 ? "..." : "") : "-",
-  },
-  {
-    id: "added_at",
+    id: "created_at",
     header: "Added",
-    accessorKey: "added_at",
+    accessorKey: "created_at",
     align: "right",
     enableSorting: true,
     cell: (v) => new Date(v as string).toLocaleDateString(),

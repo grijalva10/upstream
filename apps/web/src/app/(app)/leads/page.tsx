@@ -15,14 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SortField = "name" | "status" | "company_type" | "created_at" | "last_activity";
+type SortField = "name" | "status" | "lead_type" | "created_at" | "last_activity";
 type SortDir = "asc" | "desc";
 
 interface Lead {
   id: string;
   name: string;
   status: string;
-  company_type: string | null;
+  lead_type: string;
   source: string | null;
   created_at: string;
   contacts: { id: string; name: string; email: string | null }[];
@@ -72,7 +72,7 @@ async function getLeads(
       id,
       name,
       status,
-      company_type,
+      lead_type,
       source,
       created_at,
       contacts (id, name, email),
@@ -132,7 +132,7 @@ async function getLeads(
       id: lead.id,
       name: lead.name,
       status: lead.status,
-      company_type: lead.company_type,
+      lead_type: lead.lead_type,
       source: lead.source,
       created_at: lead.created_at,
       contacts: lead.contacts || [],
@@ -211,7 +211,7 @@ interface PageProps {
   searchParams: Promise<{ page?: string; sort?: string; dir?: string }>;
 }
 
-const VALID_SORT_FIELDS: SortField[] = ["name", "status", "company_type", "created_at", "last_activity"];
+const VALID_SORT_FIELDS: SortField[] = ["name", "status", "lead_type", "created_at", "last_activity"];
 
 export default async function LeadsPage({ searchParams }: PageProps) {
   const params = await searchParams;
@@ -242,7 +242,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                   </SortableHeader>
                 </TableHead>
                 <TableHead>
-                  <SortableHeader field="company_type" currentSort={sortField} currentDir={sortDir}>
+                  <SortableHeader field="lead_type" currentSort={sortField} currentDir={sortDir}>
                     Type
                   </SortableHeader>
                 </TableHead>
@@ -286,7 +286,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {lead.company_type || "-"}
+                      {lead.lead_type}
                     </TableCell>
                     <TableCell>{lead.contacts.length}</TableCell>
                     <TableCell>{lead.property_count}</TableCell>

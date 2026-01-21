@@ -2,27 +2,19 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { ContactsCard } from "./_components/contacts-card";
 import { PropertiesCard } from "./_components/properties-card";
 import { DealsCard } from "./_components/deals-card";
 import { TasksCard, type Task } from "./_components/tasks-card";
 import { ActivityTimeline, type Activity } from "./_components/activity-timeline";
 import { ActivityActions } from "./_components/activity-actions";
+import { StatusSelect } from "./_components/status-select";
+import { TypeSelect } from "./_components/type-select";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-const statusColors: Record<string, string> = {
-  new: "bg-slate-100 text-slate-800",
-  contacted: "bg-blue-100 text-blue-800",
-  engaged: "bg-amber-100 text-amber-800",
-  qualified: "bg-green-100 text-green-800",
-  handed_off: "bg-purple-100 text-purple-800",
-  dnc: "bg-red-100 text-red-800",
-  rejected: "bg-gray-100 text-gray-800",
-};
 
 async function getLead(id: string) {
   const supabase = createAdminClient();
@@ -34,7 +26,7 @@ async function getLead(id: string) {
       id,
       name,
       status,
-      company_type,
+      lead_type,
       source,
       notes,
       created_at,
@@ -432,14 +424,14 @@ export default async function LeadDetailPage({ params }: PageProps) {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold">{lead.name}</h1>
-          <Badge className={statusColors[lead.status]}>{lead.status}</Badge>
+          <StatusSelect leadId={id} currentStatus={lead.status} />
         </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          {lead.company_type && <span className="capitalize">{lead.company_type}</span>}
+        <div className="flex items-center gap-4 text-sm">
+          <TypeSelect leadId={id} currentType={lead.lead_type} />
           {lead.source && (
             <>
-              <span>·</span>
-              <span>Source: {lead.source}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground">Source: {lead.source}</span>
             </>
           )}
         </div>

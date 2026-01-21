@@ -20,15 +20,10 @@ export interface Lead {
   costar_company_id: string | null;
   name: string;
   status: string;
+  lead_type: string;
   source: string | null;
   notes: string | null;
-  has_broker: boolean | null;
-  broker_contact: string | null;
-  qualification_status: string | null;
-  lead_score: number | null;
-  is_buyer: boolean | null;
-  is_seller: boolean | null;
-  company_type: number | null;
+  closed_reason: string | null;
   contact_count: number;
   property_count: number;
   created_at: string;
