@@ -117,6 +117,7 @@ interface ClassificationResult {
   confidence: number;
   extracted: ExtractedData;
   draft_reply?: string;
+  context_brief?: string;
   reasoning: string;
 }
 
@@ -296,13 +297,12 @@ async function processEmail(email: EmailRecord): Promise<void> {
     const originalEmail = extractBounceRecipient(email.subject || '', email.body_text || '');
     if (originalEmail) {
       await supabase
-        .from('email_exclusions')
+        .from('exclusions')
         .upsert({
-          email: originalEmail.toLowerCase(),
+          exclusion_type: 'email',
+          value: originalEmail.toLowerCase(),
           reason: 'bounce',
-          source_email_id: email.id,
-        })
-        .select();
+        }, { onConflict: 'exclusion_type,value' });
       console.log(`[process-replies] Added bounced address to exclusions: ${originalEmail}`);
     }
     return;
@@ -493,6 +493,7 @@ async function classifyEmail(
       confidence: parsed.confidence || 0.5,
       extracted: parsed.extracted || {},
       draft_reply: parsed.draft_reply,
+      context_brief: parsed.context_brief,
       reasoning: parsed.reasoning || '',
     };
   } catch (err) {
@@ -604,6 +605,7 @@ RESPOND WITH JSON ONLY:
     "reason": null
   },
   "draft_reply": "Your suggested reply or null",
+  "context_brief": "2-3 sentence context summary for human reviewer",
   "reasoning": "Brief explanation"
 }
 
@@ -615,7 +617,13 @@ RULES:
 - For pass: No reply needed, extract reason
 - For bounce/other: No reply needed
 - Keep draft replies SHORT and professional, no signature
-- If unsure, default to "other"`;
+- If unsure, default to "other"
+
+CONTEXT_BRIEF RULES:
+- Always generate context_brief for hot and question classifications
+- Include: What they said (1 sentence), property/deal context (1 sentence), why this needs attention
+- Keep under 100 words, factual and concise
+- Example: "Stephen Wong owns 5000 SF industrial at 123 Main St (loan maturing June 2026). He's asking about our buyer's timeline and whether they'd consider a leaseback. Hot signal: engaged and asking deal-specific questions."`;
 }
 
 // =============================================================================
@@ -638,7 +646,7 @@ async function executeAction(
       break;
 
     case 'question':
-      await handleQuestion(result, email, contact);
+      await handleQuestion(result, email, contact, lead, property);
       break;
 
     case 'pass':
@@ -694,18 +702,20 @@ async function handleHot(
 
   // ALWAYS create draft - never auto-send
   if (result.draft_reply && contact) {
-    await createDraft(email, contact, result.draft_reply, 'hot_response', lead, property);
+    await createDraft(email, contact, result.draft_reply, 'hot_response', lead, property, result.context_brief);
   }
 }
 
 async function handleQuestion(
   result: ClassificationResult,
   email: EmailRecord,
-  contact: ContactRecord | null
+  contact: ContactRecord | null,
+  lead: LeadRecord | null,
+  property: PropertyRecord | null
 ): Promise<void> {
   // Create draft answer
   if (result.draft_reply && contact) {
-    await createDraft(email, contact, result.draft_reply, 'question_answer');
+    await createDraft(email, contact, result.draft_reply, 'question_answer', lead, property, result.context_brief);
   }
 }
 
@@ -746,22 +756,19 @@ async function handlePass(
 
   if (isDNC && contact) {
     await supabase
-      .from('dnc_entries')
+      .from('exclusions')
       .upsert({
-        email: email.from_email.toLowerCase(),
-        reason: 'requested',
-        source: 'email_response',
-        source_email_id: email.id,
-        notes: result.reasoning,
-      })
-      .select();
+        exclusion_type: 'email',
+        value: email.from_email.toLowerCase(),
+        reason: 'dnc',
+      }, { onConflict: 'exclusion_type,value' });
 
     await supabase
       .from('contacts')
       .update({ status: 'dnc', status_changed_at: new Date().toISOString() })
       .eq('id', contact.id);
 
-    console.log(`[process-replies] Added ${email.from_email} to DNC`);
+    console.log(`[process-replies] Added ${email.from_email} to exclusions`);
   }
 
   // If referral info extracted, create new contact
@@ -784,13 +791,12 @@ async function handlePass(
 async function handleBounce(email: EmailRecord, contact: ContactRecord | null): Promise<void> {
   // Add to exclusions
   await supabase
-    .from('email_exclusions')
+    .from('exclusions')
     .upsert({
-      email: email.from_email.toLowerCase(),
+      exclusion_type: 'email',
+      value: email.from_email.toLowerCase(),
       reason: 'bounce',
-      source_email_id: email.id,
-    })
-    .select();
+    }, { onConflict: 'exclusion_type,value' });
 
   // Update contact status
   if (contact) {
@@ -813,7 +819,8 @@ async function createDraft(
   body: string,
   draftType: string,
   lead?: LeadRecord | null,
-  property?: PropertyRecord | null
+  property?: PropertyRecord | null,
+  contextBrief?: string
 ): Promise<void> {
   const subject = email.subject?.startsWith('Re:')
     ? email.subject
@@ -831,6 +838,7 @@ async function createDraft(
     draft_type: draftType,
     status: 'pending',
     generated_by: 'process-replies',
+    context_brief: contextBrief,
   });
 
   console.log(`[process-replies] Created draft for review: ${contact.email}`);

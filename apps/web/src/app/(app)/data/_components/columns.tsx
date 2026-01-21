@@ -576,20 +576,11 @@ export const exclusionFilters: Filter[] = [
     label: "Reason",
     options: [
       { value: "all", label: "All" },
-      { value: "requested", label: "Requested" },
-      { value: "bounced", label: "Bounced" },
-      { value: "complaint", label: "Complaint" },
+      { value: "dnc", label: "Do Not Contact" },
+      { value: "bounce", label: "Bounced" },
+      { value: "bad_contact", label: "Bad Contact" },
+      { value: "broker", label: "Has Broker" },
       { value: "manual", label: "Manual" },
-    ],
-  },
-  {
-    id: "source",
-    label: "Source",
-    options: [
-      { value: "all", label: "All" },
-      { value: "email_response", label: "Email Response" },
-      { value: "manual", label: "Manual" },
-      { value: "import", label: "Import" },
     ],
   },
 ];

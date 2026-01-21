@@ -89,17 +89,13 @@ export async function GET(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Failed to fetch contacts" }, { status: 500 });
     }
 
-    // Get DNC list
-    const { data: dncList } = await supabase
-      .from("dnc_entries")
-      .select("email");
-    const dncEmails = new Set((dncList || []).map(d => d.email?.toLowerCase()));
-
-    // Get exclusions (bounces)
+    // Get all email exclusions (DNC, bounces, etc.)
     const { data: exclusionsList } = await supabase
-      .from("email_exclusions")
-      .select("email, reason");
-    const exclusions = new Map((exclusionsList || []).map(e => [e.email?.toLowerCase(), e.reason]));
+      .from("exclusions")
+      .select("value, reason")
+      .eq("exclusion_type", "email");
+    const exclusions = new Map((exclusionsList || []).map(e => [e.value?.toLowerCase(), e.reason]));
+    const dncEmails = new Set(exclusions.keys());
 
     // Get existing enrollments in ANY active campaign
     const { data: existingEnrollments } = await supabase

@@ -30,29 +30,17 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  // Check for DNC/exclusions before approving
+  // Check for exclusions before approving
   const { data: exclusion } = await supabase
-    .from("email_exclusions")
+    .from("exclusions")
     .select("id, reason")
-    .eq("email", draft.to_email.toLowerCase())
+    .eq("exclusion_type", "email")
+    .eq("value", draft.to_email.toLowerCase())
     .single();
 
   if (exclusion) {
     return NextResponse.json(
       { error: `Email is excluded: ${exclusion.reason}` },
-      { status: 400 }
-    );
-  }
-
-  const { data: dnc } = await supabase
-    .from("dnc_entries")
-    .select("id, reason")
-    .eq("email", draft.to_email.toLowerCase())
-    .single();
-
-  if (dnc) {
-    return NextResponse.json(
-      { error: `Email is on DNC list: ${dnc.reason}` },
       { status: 400 }
     );
   }

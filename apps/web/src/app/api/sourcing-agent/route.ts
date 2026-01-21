@@ -54,28 +54,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create agent_task to trigger sourcing agent
-    const { error: taskError } = await supabase
-      .from("agent_tasks")
-      .insert({
-        task_type: "generate_queries",
-        priority: 7,
-        status: "pending",
-        input_data: {
-          search_id: search.id,
-          search_name: searchName,
-          criteria_json: criteria,
-        },
-      });
-
-    if (taskError) {
-      console.error("Error creating task:", taskError);
-      // Don't fail the request, just log it
-    }
-
     return NextResponse.json({
       status: "submitted",
-      message: `Created search "${searchName}". Sourcing agent task queued.`,
+      message: `Created search "${searchName}". Use POST /api/searches/${search.id}/run-agent to generate queries.`,
       searchId: search.id,
       // Backward compatibility
       criteriaId: search.id,

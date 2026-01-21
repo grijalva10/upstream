@@ -199,6 +199,20 @@ export async function POST(request: Request) {
           );
         }
 
+        // Get the contact to get their email
+        const { data: contact, error: fetchError } = await supabase
+          .from("contacts")
+          .select("email")
+          .eq("id", contactId)
+          .single();
+
+        if (fetchError || !contact) {
+          return NextResponse.json(
+            { error: "Contact not found" },
+            { status: 404 }
+          );
+        }
+
         // Update contact status
         const { error: updateError } = await supabase
           .from("contacts")
@@ -213,17 +227,15 @@ export async function POST(request: Request) {
           );
         }
 
-        // Add to DNC entries
-        const { error: dncError } = await supabase
-          .from("dnc_entries")
-          .insert({
-            contact_id: contactId,
-            reason: data.reason as string || "Marked via AI assistant",
-          });
-
-        if (dncError) {
-          console.error("Error adding DNC entry:", dncError);
-          // Don't fail the whole operation for this
+        // Add to exclusions if email exists
+        if (contact.email) {
+          await supabase
+            .from("exclusions")
+            .upsert({
+              exclusion_type: "email",
+              value: contact.email.toLowerCase(),
+              reason: "dnc",
+            }, { onConflict: "exclusion_type,value" });
         }
 
         return NextResponse.json({

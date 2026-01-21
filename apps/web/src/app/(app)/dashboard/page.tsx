@@ -25,7 +25,6 @@ async function getDashboardData() {
     stalledResult,
     pipelineResult,
     dealsReadyResult,
-    agentActivityResult,
     costarStatusResult,
     outlookStatusResult,
     claudeStatusResult,
@@ -116,12 +115,6 @@ async function getDashboardData() {
       .eq("status", "qualified")
       .limit(5),
 
-    // Agent activity in last 24h
-    supabase
-      .from("agent_executions")
-      .select("agent_name")
-      .gte("created_at", yesterday),
-
     // Services status - CoStar (most recent property created)
     supabase
       .from("properties")
@@ -137,11 +130,12 @@ async function getDashboardData() {
       .limit(1)
       .single(),
 
-    // Services status - Claude CLI (any agent)
+    // Services status - Claude CLI (last search with payloads)
     supabase
-      .from("agent_executions")
-      .select("created_at")
-      .order("created_at", { ascending: false })
+      .from("searches")
+      .select("updated_at")
+      .not("payloads_json", "is", null)
+      .order("updated_at", { ascending: false })
       .limit(1)
       .single(),
 
@@ -230,29 +224,25 @@ async function getDashboardData() {
       matchingClients: [], // TODO: Match against searches criteria_json
     })) || [];
 
-  // Process agent activity
-  const agentCounts: Record<string, number> = {};
-  agentActivityResult.data?.forEach((exec: { agent_name: string }) => {
-    agentCounts[exec.agent_name] = (agentCounts[exec.agent_name] || 0) + 1;
-  });
+  // Agent activity (pg-boss handles execution, no tracking table)
   const agentActivities = [
     {
       name: "sourcing-agent",
       displayName: "Sourcing",
-      runs: agentCounts["sourcing-agent"] || 0,
-      description: `${agentCounts["sourcing-agent"] || 0} runs`,
-    },
-    {
-      name: "drip-campaign-exec",
-      displayName: "Drip Exec",
-      runs: agentCounts["drip-campaign-exec"] || 0,
-      description: `${agentCounts["drip-campaign-exec"] || 0} emails queued`,
+      runs: 0,
+      description: "Generates CoStar queries",
     },
     {
       name: "process-replies",
       displayName: "Classifier",
-      runs: agentCounts["process-replies"] || 0,
-      description: `${agentCounts["process-replies"] || 0} classified`,
+      runs: 0,
+      description: "Classifies email replies",
+    },
+    {
+      name: "send-email",
+      displayName: "Email Sender",
+      runs: 0,
+      description: "Sends queued emails",
     },
   ];
 
@@ -277,8 +267,8 @@ async function getDashboardData() {
     {
       name: "Claude CLI",
       description: "AI agent execution",
-      lastActive: claudeStatusResult.data?.created_at
-        ? new Date(claudeStatusResult.data.created_at)
+      lastActive: claudeStatusResult.data?.updated_at
+        ? new Date(claudeStatusResult.data.updated_at)
         : null,
       icon: "claude" as const,
     },

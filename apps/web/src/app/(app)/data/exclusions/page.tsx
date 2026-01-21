@@ -6,9 +6,10 @@ export default async function ExclusionsPage() {
   const supabase = createAdminClient();
 
   const { data, count } = await supabase
-    .from("dnc_entries")
+    .from("exclusions")
     .select("*", { count: "exact" })
-    .order("added_at", { ascending: false })
+    .eq("exclusion_type", "email")
+    .order("created_at", { ascending: false })
     .limit(20);
 
   return (

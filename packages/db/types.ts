@@ -553,24 +553,10 @@ export interface Database {
       contacts: { Row: Contact; Insert: ContactInsert; Update: Partial<Contact> };
       property_loans: { Row: PropertyLoan; Insert: PropertyLoanInsert; Update: Partial<PropertyLoan> };
       property_leads: { Row: PropertyLead; Insert: PropertyLead; Update: Partial<PropertyLead> };
-      sourcing_strategies: { Row: SourcingStrategy; Insert: Omit<SourcingStrategy, 'id' | 'created_at'>; Update: Partial<SourcingStrategy> };
-      extraction_lists: { Row: ExtractionList; Insert: ExtractionListInsert; Update: Partial<ExtractionList> };
-      list_properties: { Row: ListProperty; Insert: ListProperty; Update: Partial<ListProperty> };
-      email_templates: { Row: EmailTemplate; Insert: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>; Update: Partial<EmailTemplate> };
       activities: { Row: Activity; Insert: ActivityInsert; Update: Partial<Activity> };
-      dnc_entries: { Row: DncEntry; Insert: Omit<DncEntry, 'id' | 'added_at'>; Update: Partial<DncEntry> };
-      agent_definitions: { Row: AgentDefinition; Insert: Omit<AgentDefinition, 'id' | 'created_at' | 'updated_at'>; Update: Partial<AgentDefinition> };
-      agent_executions: { Row: AgentExecution; Insert: AgentExecutionInsert; Update: Partial<AgentExecution> };
-      agent_tasks: { Row: AgentTask; Insert: AgentTaskInsert; Update: Partial<AgentTask> };
-      agent_execution_context: { Row: AgentExecutionContext; Insert: Omit<AgentExecutionContext, 'id' | 'created_at'>; Update: Partial<AgentExecutionContext> };
-      agent_workflows: { Row: AgentWorkflow; Insert: Omit<AgentWorkflow, 'id' | 'created_at' | 'updated_at'>; Update: Partial<AgentWorkflow> };
-      agent_workflow_steps: { Row: AgentWorkflowStep; Insert: Omit<AgentWorkflowStep, 'id' | 'created_at' | 'updated_at'>; Update: Partial<AgentWorkflowStep> };
-      agent_workflow_runs: { Row: AgentWorkflowRun; Insert: AgentWorkflowRunInsert; Update: Partial<AgentWorkflowRun> };
-      agent_workflow_step_runs: { Row: AgentWorkflowStepRun; Insert: Omit<AgentWorkflowStepRun, 'id' | 'created_at'>; Update: Partial<AgentWorkflowStepRun> };
       email_sync_state: { Row: EmailSyncState; Insert: Omit<EmailSyncState, 'id' | 'updated_at'>; Update: Partial<EmailSyncState> };
       synced_emails: { Row: SyncedEmail; Insert: Omit<SyncedEmail, 'id' | 'created_at' | 'synced_at'>; Update: Partial<SyncedEmail> };
       settings: { Row: Setting; Insert: Omit<Setting, 'id' | 'updated_at'>; Update: Partial<Setting> };
-      email_events: { Row: EmailEvent; Insert: Omit<EmailEvent, 'id' | 'created_at'>; Update: Partial<EmailEvent> };
     };
   };
 }
