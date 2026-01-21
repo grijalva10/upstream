@@ -11,12 +11,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SortField = "name" | "status" | "lead_type" | "created_at" | "last_activity";
 type SortDir = "asc" | "desc";
+
+const LEAD_STATUSES = [
+  "new", "contacted", "replied", "engaged",
+  "waiting", "qualified", "handed_off", "nurture", "closed"
+] as const;
+type LeadStatus = typeof LEAD_STATUSES[number];
 
 interface Lead {
   id: string;
@@ -56,7 +69,8 @@ function formatRelativeDate(dateStr: string): string {
 async function getLeads(
   page: number,
   sortField: SortField = "created_at",
-  sortDir: SortDir = "desc"
+  sortDir: SortDir = "desc",
+  statusFilter?: LeadStatus
 ): Promise<{ data: Lead[]; count: number }> {
   const supabase = createAdminClient();
   const from = (page - 1) * PAGE_SIZE;
@@ -65,7 +79,7 @@ async function getLeads(
   // Map sort field to actual column (last_activity handled separately)
   const dbSortField = sortField === "last_activity" ? "created_at" : sortField;
 
-  const { data, count, error } = await supabase
+  let query = supabase
     .from("leads")
     .select(
       `
@@ -79,7 +93,14 @@ async function getLeads(
       property_leads (property_id)
     `,
       { count: "exact" }
-    )
+    );
+
+  // Apply status filter if provided
+  if (statusFilter) {
+    query = query.eq("status", statusFilter);
+  }
+
+  const { data, count, error } = await query
     .order(dbSortField, { ascending: sortDir === "asc" })
     .range(from, to);
 
@@ -173,17 +194,33 @@ function getStatusColor(status: string): string {
   }
 }
 
+interface PageProps {
+  searchParams: Promise<{ page?: string; sort?: string; dir?: string; status?: string }>;
+}
+
+const VALID_SORT_FIELDS: SortField[] = ["name", "status", "lead_type", "created_at", "last_activity"];
+
+function buildUrl(params: { sort: string; dir: string; status?: string; page?: number }) {
+  const searchParams = new URLSearchParams();
+  searchParams.set("sort", params.sort);
+  searchParams.set("dir", params.dir);
+  if (params.status) searchParams.set("status", params.status);
+  if (params.page && params.page > 1) searchParams.set("page", String(params.page));
+  return `?${searchParams.toString()}`;
+}
+
 interface SortableHeaderProps {
   field: SortField;
   currentSort: SortField;
   currentDir: SortDir;
+  currentStatus?: LeadStatus;
   children: React.ReactNode;
 }
 
-function SortableHeader({ field, currentSort, currentDir, children }: SortableHeaderProps) {
+function SortableHeader({ field, currentSort, currentDir, currentStatus, children }: SortableHeaderProps) {
   const isActive = currentSort === field;
   const nextDir = isActive && currentDir === "desc" ? "asc" : "desc";
-  const href = `?sort=${field}&dir=${nextDir}`;
+  const href = buildUrl({ sort: field, dir: nextDir, status: currentStatus });
 
   return (
     <Link
@@ -207,21 +244,64 @@ function SortableHeader({ field, currentSort, currentDir, children }: SortableHe
   );
 }
 
-interface PageProps {
-  searchParams: Promise<{ page?: string; sort?: string; dir?: string }>;
+interface StatusFilterProps {
+  currentStatus?: LeadStatus;
+  sortField: string;
+  sortDir: string;
 }
 
-const VALID_SORT_FIELDS: SortField[] = ["name", "status", "lead_type", "created_at", "last_activity"];
+function StatusFilter({ currentStatus, sortField, sortDir }: StatusFilterProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="inline-flex items-center gap-1 hover:text-foreground transition-colors text-muted-foreground">
+        Status
+        {currentStatus && (
+          <Badge variant="secondary" className={cn("ml-1 text-xs", getStatusColor(currentStatus))}>
+            {currentStatus}
+          </Badge>
+        )}
+        <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem asChild>
+          <Link href={buildUrl({ sort: sortField, dir: sortDir })} className="flex items-center justify-between">
+            All
+            {!currentStatus && <Check className="h-4 w-4" />}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {LEAD_STATUSES.map((status) => (
+          <DropdownMenuItem key={status} asChild>
+            <Link
+              href={buildUrl({ sort: sortField, dir: sortDir, status })}
+              className="flex items-center justify-between gap-4"
+            >
+              <Badge variant="secondary" className={getStatusColor(status)}>
+                {status}
+              </Badge>
+              {currentStatus === status && <Check className="h-4 w-4" />}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export default async function LeadsPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const currentPage = Math.max(1, parseInt(params.page || "1", 10));
   const sortField: SortField = VALID_SORT_FIELDS.includes(params.sort as SortField)
     ? (params.sort as SortField)
     : "last_activity";
   const sortDir: SortDir = params.dir === "asc" ? "asc" : "desc";
+  const statusFilter: LeadStatus | undefined = LEAD_STATUSES.includes(params.status as LeadStatus)
+    ? (params.status as LeadStatus)
+    : undefined;
 
-  const { data: leads, count } = await getLeads(currentPage, sortField, sortDir);
+  // Reset to page 1 when filter changes (or if page is invalid)
+  const currentPage = Math.max(1, parseInt(params.page || "1", 10));
+
+  const { data: leads, count } = await getLeads(currentPage, sortField, sortDir, statusFilter);
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
   return (
@@ -232,24 +312,26 @@ export default async function LeadsPage({ searchParams }: PageProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <SortableHeader field="name" currentSort={sortField} currentDir={sortDir}>
+                  <SortableHeader field="name" currentSort={sortField} currentDir={sortDir} currentStatus={statusFilter}>
                     Name
                   </SortableHeader>
                 </TableHead>
                 <TableHead>
-                  <SortableHeader field="status" currentSort={sortField} currentDir={sortDir}>
-                    Status
-                  </SortableHeader>
+                  <StatusFilter
+                    currentStatus={statusFilter}
+                    sortField={sortField}
+                    sortDir={sortDir}
+                  />
                 </TableHead>
                 <TableHead>
-                  <SortableHeader field="lead_type" currentSort={sortField} currentDir={sortDir}>
+                  <SortableHeader field="lead_type" currentSort={sortField} currentDir={sortDir} currentStatus={statusFilter}>
                     Type
                   </SortableHeader>
                 </TableHead>
                 <TableHead>Contacts</TableHead>
                 <TableHead>Properties</TableHead>
                 <TableHead>
-                  <SortableHeader field="last_activity" currentSort={sortField} currentDir={sortDir}>
+                  <SortableHeader field="last_activity" currentSort={sortField} currentDir={sortDir} currentStatus={statusFilter}>
                     Last Activity
                   </SortableHeader>
                 </TableHead>
