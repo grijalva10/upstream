@@ -1,27 +1,38 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { SendHorizontal, Loader2, Sparkles, MessageSquare } from "lucide-react";
+import { SendHorizontal, Loader2, Sparkles, MessageSquare, Wrench, Check } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAISheet } from "./ai-sheet-provider";
 import { AIContextCard } from "./ai-context-card";
-import { AIActionCard } from "./ai-action-card";
-import type { Message, SuggestedAction } from "./types";
+import type { Message, ToolActivity } from "./types";
 
-function ChatMessage({
-  message,
-  onConfirmAction,
-  onRejectAction,
-  isExecutingAction,
-}: {
-  message: Message;
-  onConfirmAction: (action: SuggestedAction) => void;
-  onRejectAction: (action: SuggestedAction) => void;
-  isExecutingAction?: boolean;
-}) {
+interface StreamChunk {
+  type: "text" | "tool_use" | "tool_result" | "error" | "done";
+  content: string;
+  tool?: string;
+}
+
+function ToolActivityIndicator({ activity }: { activity: ToolActivity[] }) {
+  if (!activity || activity.length === 0) return null;
+
+  const runningTools = activity.filter(t => t.status === 'running');
+  const currentTool = runningTools[runningTools.length - 1];
+
+  if (!currentTool) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+      <Wrench className="w-3 h-3 animate-pulse" />
+      <span className="font-mono">{currentTool.tool}</span>
+    </div>
+  );
+}
+
+function ChatMessage({ message }: { message: Message }) {
   const isUser = message.role === "user";
 
   return (
@@ -36,7 +47,7 @@ function ChatMessage({
       >
         {isUser ? "Y" : <Sparkles className="w-3 h-3" />}
       </div>
-      <div className={cn("flex-1 min-w-0 space-y-2", isUser && "text-right")}>
+      <div className={cn("flex-1 min-w-0 space-y-1", isUser && "text-right")}>
         <div
           className={cn(
             "inline-block rounded-2xl px-3.5 py-2 text-[13px] max-w-[88%] leading-relaxed",
@@ -45,16 +56,30 @@ function ChatMessage({
               : "bg-muted/70 text-foreground rounded-bl-md"
           )}
         >
-          <p className="whitespace-pre-wrap text-left">{message.content}</p>
+          <p className="whitespace-pre-wrap text-left">{message.content || (message.isStreaming ? "..." : "")}</p>
         </div>
-        {message.action && (
+        {message.toolActivity && message.toolActivity.length > 0 && (
           <div className={cn("max-w-[88%]", isUser ? "ml-auto" : "mr-auto")}>
-            <AIActionCard
-              action={message.action}
-              onConfirm={onConfirmAction}
-              onReject={onRejectAction}
-              isExecuting={isExecutingAction}
-            />
+            <div className="flex flex-wrap gap-1 mt-1">
+              {message.toolActivity.map((t, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono",
+                    t.status === 'running'
+                      ? "bg-amber-500/10 text-amber-600"
+                      : "bg-green-500/10 text-green-600"
+                  )}
+                >
+                  {t.status === 'running' ? (
+                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                  ) : (
+                    <Check className="w-2.5 h-2.5" />
+                  )}
+                  {t.tool}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -63,12 +88,12 @@ function ChatMessage({
 }
 
 export function AIChat() {
-  const { context, setContext, messages, addMessage, isLoading, setIsLoading } = useAISheet();
+  const { context, setContext, messages, addMessage, updateMessage, isLoading, setIsLoading } = useAISheet();
 
   const [input, setInput] = useState("");
-  const [executingAction, setExecutingAction] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -89,6 +114,20 @@ export function AIChat() {
     setInput("");
     setIsLoading(true);
 
+    // Create assistant message placeholder
+    const assistantMsgId = addMessage({
+      role: "assistant",
+      content: "",
+      isStreaming: true,
+      toolActivity: []
+    });
+
+    // Abort any previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     try {
       const response = await fetch("/api/ai/chat", {
         method: "POST",
@@ -100,22 +139,115 @@ export function AIChat() {
           })),
           context,
         }),
+        signal: abortControllerRef.current.signal,
       });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-      const data = await response.json();
-      addMessage({ role: "assistant", content: data.message, action: data.action });
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedContent = "";
+      let toolActivity: ToolActivity[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+
+          try {
+            const chunk: StreamChunk = JSON.parse(line.slice(6));
+
+            switch (chunk.type) {
+              case "text":
+                accumulatedContent += chunk.content;
+                updateMessage(assistantMsgId, {
+                  content: accumulatedContent,
+                  toolActivity: [...toolActivity],
+                });
+                break;
+
+              case "tool_use":
+                if (chunk.tool) {
+                  toolActivity = [...toolActivity, { tool: chunk.tool, status: 'running' }];
+                  updateMessage(assistantMsgId, {
+                    content: accumulatedContent,
+                    toolActivity: [...toolActivity],
+                  });
+                }
+                break;
+
+              case "tool_result":
+                // Mark the last running tool as done
+                const lastRunning = toolActivity.findIndex(t => t.status === 'running');
+                if (lastRunning >= 0) {
+                  toolActivity = toolActivity.map((t, i) =>
+                    i === lastRunning ? { ...t, status: 'done' as const } : t
+                  );
+                  updateMessage(assistantMsgId, {
+                    content: accumulatedContent,
+                    toolActivity: [...toolActivity],
+                  });
+                }
+                break;
+
+              case "error":
+                accumulatedContent += `\n\nError: ${chunk.content}`;
+                updateMessage(assistantMsgId, {
+                  content: accumulatedContent,
+                  isStreaming: false,
+                  toolActivity: [...toolActivity],
+                });
+                break;
+
+              case "done":
+                // Mark all tools as done
+                toolActivity = toolActivity.map(t => ({ ...t, status: 'done' as const }));
+                updateMessage(assistantMsgId, {
+                  content: accumulatedContent || chunk.content || "Done.",
+                  isStreaming: false,
+                  toolActivity: [...toolActivity],
+                });
+                break;
+            }
+          } catch {
+            // Skip malformed lines
+          }
+        }
+      }
+
+      // Finalize message
+      updateMessage(assistantMsgId, {
+        content: accumulatedContent || "Done.",
+        isStreaming: false,
+        toolActivity: toolActivity.map(t => ({ ...t, status: 'done' as const })),
+      });
+
     } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        return; // Request was cancelled
+      }
       console.error("AI chat error:", error);
-      addMessage({
-        role: "assistant",
+      updateMessage(assistantMsgId, {
         content: "Sorry, I encountered an error. Please try again.",
+        isStreaming: false,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [input, messages, context, isLoading, addMessage, setIsLoading]);
+  }, [input, messages, context, isLoading, addMessage, updateMessage, setIsLoading]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -125,47 +257,6 @@ export function AIChat() {
       }
     },
     [sendMessage]
-  );
-
-  const handleConfirmAction = useCallback(
-    async (action: SuggestedAction) => {
-      setExecutingAction(true);
-      try {
-        const response = await fetch("/api/ai/execute-action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action }),
-        });
-
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-        addMessage({
-          role: "assistant",
-          content: data.message || `${action.label} completed.`,
-          action: { ...action, confirmed: true },
-        });
-      } catch (error) {
-        console.error("Action execution error:", error);
-        addMessage({
-          role: "assistant",
-          content: "Couldn't complete that action. Please try again.",
-        });
-      } finally {
-        setExecutingAction(false);
-      }
-    },
-    [addMessage]
-  );
-
-  const handleRejectAction = useCallback(
-    (action: SuggestedAction) => {
-      addMessage({
-        role: "assistant",
-        content: `Cancelled. Let me know if you need something else.`,
-      });
-    },
-    [addMessage]
   );
 
   return (
@@ -183,32 +274,15 @@ export function AIChat() {
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4">
                 <MessageSquare className="w-5 h-5 text-primary" />
               </div>
-              <p className="text-sm font-medium">How can I help?</p>
+              <p className="text-sm font-medium">Full agentic mode</p>
               <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                Paste notes, ask questions, or request actions
+                I can read files, query the database, run commands, and take actions
               </p>
             </div>
           ) : (
             messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                onConfirmAction={handleConfirmAction}
-                onRejectAction={handleRejectAction}
-                isExecutingAction={executingAction}
-              />
+              <ChatMessage key={message.id} message={message} />
             ))
-          )}
-          {isLoading && (
-            <div className="flex gap-2.5">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-primary animate-pulse" />
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                <span>Thinking...</span>
-              </div>
-            </div>
           )}
         </div>
       </ScrollArea>
@@ -239,7 +313,7 @@ export function AIChat() {
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground/60 mt-1.5 text-center">
-          Enter to send
+          Enter to send • Ctrl+J to toggle
         </p>
       </div>
     </div>

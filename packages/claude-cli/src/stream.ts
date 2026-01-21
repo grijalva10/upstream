@@ -97,41 +97,58 @@ export async function* runStream(
   }
 }
 
+interface ContentBlock {
+  type: 'text' | 'tool_use' | 'tool_result';
+  text?: string;
+  name?: string;
+  input?: unknown;
+  content?: string;
+}
+
+interface StreamMessage {
+  type: string;
+  message?: {
+    content?: ContentBlock[];
+  };
+  result?: string;
+}
+
 /**
  * Parse a single line from stream-json output.
  */
 function parseStreamLine(line: string): StreamChunk | null {
   try {
-    const parsed: ClaudeStreamLine = JSON.parse(line);
+    const parsed: StreamMessage = JSON.parse(line);
 
-    // Handle different message types
-    if (parsed.type === 'assistant' && parsed.message) {
-      const msg = parsed.message;
+    // Handle assistant messages with content array
+    if (parsed.type === 'assistant' && parsed.message?.content) {
+      const chunks: StreamChunk[] = [];
 
-      if (msg.type === 'text' && msg.text) {
-        return {
-          type: 'text',
-          content: msg.text,
-          raw: parsed,
-        };
+      for (const block of parsed.message.content) {
+        if (block.type === 'text' && block.text) {
+          chunks.push({
+            type: 'text',
+            content: block.text,
+            raw: parsed,
+          });
+        } else if (block.type === 'tool_use' && block.name) {
+          chunks.push({
+            type: 'tool_use',
+            content: '',
+            tool: block.name,
+            raw: parsed,
+          });
+        } else if (block.type === 'tool_result') {
+          chunks.push({
+            type: 'tool_result',
+            content: typeof block.content === 'string' ? block.content : '',
+            raw: parsed,
+          });
+        }
       }
 
-      if (msg.type === 'tool_use' && msg.name) {
-        return {
-          type: 'tool_use',
-          content: msg.content || '',
-          tool: msg.name,
-          raw: parsed,
-        };
-      }
-
-      if (msg.type === 'tool_result') {
-        return {
-          type: 'tool_result',
-          content: msg.content || '',
-          raw: parsed,
-        };
-      }
+      // Return first chunk (we'll handle multiple chunks in the generator)
+      return chunks[0] || null;
     }
 
     // Handle result/completion

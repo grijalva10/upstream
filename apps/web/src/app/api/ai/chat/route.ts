@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { runBatch } from "@upstream/claude-cli";
+import { createSSEStream } from "@upstream/claude-cli";
 import { resolve } from "path";
 
 interface EntityContext {
@@ -11,13 +10,6 @@ interface EntityContext {
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-}
-
-interface SuggestedAction {
-  type: string;
-  label: string;
-  data: Record<string, unknown>;
-  confirmed: boolean;
 }
 
 interface ChatRequest {
@@ -100,43 +92,20 @@ Current Context - Deal:
 
 ${contextSection}
 
+You have full access to tools - you can read files, query the database, run commands, and take actions. Use them freely to help the user.
+
 You can help with:
-1. Creating contacts (sellers, buyers, brokers, team members)
-2. Creating searches from buyer criteria
-3. Drafting email replies
-4. Scheduling calls
-5. Updating deal/contact status
-6. Answering questions about contacts, deals, properties
-7. Parsing unstructured text (like forwarded notes) into structured data
-
-When the user provides unstructured text (like pasted notes, forwarded emails, or verbal summaries), extract any structured data you can identify and suggest creating appropriate records.
-
-IMPORTANT: When you want to suggest an action, include a JSON block at the end of your response in this exact format:
-
-\`\`\`action
-{
-  "type": "create_contact" | "create_search" | "create_deal" | "send_email" | "create_task" | "update_contact" | "mark_dnc",
-  "label": "Human readable action label",
-  "data": { ... action-specific data ... }
-}
-\`\`\`
-
-Action data formats:
-- create_contact: { "first_name": "", "last_name": "", "email": "", "phone": "", "company_name": "", "role": "", "type": "seller|buyer|broker|team" }
-- create_search: { "name": "", "property_type": "", "market": "", "budget": "", "criteria": {} }
-- create_deal: { "property_id": "", "contact_id": "", "status": "" }
-- send_email: { "to": "", "subject": "", "body": "" }
-- create_task: { "title": "", "due_date": "", "contact_id": "" }
-- update_contact: { "contact_id": "", "updates": {} }
-- mark_dnc: { "contact_id": "", "reason": "" }
-
-Always confirm before taking actions. Show what you'll create and let the user approve.
+1. Querying the database for contacts, leads, properties, searches
+2. Creating and updating records
+3. Drafting emails and messages
+4. Analyzing deal data
+5. Running searches and generating reports
+6. Any other task the operator needs
 
 Be concise and professional. You're talking to an experienced CRE broker who values efficiency.`;
 }
 
 function buildPromptFromMessages(messages: ChatMessage[], systemPrompt: string): string {
-  // Build a prompt that includes the conversation history
   let prompt = systemPrompt + "\n\n--- CONVERSATION HISTORY ---\n\n";
 
   for (const msg of messages.slice(0, -1)) {
@@ -144,7 +113,6 @@ function buildPromptFromMessages(messages: ChatMessage[], systemPrompt: string):
     prompt += `${role}: ${msg.content}\n\n`;
   }
 
-  // Add the latest user message as the actual query
   const lastMessage = messages[messages.length - 1];
   if (lastMessage) {
     prompt += `User: ${lastMessage.content}\n\nAssistant:`;
@@ -153,74 +121,41 @@ function buildPromptFromMessages(messages: ChatMessage[], systemPrompt: string):
   return prompt;
 }
 
-function parseAction(content: string): SuggestedAction | undefined {
-  const actionMatch = content.match(/```action\s*([\s\S]*?)\s*```/);
-  if (!actionMatch) return undefined;
-
-  try {
-    const actionData = JSON.parse(actionMatch[1].trim());
-    return {
-      type: actionData.type,
-      label: actionData.label || actionData.type.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
-      data: actionData.data || {},
-      confirmed: false,
-    };
-  } catch {
-    return undefined;
-  }
-}
-
-function cleanContent(content: string): string {
-  // Remove the action block from the visible message
-  return content.replace(/```action\s*[\s\S]*?```/g, "").trim();
-}
-
 export async function POST(request: Request) {
   try {
     const body: ChatRequest = await request.json();
     const { messages, context } = body;
 
     if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: "Messages array is required" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Messages array is required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const systemPrompt = buildSystemPrompt(context);
     const prompt = buildPromptFromMessages(messages, systemPrompt);
 
-    // Use CLI for chat - simple single-turn with history in prompt
-    const result = await runBatch({
+    // Create SSE stream with full agentic capabilities
+    const stream = createSSEStream({
       prompt,
-      maxTurns: 1,
-      timeout: 30000,
-      cwd: resolve(process.cwd(), "../.."), // Project root
+      maxTurns: 50,
+      timeout: 300000, // 5 minutes
+      cwd: resolve(process.cwd(), "../.."),
     });
 
-    if (!result.success) {
-      console.error("AI chat error:", result.error);
-      return NextResponse.json(
-        { error: "Failed to process chat request" },
-        { status: 500 }
-      );
-    }
-
-    const rawContent = result.output;
-
-    // Parse action if present
-    const action = parseAction(rawContent);
-    const cleanedContent = cleanContent(rawContent);
-
-    return NextResponse.json({
-      message: cleanedContent,
-      action,
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
     });
   } catch (error) {
     console.error("AI chat error:", error);
-    return NextResponse.json(
-      { error: "Failed to process chat request" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: "Failed to process chat request" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }

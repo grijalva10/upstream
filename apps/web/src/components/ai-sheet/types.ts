@@ -13,11 +13,18 @@ export interface SuggestedAction {
   confirmed: boolean;
 }
 
+export interface ToolActivity {
+  tool: string;
+  status: 'running' | 'done';
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   action?: SuggestedAction;
+  toolActivity?: ToolActivity[];
+  isStreaming?: boolean;
   createdAt: Date;
 }
 
@@ -29,7 +36,8 @@ export interface AISheetContextValue {
   context: EntityContext | null;
   setContext: (context: EntityContext | null) => void;
   messages: Message[];
-  addMessage: (message: Omit<Message, 'id' | 'createdAt'>) => void;
+  addMessage: (message: Omit<Message, 'id' | 'createdAt'>) => string;
+  updateMessage: (id: string, updates: Partial<Message>) => void;
   clearMessages: () => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;

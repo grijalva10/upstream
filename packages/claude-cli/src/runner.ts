@@ -6,15 +6,12 @@
  */
 
 import { spawn, type ChildProcess } from 'child_process';
-import { writeFile, unlink, mkdtemp } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
 import type { ClaudeRunOptions, ClaudeJsonResponse } from './types.js';
 
 /** Default timeout in milliseconds (2 minutes) */
 const DEFAULT_TIMEOUT = 120000;
 
-/** Maximum command line length before using temp file for prompt */
+/** Maximum command line length before using stdin for prompt */
 const MAX_CMD_LENGTH = 8000;
 
 /**
@@ -26,6 +23,10 @@ export function buildArgs(options: ClaudeRunOptions): string[] {
   // Output format
   if (options.outputFormat && options.outputFormat !== 'text') {
     args.push('--output-format', options.outputFormat);
+    // stream-json requires --verbose in print mode
+    if (options.outputFormat === 'stream-json') {
+      args.push('--verbose');
+    }
   }
 
   // Max turns
@@ -57,35 +58,10 @@ export function buildArgs(options: ClaudeRunOptions): string[] {
 }
 
 /**
- * Determine if we need to use a temp file for the prompt.
- * This is necessary on Windows where command line length is limited.
+ * Check if prompt needs stdin (too long for command line or contains newlines).
  */
-function needsTempFile(prompt: string): boolean {
+function needsStdin(prompt: string): boolean {
   return prompt.length > MAX_CMD_LENGTH || prompt.includes('\n');
-}
-
-/**
- * Create a temp file with the prompt content.
- */
-async function createPromptFile(prompt: string): Promise<string> {
-  const tempDir = await mkdtemp(join(tmpdir(), 'claude-'));
-  const tempFile = join(tempDir, 'prompt.txt');
-  await writeFile(tempFile, prompt, 'utf-8');
-  return tempFile;
-}
-
-/**
- * Clean up temp file.
- */
-async function cleanupTempFile(filePath: string): Promise<void> {
-  try {
-    await unlink(filePath);
-    // Try to remove the directory too
-    const { rmdir } = await import('fs/promises');
-    await rmdir(filePath.replace(/[/\\][^/\\]+$/, ''));
-  } catch {
-    // Ignore cleanup errors
-  }
 }
 
 /**
@@ -101,7 +77,7 @@ export async function spawnClaude(
   const args = buildArgs(options);
 
   // Short prompt - pass directly as argument
-  if (!needsTempFile(options.prompt)) {
+  if (!needsStdin(options.prompt)) {
     args.push(options.prompt);
     const proc = spawn('claude', args, {
       cwd: options.cwd,
@@ -112,33 +88,19 @@ export async function spawnClaude(
     return { process: proc, cleanup: async () => {} };
   }
 
-  // Long prompt - use temp file and pipe via PowerShell (Windows) or shell (Unix)
-  const tempFile = await createPromptFile(options.prompt);
-  const isWindows = process.platform === 'win32';
+  // Long prompt - write to stdin directly (works on all platforms)
+  const proc = spawn('claude', args, {
+    cwd: options.cwd,
+    env: { ...process.env },
+    shell: true,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
 
-  let proc: ChildProcess;
-  if (isWindows) {
-    // Use PowerShell on Windows for reliable piping with paths
-    const psScript = `Get-Content -Raw "${tempFile}" | claude ${args.join(' ')}`;
-    proc = spawn('powershell.exe', ['-Command', psScript], {
-      cwd: options.cwd,
-      env: { ...process.env },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-  } else {
-    // Use sh on Unix
-    const pipeCmd = `cat "${tempFile}" | claude ${args.join(' ')}`;
-    proc = spawn('sh', ['-c', pipeCmd], {
-      cwd: options.cwd,
-      env: { ...process.env },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-  }
+  // Write prompt to stdin and close it
+  proc.stdin?.write(options.prompt);
+  proc.stdin?.end();
 
-  return {
-    process: proc,
-    cleanup: async () => cleanupTempFile(tempFile),
-  };
+  return { process: proc, cleanup: async () => {} };
 }
 
 /**

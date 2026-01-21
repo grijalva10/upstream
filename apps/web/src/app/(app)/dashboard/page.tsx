@@ -7,6 +7,8 @@ import { StalledDealsCard } from "./_components/stalled-deals-card";
 import { PipelineSnapshot } from "./_components/pipeline-snapshot";
 import { DealsReadyCard } from "./_components/deals-ready-card";
 import { AgentActivityTimeline } from "./_components/agent-activity";
+import { ServicesStatusCard } from "./_components/services-status-card";
+import { CampaignsCard } from "./_components/campaigns-card";
 import { Classification } from "@/components/classification-badge";
 
 async function getDashboardData() {
@@ -24,6 +26,10 @@ async function getDashboardData() {
     pipelineResult,
     dealsReadyResult,
     agentActivityResult,
+    costarStatusResult,
+    outlookStatusResult,
+    claudeStatusResult,
+    campaignsResult,
   ] = await Promise.all([
     // Pending email drafts
     supabase
@@ -115,6 +121,35 @@ async function getDashboardData() {
       .from("agent_executions")
       .select("agent_name")
       .gte("created_at", yesterday),
+
+    // Services status - CoStar (most recent property created)
+    supabase
+      .from("properties")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single(),
+
+    // Services status - Outlook sync
+    supabase
+      .from("email_sync_state")
+      .select("last_sync_at")
+      .limit(1)
+      .single(),
+
+    // Services status - Claude CLI (any agent)
+    supabase
+      .from("agent_executions")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single(),
+
+    // All campaigns
+    supabase
+      .from("campaigns")
+      .select("id, name, status, total_enrolled, total_replied")
+      .order("created_at", { ascending: false }),
   ]);
 
   // Process calls
@@ -221,6 +256,44 @@ async function getDashboardData() {
     },
   ];
 
+  // Build services status
+  const services = [
+    {
+      name: "CoStar",
+      description: "Property data extraction",
+      lastActive: costarStatusResult.data?.created_at
+        ? new Date(costarStatusResult.data.created_at)
+        : null,
+      icon: "costar" as const,
+    },
+    {
+      name: "Outlook",
+      description: "Email sync",
+      lastActive: outlookStatusResult.data?.last_sync_at
+        ? new Date(outlookStatusResult.data.last_sync_at)
+        : null,
+      icon: "outlook" as const,
+    },
+    {
+      name: "Claude CLI",
+      description: "AI agent execution",
+      lastActive: claudeStatusResult.data?.created_at
+        ? new Date(claudeStatusResult.data.created_at)
+        : null,
+      icon: "claude" as const,
+    },
+  ];
+
+  // Process campaigns
+  const campaigns =
+    campaignsResult.data?.map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      status: c.status,
+      totalEnrolled: c.total_enrolled || 0,
+      totalReplied: c.total_replied || 0,
+    })) || [];
+
   return {
     emailDrafts: emailDraftsResult.count || 0,
     lowConfidence: lowConfidenceResult.count || 0,
@@ -231,6 +304,8 @@ async function getDashboardData() {
     pipelineStages,
     dealsReady,
     agentActivities,
+    services,
+    campaigns,
   };
 }
 
@@ -253,9 +328,15 @@ export default async function DashboardPage() {
         </div>
 
         {/* Bottom row: Deals ready + Agent activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           <DealsReadyCard deals={data.dealsReady} />
           <AgentActivityTimeline activities={data.agentActivities} />
+        </div>
+
+        {/* System row: Services + Campaigns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ServicesStatusCard services={data.services} />
+          <CampaignsCard campaigns={data.campaigns} />
         </div>
       </PageContainer>
     </PageSetup>

@@ -45,6 +45,13 @@ export function AISheetProvider({ children }: { children: ReactNode }): ReactNod
       createdAt: new Date(),
     };
     setMessages((prev) => [...prev, newMessage]);
+    return newMessage.id;
+  }, []);
+
+  const updateMessage = useCallback((id: string, updates: Partial<Message>) => {
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg))
+    );
   }, []);
 
   const clearMessages = useCallback(() => {
@@ -73,11 +80,12 @@ export function AISheetProvider({ children }: { children: ReactNode }): ReactNod
       setContext,
       messages,
       addMessage,
+      updateMessage,
       clearMessages,
       isLoading,
       setIsLoading,
     }),
-    [isOpen, open, close, toggle, context, messages, addMessage, clearMessages, isLoading]
+    [isOpen, open, close, toggle, context, messages, addMessage, updateMessage, clearMessages, isLoading]
   );
 
   return (
