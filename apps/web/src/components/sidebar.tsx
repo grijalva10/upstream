@@ -6,6 +6,8 @@ import {
   LayoutDashboard,
   Users,
   Inbox,
+  Search,
+  Send,
   Settings,
 } from "lucide-react";
 import {
@@ -16,12 +18,11 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-// Core navigation: Dashboard, Inbox, Leads, Settings
-// AI Sheet handles campaign creation, search queries, and monitoring
-// See docs/VISION.md for UI/UX philosophy
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/inbox", icon: Inbox, label: "Inbox" },
+  { href: "/searches", icon: Search, label: "Searches" },
+  { href: "/campaigns", icon: Send, label: "Campaigns" },
   { href: "/leads", icon: Users, label: "Leads" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
