@@ -52,7 +52,7 @@ export function CampaignsPanel({ campaigns }: CampaignsPanelProps) {
         </div>
       ) : (
         <ScrollArea className="flex-1 -mx-1 px-1">
-          <div className="space-y-1">
+          <div className="space-y-1 md:grid md:grid-cols-2 md:gap-2 md:space-y-0 lg:grid-cols-1 lg:gap-0 lg:space-y-1">
             {campaigns.map((campaign) => {
               const config = statusConfig[campaign.status] || statusConfig.draft;
               const replyRate =

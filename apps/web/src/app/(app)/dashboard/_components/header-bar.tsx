@@ -35,8 +35,8 @@ export function HeaderBar({ workerRunning, workerPaused, onTogglePause }: Header
       : "text-red-500";
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 border-b border-border/50">
-      <h1 className="text-sm font-semibold tracking-tight">UPSTREAM</h1>
+    <div className="flex items-center justify-between py-2 md:py-3 px-3 md:px-4 border-b border-border/50">
+      <h1 className="text-xs md:text-sm font-semibold tracking-tight">UPSTREAM</h1>
       <div className="flex items-center gap-4">
         <button
           onClick={onTogglePause}

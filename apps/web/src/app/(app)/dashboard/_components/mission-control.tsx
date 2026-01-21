@@ -83,37 +83,37 @@ export function MissionControl({ data }: MissionControlProps) {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="min-h-screen lg:h-screen flex flex-col bg-background">
       <HeaderBar
         workerRunning={data.worker.isRunning}
         workerPaused={data.worker.isPaused}
         onTogglePause={handleTogglePause}
       />
 
-      <div className="flex-1 grid grid-cols-[1fr_1fr_1.2fr] grid-rows-[1fr_1fr] gap-px bg-border/30 min-h-0">
-        {/* Row 1, Col 1: Attention */}
-        <div className="bg-background p-4">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1.2fr] md:grid-rows-[1fr_1fr_auto] lg:grid-rows-[1fr_1fr] gap-px bg-border/30 min-h-0 overflow-y-auto lg:overflow-hidden">
+        {/* Attention - Row 1, Col 1 */}
+        <div className="bg-background p-3 md:p-4">
           <AttentionPanel items={data.attention} />
         </div>
 
-        {/* Row 1, Col 2: Pipeline */}
-        <div className="bg-background p-4">
+        {/* Pipeline - Row 1, Col 2 */}
+        <div className="bg-background p-3 md:p-4">
           <PipelineFlow leadStages={data.leadStages} dealStages={data.dealStages} />
         </div>
 
-        {/* Row 1-2, Col 3: Campaigns (spans both rows) */}
-        <div className="bg-background p-4 row-span-2">
-          <CampaignsPanel campaigns={data.campaigns} />
-        </div>
-
-        {/* Row 2, Col 1: Jobs */}
-        <div className="bg-background p-4">
+        {/* Jobs - Row 2, Col 1 */}
+        <div className="bg-background p-3 md:p-4">
           <JobsPanel jobs={data.jobs} />
         </div>
 
-        {/* Row 2, Col 2: Searches */}
-        <div className="bg-background p-4">
+        {/* Searches - Row 2, Col 2 */}
+        <div className="bg-background p-3 md:p-4">
           <SearchesPanel searches={data.searches} totalCount={data.searchesTotal} />
+        </div>
+
+        {/* Campaigns - Full width on tablet, right column spanning both rows on desktop */}
+        <div className="bg-background p-3 md:p-4 md:col-span-2 lg:col-span-1 lg:row-span-2 lg:row-start-1 lg:col-start-3">
+          <CampaignsPanel campaigns={data.campaigns} />
         </div>
       </div>
 

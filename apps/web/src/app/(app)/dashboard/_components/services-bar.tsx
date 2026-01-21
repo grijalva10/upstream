@@ -37,17 +37,17 @@ const statusColors: Record<string, string> = {
 
 export function ServicesBar({ services }: ServicesBarProps) {
   return (
-    <div className="flex items-center justify-between gap-8 py-3 px-4 border-t border-border/50 bg-muted/20">
+    <div className="flex items-center justify-between gap-4 md:gap-8 py-2 md:py-3 px-3 md:px-4 border-t border-border/50 bg-muted/20">
       {services.map((service) => (
         <div key={service.name} className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
+          <div className="flex items-center gap-1.5 md:gap-2 mb-0.5">
             <span className="text-xs font-medium">{service.name}</span>
             <div className={cn("w-1.5 h-1.5 rounded-full", statusColors[service.status])} />
-            <span className="text-xs font-mono text-muted-foreground">
+            <span className="text-xs font-mono text-muted-foreground hidden md:inline">
               {formatRelativeTime(service.lastActive)}
             </span>
           </div>
-          <div className="text-[10px] text-muted-foreground/70 font-mono truncate">
+          <div className="text-[10px] text-muted-foreground/70 font-mono truncate hidden md:block">
             {service.detail}
           </div>
         </div>

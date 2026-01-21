@@ -69,7 +69,7 @@ function JobRow({ job }: { job: Job }) {
         <span className="text-xs font-mono text-muted-foreground w-16 text-right">
           {formatRelativeTime(job.lastRun)}
         </span>
-        <span className="text-xs font-mono text-muted-foreground/60 w-16 text-right">
+        <span className="text-xs font-mono text-muted-foreground/60 w-16 text-right hidden md:block">
           {job.nextRun}
         </span>
         <div className="w-4 flex items-center justify-center">
@@ -109,7 +109,7 @@ export function JobsPanel({ jobs }: JobsPanelProps) {
         </h2>
         <div className="flex items-center gap-4 text-[10px] text-muted-foreground/50 font-mono">
           <span>last</span>
-          <span>next</span>
+          <span className="hidden md:inline">next</span>
         </div>
       </div>
 

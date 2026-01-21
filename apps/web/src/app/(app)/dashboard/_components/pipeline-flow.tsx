@@ -22,7 +22,7 @@ function PipelineRow({ label, stages, href }: PipelineRowProps) {
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider w-12">
           {label}
         </span>
-        <div className="flex items-baseline gap-1 flex-1">
+        <div className="flex items-baseline gap-x-1 gap-y-0.5 flex-1 flex-wrap">
           {stages.map((stage, index) => (
             <div key={stage.name} className="flex items-baseline">
               <span
