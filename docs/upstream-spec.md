@@ -4,6 +4,8 @@
 
 *Technical Documentation for IP Review*
 
+> **Context:** This document describes the technical system for IP/legal purposes. For the full product vision including the relationship with Lee 1031 X and bidirectional flows (buyers, sellers, pivots), see `VISION.md`.
+
 ---
 
 ## CONFIDENTIAL DISCLOSURE NOTICE

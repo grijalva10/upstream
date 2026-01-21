@@ -1,5 +1,7 @@
 # Upstream Sourcing Engine
 
+> **Note:** This is a simplified overview. See `docs/VISION.md` for the full architecture including bidirectional flows (buyers becoming sellers, campaigns uncovering different inventory, etc.) and how Upstream feeds into Lee 1031 X.
+
 ## What Is It
 A tool that finds property owners who might sell, emails them, and packages deals.
 
