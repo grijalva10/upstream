@@ -24,9 +24,10 @@
 |-------|---------|
 | `campaigns` | Email campaigns linked to searches |
 | `enrollments` | Contact enrolled in campaign with step tracking |
+| `email_queue` | Outbound emails pending send |
+| `email_drafts` | Approval queue for AI-generated emails |
 | `activities` | All touchpoints (email, call, note, meeting) |
 | `exclusions` | Unified exclusion list (email/phone/domain + reason) |
-| `email_drafts` | Approval queue for AI-generated emails |
 
 ## Email Sync
 
@@ -40,7 +41,8 @@
 | Table | Purpose |
 |-------|---------|
 | `tasks` | Follow-ups, call reminders, review items |
-| `qualification_data` | Pricing, motivation, timeline per deal |
+| `calls` | Scheduled/completed calls with contacts |
+| `deal_activity` | Activity log per deal |
 | `deal_packages` | Packaged qualified deals for handoff |
 
 ## System
@@ -49,3 +51,4 @@
 |-------|---------|
 | `users` | App users (email, name, role) |
 | `settings` | Config key-value store |
+| `worker_status` | Background worker health tracking |
