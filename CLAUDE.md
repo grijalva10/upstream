@@ -159,69 +159,9 @@ npx supabase db reset       # Reset and re-seed
 npx supabase db diff        # Generate migration from changes
 ```
 
-### Schema Overview (~30 tables)
+### Schema Overview
 
-**Core Entities:**
-| Table | Purpose |
-|-------|---------|
-| `properties` | CRE assets from CoStar (address, type, size, class) |
-| `leads` | Organizations we're engaging (see Lead Status below) |
-| `contacts` | People at leads who receive outreach |
-| `deals` | Specific property opportunities (qualification tracking) |
-| `property_loans` | Loan/distress data (maturity, LTV, DSCR, payment status) |
-| `property_leads` | Junction: property ↔ lead (owner/manager/lender) |
-| `lead_actions` | **VIEW** - AI query interface with computed `next_action` |
-
-**Searches & Sourcing:**
-| Table | Purpose |
-|-------|---------|
-| `searches` | Search profiles with criteria JSON + generated payloads (main entity) |
-| `search_properties` | Junction: search ↔ property |
-| `markets` | CoStar market reference (id, name, state) |
-| `sourcing_strategies` | Predefined query strategies (hold_period, financial_distress, etc.) |
-| `campaigns` | Email campaigns linked to searches |
-
-**Outreach (CRM):**
-| Table | Purpose |
-|-------|---------|
-| `email_templates` | Reusable email templates with merge tags |
-| `enrollments` | Contact enrolled in a campaign with per-email tracking |
-| `activities` | All touchpoints (email_sent, email_received, call, note) |
-| `dnc_entries` | Do Not Contact list |
-
-**Agent Automation:**
-| Table | Purpose |
-|-------|---------|
-| `agent_definitions` | Registry of Claude agents (name, model, tools) |
-| `agent_executions` | Logs of agent runs (prompt, response, tokens) |
-| `agent_tasks` | Work queue for scheduled agent execution |
-| `agent_workflows` | Multi-step pipelines chaining agents |
-| `agent_workflow_steps` | Steps in a workflow |
-| `agent_workflow_runs` | Workflow execution instances |
-| `agent_workflow_step_runs` | Step execution within a run |
-
-**Email Sync:**
-| Table | Purpose |
-|-------|---------|
-| `email_sync_state` | Outlook sync cursor (last_sync_at, last_entry_id) |
-| `synced_emails` | Raw emails synced from Outlook |
-
-**Qualification Pipeline (new):**
-| Table | Purpose |
-|-------|---------|
-| `tasks` | Call reminders, follow-ups, review tasks |
-| `qualification_data` | Tracks pricing, motivation, decision maker per deal |
-| `email_template_variants` | A/B testing for email templates |
-| `email_exclusions` | Permanent exclusion list (bounces, hard passes) |
-| `deal_packages` | Packaged qualified deals for handoff |
-| `email_drafts` | Approval queue for agent-generated emails |
-
-**Other:**
-| Table | Purpose |
-|-------|---------|
-| `users` | App users |
-| `settings` | Config key-value store |
-| `email_events` | Open/click tracking events |
+See `docs/SCHEMA.md` for the full table reference.
 
 ### Key Relationships
 ```
@@ -414,3 +354,8 @@ To restore from backup:
 ```bash
 psql postgresql://postgres:postgres@127.0.0.1:55322/postgres < backup_YYYYMMDD_HHMMSS.sql
 ```
+
+### Schema Documentation
+**When creating or deleting database tables, update `docs/SCHEMA.md`.**
+
+This keeps the schema documentation in sync with the actual database.
